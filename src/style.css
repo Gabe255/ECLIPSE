@@ -245,3 +245,51 @@ body{background:radial-gradient(ellipse at 80% 8%,color-mix(in srgb,var(--accent
 .release-history-row a{flex:0 0 auto;color:var(--accent);text-decoration:none}
 #compatibilityResult p{margin:7px 0}
 #compatibilityResult p:last-child{color:#c5c2d5}
+
+
+/* ECLIPSE contrast and motion pass */
+:root{color-scheme:dark}
+body,.shell,.main,.view{color:#f4f2ff}
+h1,h2,h3,h4,p,label,span,small,strong,b,button{ text-shadow:none }
+.eyebrow,.collection-count,.console-card small,.widget-caption,.settings-note,
+.console-banner-copy>p:last-child,.console-banner-index,.empty-state p,
+.system-featured-copy p:not(.eyebrow),.system-empty-hero p:last-child,
+.update-result,.update-result p,.mascot-message,.mascot-tips span,
+.settings-card label,.folder-item,.release-history-row{color:#c4c3d4}
+.topbar,.wordmark,.section-head h2,.welcome-row h1,.console-banner-copy h1,
+.system-home-head h2,.system-row-label h3,.settings-panel h3,
+.game-meta h3,.system-game-meta b,.system-folder b,.mascot-card h2{color:#fbfaff}
+input,textarea,select{color:#fbfaff!important;background:#171827!important}
+input::placeholder,textarea::placeholder{color:#a6a5b8!important;opacity:1}
+button{color:#f4f2ff}
+.subtle-btn,.page-tab,.system-chip{color:#dedced}
+.subtle-btn:hover,.page-tab:hover,.system-chip:hover{color:#fff}
+.settings-card,.dashboard-widget,.console-card,.system-folder,.system-game-card{color:#f4f2ff}
+.settings-card select option{background:#171827;color:#fff}
+.scan-status{margin:10px 0 18px;padding:13px 15px;border:1px solid #ffffff20;border-radius:8px;background:#ffffff08;color:#e5e2f2;font:11px 'DM Mono';line-height:1.6}
+.library-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.library-actions .primary-btn{white-space:nowrap}
+.art-generic,.game-art.art-generic{background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--accent) 36%,#25243b),#10111d 68%)}
+.game-art.art-generic .art-mark{color:#f4f2ff;text-shadow:0 0 28px var(--accent)}
+.system-folder-row{border-color:#ffffff22}
+.system-folder{color:#f4f2ff}
+.system-empty-hero{color:#f4f2ff}
+.mascot-art{animation:mascotHover 3.4s ease-in-out infinite}
+.mascot-face{animation:mascotNod 4.8s ease-in-out infinite;transform-origin:50% 85%}
+.mascot-hat{animation:mascotHat 4.8s ease-in-out infinite;transform-origin:50% 100%}
+.mascot-eye{animation:mascotBlink 5.2s infinite}
+.mascot-body:after{content:"";position:absolute;right:-7px;top:13px;width:48px;height:12px;border-radius:12px;background:linear-gradient(90deg,#25293b,#aeb3c8);border:1px solid #8b90a7;transform:rotate(-22deg);transform-origin:5px 50%;animation:mascotPoint 2.7s ease-in-out infinite}
+.mascot-body:before{content:"";position:absolute;right:-17px;top:2px;width:18px;height:8px;border-radius:8px;background:#d7d9e6;transform:rotate(-22deg);z-index:2;animation:mascotFinger 2.7s ease-in-out infinite}
+.mascot-card{animation:mascotCardIn .55s cubic-bezier(.2,.8,.2,1) both}
+.mascot-message{min-height:42px}
+@keyframes mascotHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes mascotNod{0%,72%,100%{transform:rotate(0)}78%{transform:rotate(-5deg)}84%{transform:rotate(3deg)}90%{transform:rotate(0)}}
+@keyframes mascotHat{0%,72%,100%{transform:rotate(-5deg) translateY(0)}80%{transform:rotate(-9deg) translateY(-3px)}88%{transform:rotate(-3deg)}}
+@keyframes mascotBlink{0%,44%,48%,100%{transform:scaleY(1)}46%{transform:scaleY(.12)}}
+@keyframes mascotPoint{0%,100%{transform:rotate(-22deg) translateX(0)}45%,65%{transform:rotate(-7deg) translateX(8px)}}
+@keyframes mascotFinger{0%,100%{transform:rotate(-22deg) translate(0,0)}45%,65%{transform:rotate(-7deg) translate(8px,-3px)}}
+@keyframes mascotCardIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.system-boot{animation:bootFade .28s ease-out}
+.system-game-card,.console-card,.system-folder,.game-card{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.system-game-card:hover,.console-card:hover,.system-folder:hover,.game-card:hover{box-shadow:0 12px 28px #0005}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
