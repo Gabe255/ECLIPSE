@@ -849,37 +849,57 @@ document.addEventListener('keydown',e=>{
  }
 });
 
-/* Physical gamepad navigation for Android handhelds (AYN Odin and similar). */
+/* Physical gamepad support for Android handhelds (AYN Odin and similar). */
 (function enableGamepadNavigation(){
- let lastMove=0,wasA=false,wasB=false;
+ let lastMove=0, wasConfirm=false, wasBack=false, wasX=false, wasY=false, wasL1=false, wasR1=false;
+ let activePadIndex=null, lastStatus='';
  const isVisible=el=>!!(el&&el.getClientRects().length&&!el.closest('.hidden'));
  const focusables=()=>[...document.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(isVisible);
+ const status=message=>{const node=document.querySelector('#controllerStatus');if(node&&message!==lastStatus){node.textContent=message;lastStatus=message;}};
  function moveFocus(direction){
   const items=focusables();if(!items.length)return;
-  let current=document.activeElement;
+  const current=document.activeElement;
   if(!items.includes(current)){items[0].focus();items[0].scrollIntoView({block:'nearest',inline:'nearest'});return;}
   const a=current.getBoundingClientRect(),ax=a.left+a.width/2,ay=a.top+a.height/2;
-  const candidates=items.filter(el=>el!==current).map(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,dx=x-ax,dy=y-ay;const primary=direction==='left'?-dx:direction==='right'?dx:direction==='up'?-dy:dy;const cross=direction==='left'||direction==='right'?Math.abs(dy):Math.abs(dx);return {el,primary,cross,score:primary>2?primary+cross*1.8:Infinity};}).filter(x=>Number.isFinite(x.score)).sort((x,y)=>x.score-y.score);
+  const candidates=items.filter(el=>el!==current).map(el=>{const r=el.getBoundingClientRect(),dx=r.left+r.width/2-ax,dy=r.top+r.height/2-ay;const primary=direction==='left'?-dx:direction==='right'?dx:direction==='up'?-dy:dy;const cross=direction==='left'||direction==='right'?Math.abs(dy):Math.abs(dx);return {el,score:primary>2?primary+cross*1.8:Infinity};}).filter(x=>Number.isFinite(x.score)).sort((x,y)=>x.score-y.score);
   const next=candidates[0]?.el;if(next){next.focus({preventScroll:true});next.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'});}
  }
- function back(){const modal=document.querySelector('.modal-backdrop:not(.hidden),.mascot-welcome:not(.hidden),.onboarding-backdrop:not(.hidden),.control-center-backdrop:not(.hidden)');if(modal){modal.classList.add('hidden');return;}if(activePage!=='home'){showView('home');return;}}
+ function back(){
+  const modal=document.querySelector('.modal-backdrop:not(.hidden),.mascot-welcome:not(.hidden),.onboarding-backdrop:not(.hidden),.control-center-backdrop:not(.hidden)');
+  if(modal){modal.classList.add('hidden');return;}
+  if(activePage!=='home'){showView('home');return;}
+ }
+ const wasPressed=(buttons,index)=>!!buttons[index]?.pressed;
  function poll(){
-  const pads=navigator.getGamepads?.();if(!pads)return;
-  const pad=[...pads].find(Boolean);if(!pad)return;
+  let pads=[];
+  try{pads=[...(navigator.getGamepads?.()||[])].filter(p=>p&&p.connected!==false);}catch{}
+  const pad=pads.find(p=>p.index===activePadIndex)||pads[0];
+  if(!pad){
+   activePadIndex=null;
+   status('No controller detected. Connect a Bluetooth or USB gamepad, then press any button.');
+   wasConfirm=wasBack=wasX=wasY=wasL1=wasR1=false;
+   return;
+  }
+  activePadIndex=pad.index;
+  status('Controller connected: '+(pad.id||'Gamepad')+'. D-pad / left stick to move · A to select · B to go back.');
   const b=pad.buttons||[],axis=pad.axes||[];
-  const pressed=i=>!!b[i]?.pressed;
-  const now=Date.now();
+  const pressed=i=>wasPressed(b,i);
+  const now=performance.now();
   let direction=null;
-  if(pressed(14)||axis[0]<-.55)direction='left';
-  else if(pressed(15)||axis[0]>.55)direction='right';
-  else if(pressed(12)||axis[1]<-.55)direction='up';
-  else if(pressed(13)||axis[1]>.55)direction='down';
+  if(pressed(14)||axis[0]<-.5)direction='left';
+  else if(pressed(15)||axis[0]>.5)direction='right';
+  else if(pressed(12)||axis[1]<-.5)direction='up';
+  else if(pressed(13)||axis[1]>.5)direction='down';
   if(direction&&now-lastMove>190){moveFocus(direction);lastMove=now;}
-  const confirm=pressed(0);
-  if(confirm&&!wasA){const active=document.activeElement;if(active&&active!==document.body&&typeof active.click==='function')active.click();else focusables()[0]?.click();}
-  const cancel=pressed(1)||pressed(2);
-  if(cancel&&!wasB)back();
-  wasA=confirm;wasB=cancel;
+  const confirm=pressed(0), cancel=pressed(1)||pressed(2);
+  if(confirm&&!wasConfirm){
+   const active=document.activeElement;
+   if(active&&active!==document.body&&typeof active.click==='function')active.click();
+   else focusables()[0]?.click();
+  }
+  if(cancel&&!wasBack)back();
+  // Keep extra face/shoulder buttons available to future context actions without hijacking games.
+  wasConfirm=confirm;wasBack=cancel;wasX=pressed(2);wasY=pressed(3);wasL1=pressed(4);wasR1=pressed(5);
  }
  document.addEventListener('keydown',event=>{
   if(event.key==='Escape'||event.key==='Backspace'){event.preventDefault();event.stopImmediatePropagation();back();return;}
@@ -892,15 +912,17 @@ document.addEventListener('keydown',e=>{
   }
  });
  window.addEventListener('gamepadconnected',event=>{
-  const status=document.querySelector('#controllerStatus');
-  if(status)status.textContent='Connected: '+(event.gamepad?.id||'Gamepad')+'. Use the D-pad or left stick to navigate.';
+  activePadIndex=event.gamepad?.index??null;
+  status('Controller connected: '+(event.gamepad?.id||'Gamepad')+'. D-pad / left stick to move · A to select · B to go back.');
   if(!document.activeElement||document.activeElement===document.body)focusables()[0]?.focus();
  });
- window.addEventListener('gamepaddisconnected',()=>{
-  const status=document.querySelector('#controllerStatus');
-  if(status)status.textContent='Controller disconnected. Keyboard navigation remains available.';
+ window.addEventListener('gamepaddisconnected',event=>{
+  if(event.gamepad?.index===activePadIndex)activePadIndex=null;
+  status('Controller disconnected. Connect another controller to use gamepad navigation.');
  });
- window.setInterval(poll,80);
+ // Poll continuously: some Android WebViews expose pads through getGamepads without firing connection events.
+ window.setInterval(poll,50);
+ poll();
 })();
 
 applyInterfaceMode();
