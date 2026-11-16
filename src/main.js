@@ -257,7 +257,7 @@ document.querySelector('#app').innerHTML = `
 <div class="modal-backdrop hidden" id="widgetModal"><div class="widget-modal"><div class="modal-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>HOME WIDGETS</h2></div><button class="close-modal" id="closeWidgetModal">×</button></div><p class="settings-note">Add widgets, change their order, or remove the ones you don't use.</p><div id="widgetChoices" class="widget-choices"></div><button class="primary-btn" id="doneWidgets">DONE</button></div></div>
 <div class="system-boot hidden" id="systemBoot" aria-live="polite"><div class="boot-orbit"><span></span></div><p class="eyebrow">ECLIPSE SYSTEM STARTUP</p><h2 id="bootSystemName">STARTING SYSTEM</h2><div class="boot-progress"><span></span></div><small>PREPARING YOUR GAME SPACE</small></div>
 <div class="mascot-welcome hidden" id="mascotWelcome" role="dialog" aria-modal="true" aria-labelledby="mascotTitle"><div class="mascot-card"><div class="mascot-art" aria-hidden="true"><div class="eclipse-mascot"><div class="eclipse-mascot-hat"></div><div class="eclipse-mascot-orb"><i></i><i></i><span></span></div><div class="eclipse-mascot-ring"></div></div></div><p class="eyebrow">YOUR NEW GAME SPACE</p><h2 id="mascotTitle">WELCOME TO <em>ECLIPSE.</em></h2><p class="mascot-message">I’ll show you around. Your systems, game shelves and collections all live here. Set things up your way and make this space yours.</p><div class="mascot-tips"><span><b>01</b> Pick a system</span><span><b>02</b> Build your library</span><span><b>03</b> Make it yours</span></div><div class="mascot-actions"><button class="primary-btn" id="mascotStart">SHOW ME AROUND ↗</button><button class="subtle-btn" id="mascotSkip">SKIP FOR NOW</button></div></div></div>
-<div class="modal-backdrop hidden" id="gameDetailModal"><div class="widget-modal game-detail-modal"><div class="modal-head"><div><p class="eyebrow">GAME DETAILS</p><h2 id="gameDetailTitle">GAME</h2></div><button class="close-modal" id="closeGameDetail" aria-label="Close game details">×</button></div><p class="game-detail-meta" id="gameDetailMeta"></p><div class="game-detail-file"><small>FILE LOCATION</small><p id="gameDetailPath"></p><small>PLAYER</small><p id="gameDetailPlayer"></p></div><div class="game-detail-actions"><button class="primary-btn" id="gameDetailLaunch">▶ PLAY GAME</button><button class="subtle-btn" id="gameDetailFavorite">☆ ADD TO FAVORITES</button><button class="subtle-btn" id="gameDetailRemove">REMOVE FROM LIBRARY</button></div><div class="sgdb-launch-row"><div><p class="eyebrow">STEAMGRIDDB ARTWORK</p><h3>MAKE THIS GAME LOOK RIGHT.</h3></div><button class="subtle-btn" id="openArtworkBrowser">BROWSE ARTWORK ↗</button></div><div class="sgdb-browser hidden" id="sgdbBrowser"><div class="sgdb-search-row"><input id="sgdbSearchInput" type="search" placeholder="Search SteamGridDB for this game…"><button class="primary-btn" id="sgdbSearchButton">SEARCH</button></div><p class="settings-note" id="sgdbStatus">Search for the matching game, then choose its artwork.</p><div class="sgdb-matches" id="sgdbMatches"></div><div class="sgdb-category-tabs" id="sgdbCategoryTabs"><button class="active" data-sgdb-type="grids">COVERS</button><button data-sgdb-type="heroes">BANNERS</button><button data-sgdb-type="logos">LOGOS</button><button data-sgdb-type="icons">ICONS</button></div><div class="sgdb-results" id="sgdbResults"></div></div><p class="settings-note">Choose a player for this system, then launch the original game file directly through that app.</p></div></div>
+<div class="modal-backdrop hidden" id="gameDetailModal"><div class="widget-modal game-detail-modal"><div class="modal-head"><div><p class="eyebrow">GAME DETAILS</p><h2 id="gameDetailTitle">GAME</h2></div><button class="close-modal" id="closeGameDetail" aria-label="Close game details">×</button></div><p class="game-detail-meta" id="gameDetailMeta"></p><div class="game-detail-file"><small>FILE LOCATION</small><p id="gameDetailPath"></p><small>PLAYER</small><p id="gameDetailPlayer"></p></div><div class="game-detail-actions"><button class="primary-btn" id="gameDetailLaunch">▶ PLAY GAME</button><button class="subtle-btn" id="gameDetailFavorite">☆ ADD TO FAVORITES</button><button class="subtle-btn" id="gameDetailRemove">REMOVE FROM LIBRARY</button></div><div class="sgdb-launch-row"><div><p class="eyebrow">STEAMGRIDDB ARTWORK</p><h3>MAKE THIS GAME LOOK RIGHT.</h3></div><button class="primary-btn" id="autoFetchArtwork">AUTO FETCH ART</button><button class="subtle-btn" id="openArtworkBrowser">BROWSE ARTWORK ↗</button></div><div class="sgdb-browser hidden" id="sgdbBrowser"><div class="sgdb-search-row"><input id="sgdbSearchInput" type="search" placeholder="Search SteamGridDB for this game…"><button class="primary-btn" id="sgdbSearchButton">SEARCH</button></div><p class="settings-note" id="sgdbStatus">Search for the matching game, then choose its artwork.</p><div class="sgdb-matches" id="sgdbMatches"></div><div class="sgdb-category-tabs" id="sgdbCategoryTabs"><button class="active" data-sgdb-type="grids">COVERS</button><button data-sgdb-type="heroes">BANNERS</button><button data-sgdb-type="logos">LOGOS</button><button data-sgdb-type="icons">ICONS</button></div><div class="sgdb-results" id="sgdbResults"></div></div><p class="settings-note">Choose a player for this system, then launch the original game file directly through that app.</p></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>`;
 
 const $ = s => document.querySelector(s);
@@ -618,6 +618,29 @@ function applySgdbArtwork(type,url){
  if(activePage==='console'&&activeConsoleName)renderConsoleHome(systems.find(item=>item.name===activeConsoleName)||{name:activeConsoleName,icon:'✦',family:'Platform'});
  notify('SteamGridDB '+type+' applied to '+game.title+'.');
 }
+async function autoFetchSgdbArtwork(){
+ const game=games.find(item=>item.id===selectedGameDetailId);if(!game)return;
+ if(!sgdbKey()){notify('Add your SteamGridDB API key in Settings first.');return;}
+ const button=$('#autoFetchArtwork');if(button){button.disabled=true;button.textContent='FETCHING…';}
+ try{
+  const matches=await sgdbFetch('search/autocomplete/'+encodeURIComponent(game.title));
+  if(!matches.length)throw new Error('No SteamGridDB match found for '+game.title+'.');
+  const match=matches.find(item=>(item.name||'').toLowerCase()===game.title.toLowerCase())||matches[0];
+  const art={...(game.artwork||{}),source:'SteamGridDB',gameId:match.id};
+  let found=0;
+  for(const [type,field] of [['grids','grid'],['heroes','hero'],['logos','logo'],['icons','icon']]){
+   if(art[field])continue;
+   try{const assets=await sgdbFetch(type+'/game/'+match.id+'?types=static');const first=assets.find(asset=>sgdbSafeUrl(asset.url));if(first){art[field]=sgdbSafeUrl(first.url);found++;}}
+   catch(error){console.warn('SteamGridDB '+type+' lookup failed',error);}
+  }
+  if(!found&&!art.grid&&!art.hero&&!art.logo&&!art.icon)throw new Error('No artwork was available for '+match.name+'.');
+  game.artwork=art;localStorage.setItem('eclipse-games',JSON.stringify(games));
+  setSgdbStatus('AUTO FETCH COMPLETE · '+found+' ARTWORK ITEMS ADDED.');renderKonsoruHome();renderHomeHero();renderLibrary();
+  if(activePage==='console'&&activeConsoleName)renderConsoleHome(systems.find(item=>item.name===activeConsoleName)||{name:activeConsoleName,icon:'✦',family:'Platform'});
+  notify('Fetched '+found+' artwork items for '+game.title+'.');
+ }catch(error){notify(error.message||'Could not fetch SteamGridDB artwork.');}
+ finally{if(button){button.disabled=false;button.textContent='AUTO FETCH ART';}}
+}
 function openSgdbBrowser(){
  const game=games.find(item=>item.id===selectedGameDetailId);if(!game)return;
  $('#sgdbBrowser')?.classList.remove('hidden');$('#sgdbSearchInput').value=game.title;$('#sgdbMatches')?.replaceChildren();$('#sgdbResults')?.replaceChildren();
@@ -920,6 +943,7 @@ $('#scanAppsPage')?.addEventListener('click',()=>scanInstalledApps());
 $('#appLibrarySearch')?.addEventListener('input',renderAndroidApps);
 $('#saveSgdbKey')?.addEventListener('click',()=>{const value=$('#sgdbApiKey')?.value.trim();if(!value){notify('Paste your SteamGridDB API key first.');return;}localStorage.setItem('eclipse-steamgriddb-key',value);$('#sgdbKeyStatus').textContent='API key saved on this device.';notify('SteamGridDB key saved locally.');});
 $('#clearSgdbKey')?.addEventListener('click',()=>{localStorage.removeItem('eclipse-steamgriddb-key');if($('#sgdbApiKey'))$('#sgdbApiKey').value='';if($('#sgdbKeyStatus'))$('#sgdbKeyStatus').textContent='No API key saved yet.';notify('SteamGridDB key cleared.');});
+$('#autoFetchArtwork')?.addEventListener('click',autoFetchSgdbArtwork);
 $('#openArtworkBrowser')?.addEventListener('click',openSgdbBrowser);
 $('#sgdbSearchButton')?.addEventListener('click',searchSgdbGames);
 $('#sgdbSearchInput')?.addEventListener('keydown',event=>{if(event.key==='Enter')searchSgdbGames();});
