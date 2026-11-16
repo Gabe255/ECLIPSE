@@ -3,6 +3,7 @@ import { mountExperience } from './experience.js';
 import { mountControlCenter } from './controls.js';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 const FolderAccess = registerPlugin('FolderAccess');
+const UpdateDownload = registerPlugin('UpdateDownload');
 const LauncherSetup = registerPlugin('LauncherSetup');
 const DisplayInfo = registerPlugin('DisplayInfo');
 
@@ -666,7 +667,17 @@ function compareVersions(a,b){
  return x.pre.localeCompare(y.pre,undefined,{numeric:true});
 }
 function addSafeLink(parent,url,label){
- const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=label;parent.append(link);
+ const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=label;
+ if(String(url).startsWith('https://github.com/')&&String(url).includes('/releases/download/')){
+  link.addEventListener('click',event=>{
+   if(!Capacitor.isNativePlatform())return;
+   event.preventDefault();
+   link.setAttribute('aria-busy','true');
+   UpdateDownload.openExternal({url}).then(()=>notify('Opening the APK download in Android…')).catch(error=>notify(error?.message||'Could not open the APK download.'));
+   link.removeAttribute('aria-busy');
+  });
+ }
+ parent.append(link);
 }
 async function checkUpdates(){
  const result=$('#updateResult'),history=$('#releaseHistory'),button=$('#checkUpdates');
