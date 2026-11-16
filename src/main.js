@@ -1,4 +1,6 @@
 import './style.css';
+import { Capacitor, registerPlugin } from '@capacitor/core';
+const FolderAccess = registerPlugin('FolderAccess');
 
 const VERSION = '0.2.0-alpha';
 const REPO = 'Gabe255/ECLIPSE';
@@ -271,7 +273,7 @@ function renderConsoleHome(system){
   '<section class="system-shelf"><div class="system-row-label"><div><p class="eyebrow">YOUR COLLECTION</p><h3>ALL GAMES</h3></div><span>'+titles.length+' ITEMS</span></div><div class="system-game-row">'+(titles.length?titles.map(cardFor).join(''):'<p class="settings-note">No supported game files were found for this system.</p>')+'</div></section>';
  $('#systemHome').querySelectorAll('[data-system-game]').forEach(button=>button.addEventListener('click',()=>{const game=games[Number(button.dataset.systemGame)];if(game)showGameDetails(game);}));
  $('#systemHome').querySelectorAll('[data-system-folder]').forEach(button=>button.addEventListener('click',()=>$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth'})));
- $('#systemHome').querySelector('[data-go-scan]')?.addEventListener('click',()=>{showView('library');$('#gameFolderPicker').click();});
+ $('#systemHome').querySelector('[data-go-scan]')?.addEventListener('click',()=>{showView('library');chooseGameFolder();});
 }
 function gamesForSystem(name){
  if(name==='Nintendo')return games.filter(g=>['NES','SNES','NINTENDO 64','GAME BOY','GAME BOY ADVANCE','NINTENDO DS','NINTENDO 3DS','GAMECUBE','WII','WII U','NINTENDO SWITCH','NINTENDO SWITCH 2'].includes(g.system));
@@ -287,14 +289,14 @@ function renderGames(){
  const visible=activeSystem==='All Games'?games:gamesForSystem(activeSystem);
  $('#gameGrid').innerHTML=visible.length?visible.map(g=>{const i=games.indexOf(g);return `<button class="game-card ${i===selectedGame?'focused':''}" data-game="${i}"><div class="game-art art-generic"><span class="art-glow"></span><span class="art-mark">✦</span><span class="art-caption">${g.tag||'GAME FILE'}</span></div><div class="game-meta"><div><h3>${g.title}</h3><p>${g.system} · ${g.fileName||'Imported file'}</p></div><span class="game-arrow">↗</span></div></button>`;}).join(''):'<div class="empty-state system-empty"><div class="empty-icon">✦</div><h3>NO GAMES FOUND</h3><p>Choose a game folder and scan it. ECLIPSE will only show files it can identify for this platform.</p><button class="primary-btn" id="emptyScanBtn">CHOOSE GAME FOLDER</button></div>';
  $('#gameGrid').querySelectorAll('[data-game]').forEach(card=>card.addEventListener('click',()=>{selectedGame=Number(card.dataset.game);showGameDetails(games[selectedGame]);}));
- $('#emptyScanBtn')?.addEventListener('click',()=>$('#gameFolderPicker').click());
+ $('#emptyScanBtn')?.addEventListener('click',chooseGameFolder);
 }
 function showGameDetails(game){
  if(!game)return;
  notify(game.title+' · '+game.system+' · File: '+game.fileName+'. Player assignment and launch integration are next.');
 }
 function inferGameSystem(file){
- const path=(file.webkitRelativePath||file.name).toLowerCase().replace(/\\/g,'/');
+ const path=(file.webkitRelativePath||file.relativePath||file.name).toLowerCase().replace(/\\/g,'/');
  const ext=(file.name.split('.').pop()||'').toLowerCase();
  const dirMatch=supportedGameTypes.find(item=>item.dirs.some(dir=>path.includes('/'+dir+'/')||path.startsWith(dir+'/')));
  if(dirMatch&&dirMatch.ext.includes(ext))return dirMatch.system;
@@ -302,19 +304,45 @@ function inferGameSystem(file){
  return extensionMatches.length===1?extensionMatches[0].system:null;
 }
 function titleFromFile(name){return name.replace(/\.[^.]+$/,'').replace(/[._-]+/g,' ').replace(/\s+/g,' ').trim().replace(/\b\w/g,ch=>ch.toUpperCase());}
-function scanSelectedFolder(fileList){
+function scanSelectedFolder(fileList,folderUri='browser'){
  const files=[...fileList].filter(file=>file&&file.size>0);
  const found=[];
  for(const file of files){
   const system=inferGameSystem(file);if(!system)continue;
-  const relative=file.webkitRelativePath||file.name;
-  if(games.some(game=>game.relativePath===relative))continue;
-  found.push({id:relative+'|'+file.size,title:titleFromFile(file.name),system,year:'',art:'generic',tag:file.name.split('.').pop().toUpperCase(),fileName:file.name,relativePath:relative,size:file.size,lastModified:file.lastModified});
+  const relative=file.webkitRelativePath||file.relativePath||file.name;
+  const id=(folderUri||'browser')+'|'+relative+'|'+file.size;
+  if(games.some(game=>game.id===id))continue;
+  found.push({id,title:titleFromFile(file.name),system,year:'',art:'generic',tag:file.name.split('.').pop().toUpperCase(),fileName:file.name,relativePath:relative,size:file.size,lastModified:file.lastModified,uri:file.uri||null});
  }
  if(found.length){games.push(...found);localStorage.setItem('eclipse-games',JSON.stringify(games));activeSystem='All Games';renderLibrary();renderWidgets();renderHomeHero();}
  const status=$('#scanStatus');
  status.textContent=found.length?'Found '+found.length+' supported game file(s). '+files.length+' total file(s) were checked.': 'No supported game files were found in that folder. Nothing was added to Home or your library.';
  notify(found.length?'Added '+found.length+' games to your library.':'No games found — nothing added.');
+}
+async function chooseGameFolder(){
+ const status=$('#scanStatus');
+ if(Capacitor.isNativePlatform()){
+  status.textContent='Choose your game folder. ECLIPSE is scanning its files…';
+  try{
+   const result=await FolderAccess.pickAndScan();
+   if(result.uri)localStorage.setItem('eclipse-folder-uri',result.uri);
+   scanSelectedFolder(result.files||[],result.uri||'android');
+   if(result.truncated)status.textContent+=' Scan limit reached at 5,000 files; choose a smaller platform folder for the rest.';
+  }catch(error){
+   const message=String(error?.message||error||'');
+   if(!message.toLowerCase().includes('cancel'))status.textContent='Folder scan failed: '+message;
+  }
+ }else{
+  $('#gameFolderPicker').click();
+ }
+}
+async function rescanGameFolder(){
+ const uri=localStorage.getItem('eclipse-folder-uri');
+ if(Capacitor.isNativePlatform()&&uri){
+  const status=$('#scanStatus');status.textContent='Rescanning your saved game folder…';
+  try{const result=await FolderAccess.scanFolder({uri});scanSelectedFolder(result.files||[],uri);if(result.truncated)status.textContent+=' Scan limit reached at 5,000 files.';}
+  catch(error){status.textContent='Could not access that folder. Its permission may have been revoked. Choose it again.';notify('Folder permission needs to be renewed.');}
+ }else chooseGameFolder();
 }
 function compareVersions(a,b){
  const parse=value=>{const clean=String(value||'').replace(/^v/i,'');const [core,pre='']=clean.split('-',2);return {parts:core.split('.').map(n=>Number(n)||0),pre};};
@@ -382,9 +410,9 @@ $('#themeSelect').addEventListener('change',e=>setTheme(e.target.value));
 $('#settingsTheme').addEventListener('change',e=>setTheme(e.target.value));
 document.querySelectorAll('.rail-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
 $('#backToLibrary').addEventListener('click',()=>showView('library'));
-$('#scanGamesBtn').addEventListener('click',()=>$('#gameFolderPicker').click());
-$('#homeScanBtn').addEventListener('click',()=>{showView('library');$('#gameFolderPicker').click();});
-$('#gameFolderPicker').addEventListener('change',e=>{if(e.target.files?.length)scanSelectedFolder(e.target.files);e.target.value='';});
+$('#scanGamesBtn').addEventListener('click',chooseGameFolder);
+$('#homeScanBtn').addEventListener('click',()=>{showView('library');chooseGameFolder();});
+$('#gameFolderPicker').addEventListener('change',e=>{if(e.target.files?.length)scanSelectedFolder(e.target.files,'browser');e.target.value='';});
 
 $('#editWidgets').addEventListener('click',()=>{$('#widgetModal').classList.remove('hidden');renderWidgetChoices();});
 $('#closeWidgetModal').addEventListener('click',()=>{$('#widgetModal').classList.add('hidden');renderWidgets();});
@@ -399,7 +427,7 @@ $('#systemCountsSetting').addEventListener('change',e=>{preferences.systemCounts
 $('#startPageSetting').addEventListener('change',e=>{preferences.startPage=e.target.value;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));notify('Startup page saved.');});
 $('#addFolderPath').addEventListener('click',()=>{$('#gameFolderPicker').click();});
 
-$('#rescanFolders').addEventListener('click',()=>{$('#scanResult').textContent='Choose a folder again to rescan it. ECLIPSE does not invent entries when no supported files are found.';$('#gameFolderPicker').click();});
+$('#rescanFolders').addEventListener('click',rescanGameFolder);
 $('#resetAllDefaults').addEventListener('click',()=>{if(!confirm('Restore ECLIPSE default settings?'))return;activeTheme='violet';localStorage.setItem('eclipse-theme',activeTheme);document.documentElement.dataset.theme=activeTheme;$('#themeSelect').value=activeTheme;widgets=['recent','systems','favorites'];pageNames=['Home','Discover','Collections'];currentPage=0;preferences={showHero:true,compactRows:false,systemCounts:true,startPage:'home'};localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));saveLayout();renderWidgets();renderSettings();document.querySelector('.feature-hero').classList.remove('hidden');notify('Default settings restored.');});
 document.querySelectorAll('[data-settings-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-settings-tab]').forEach(x=>x.classList.toggle('active',x===b));['personal','library','controls','system'].forEach(k=>$('#settings'+k[0].toUpperCase()+k.slice(1)).classList.toggle('hidden',k!==b.dataset.settingsTab));}));
 $('#checkUpdates').addEventListener('click',checkUpdates);
