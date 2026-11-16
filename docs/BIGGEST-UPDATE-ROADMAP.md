@@ -1,139 +1,144 @@
 # ECLIPSE — Biggest Update Roadmap
 
-**Target release:** 3.0.0  
-**Release style:** Stable releases only (3.1.0, 3.2.0, etc.). No alpha/beta labels.  
-**Development approach:** Ship in small, testable mini-updates. Fix bugs as soon as they are found instead of waiting for the entire roadmap.
+**Project version:** 3.0.0 development line  
+**Release policy:** Stable releases only. Do not publish a stable tag until the release checks below pass.  
+**Status language:** “Implemented” means the code exists. “Build verified” means CI passed. “Device verified” means it was tested on real Android hardware. These are separate checks.
 
-## Release philosophy
+## Current release-readiness snapshot
 
-This roadmap is the master plan, not a promise that every feature is already implemented. Each feature must be built, tested on-device, and checked in CI before being marked complete.
-
-### Mini-update cycle
-1. Pick one small feature or bug fix.
-2. Implement only that change and keep the rest of the app stable.
-3. Run the Android build and check the GitHub Actions result.
-4. Test the feature on the device.
-5. Fix any bugs immediately in a follow-up mini-update.
-6. Update this roadmap with status and notes.
-
-Do not call an update complete just because the code was pushed or uploaded. A successful build and a real device test are required.
-
-## 1. ECLIPSE home experience
-- Clean, console-inspired home screen with a clear systems menu.
-- Per-system pages with Overview, Games, Players, Scan Games, and System Settings.
-- Customizable shelves and library organization.
-- Favorites and recently played sections based only on real user library data.
-- Search across game title, system, filename, and file path.
-- Useful empty states instead of fake/demo games.
-- Responsive layout for phone, tablet, and desktop-sized screens.
-
-## 2. System pages and navigation
-- Each system gets its own menu and settings.
-- Games view shows only games actually imported or discovered.
-- Players view lets the user assign an installed emulator/player to that system.
-- Scan Games rescans the selected game folder.
-- System Settings contains system-specific options.
-- Menu selection and navigation should remain consistent when switching systems.
-
-## 3. Game library and scanning
-- Scan user-selected folders using Android's document picker.
-- Support platform folders and common game-file extensions.
-- Preserve file names, relative paths, and content URIs.
-- Never invent game entries when a scan finds no supported files.
-- Allow rescanning without duplicating existing entries.
-- Let users remove a library entry without deleting the original game file.
-- Add metadata scraping for title, platform, cover art, description, and screenshots where a reliable match exists.
-- If a match is uncertain or unavailable, show the filename and let the user correct it rather than inventing details.
-
-## 4. Players and emulator support
-- Discover launchable apps visible to Android.
-- Let users manually choose a player/emulator for each system.
-- Add known emulator options and matching rules, while still allowing manual selection.
-- Show which player is assigned to each system.
-- Implement real game launching by passing the selected game's content URI to the chosen emulator using that emulator's documented launch method.
-- Show a clear message when an emulator cannot open a selected file.
-- Do not claim universal emulator compatibility; test each supported emulator and file type.
-
-## 5. Treat as Game
-- Add a way to mark an installed launchable app as a game.
-- Let the user assign it to a platform/category.
-- Let users undo the choice or change its category.
-- Keep emulator/player apps separate from the user's game collection unless the user chooses otherwise.
-- Respect Android package-visibility limits; do not claim to scan every Play Store app.
-
-## 6. Data, backups, and portability
-- Finish the native Android data-folder picker and its persistent folder permission handling.
-- Save and restore an ECLIPSE backup containing library metadata, settings, favorites, and other supported app data.
-- Clearly show whether a folder is connected and whether a backup succeeded.
-- Keep the backup flow separate from the live primary-storage system until automatic folder-backed persistence is actually implemented.
-- Do not overwrite a backup without clear user confirmation.
-- Test restore behavior and handle malformed or incompatible backup files safely.
-
-## 7. Playtime and activity
-- Track playtime only when a game is actually launched through ECLIPSE and a reliable session can be observed.
-- Show recent activity and per-game playtime when supported.
-- Explain limitations when Android or an emulator does not provide enough information to track a session accurately.
-- Do not fabricate playtime.
-
-## 8. Desktop shortcuts and Home
-- When adding a shortcut, ask which platform/system it belongs to.
-- Offer an option to add the game/app to the ECLIPSE Home screen.
-- Keep shortcut labels and icons tied to the selected real app or game.
-- Respect Android launcher and browser/desktop platform limitations; only show actions the current platform can actually perform.
-
-## 9. Mascot and onboarding
-- Keep the ECLIPSE mascot: a mysterious character in a suit, hat, and shades, with an eclipse-themed identity.
-- Use the mascot to guide first-time setup: choose a data/backup location, add game folders, scan systems, and assign players.
-- Make tips dismissible and avoid blocking normal navigation.
-- Add helpful explanations for empty libraries, missing players, and scan errors.
-
-## 10. Settings and polish
-- Clear settings sections for Library, Data & Backup, Players, Appearance, and About.
-- Readable text, accessible contrast, and touch-friendly controls.
-- Consistent animations and transitions without slowing navigation.
-- Confirm destructive actions and explain what will and will not be deleted.
-- Keep error messages actionable and understandable.
-
-## 11. Stable release and update safety
-- Keep the Android application ID stable: `com.eclipse.launcher`.
-- Use a persistent private Android signing key for stable releases.
-- Never publish a tagged stable release using a temporary/debug signing key.
-- Keep signing secrets in GitHub Actions secrets; never commit the keystore or expose passwords.
-- Verify that a new APK can update an existing installation before publishing.
-- Publish stable version tags such as `v3.0.0`, then `v3.1.0`, `v3.2.0`, and so on.
-- Keep release notes honest about implemented, tested, and known-limited features.
-
-## Suggested mini-update order
-
-| Update | Focus | Completion check |
+| Area | Current status | Notes |
 |---|---|---|
-| 1 | Finish native data-folder picker, save, and restore methods | Backup and restore tested on Android |
-| 2 | Verify system menu and per-system navigation | Every menu item opens the correct section |
-| 3 | Treat as Game and platform assignment | User can mark, categorize, edit, and undo |
-| 4 | Emulator launch foundation | One supported emulator opens a real selected game |
-| 5 | Expand tested emulator/player support | Each listed player has verified launch behavior |
-| 6 | Game metadata and artwork scraping | Reliable matches only; graceful no-match behavior |
-| 7 | Desktop/Home shortcuts | Platform-appropriate shortcut flow works |
-| 8 | Playtime and activity | Sessions are measured accurately where supported |
-| 9 | Final stability, accessibility, and release checks | Clean CI build and device regression test |
+| Web dashboard and system picker | Implemented; latest web CI passing | 37 system categories and system landing-page UI |
+| Experience Studio | Implemented | Themes, wallpaper, profiles, motion settings, JSON backup/restore |
+| Apps Library | Implemented foundation | Android app discovery, Treat as Game labels, manual playtime |
+| Folder scanning and backup folder | Native implementation present | Requires Android device testing and edge-case checks |
+| Mascot and first-run setup | Implemented | Eclipse orb mascot; display, default Home, and storage setup |
+| Single/dual display | Implemented; Android APK build verified | AndroidX WindowManager detection; real foldable/phone validation still required |
+| Default Android Home request | Implemented; Android APK build verified | User must confirm through Android's system role picker; device behavior still needs validation |
+| Control Center | Implemented in web and native code | Android panels, app-window brightness, battery status; APK/device validation required |
+| Game Mode | Implemented as an ECLIPSE UI mode | Reduces interface effects only; no CPU/GPU tuning |
+| Third-party emulator launching | Not implemented end-to-end | Player assignment is not proof of compatibility |
+| Metadata/artwork scraping | Not implemented | Requires provider integration and reliable-match handling |
+| Achievements and online theme marketplace | Not implemented | Future work |
+| Cloud sync and automatic foreground playtime | Not implemented | Requires additional services/permissions and privacy design |
 
-## Current known gaps to track
-- The data-folder UI has been added, but its matching native Android methods still need verification/implementation.
-- Game launching through assigned emulators is not yet wired end-to-end.
-- Treat as Game is not yet implemented.
-- Metadata/artwork scraping is not yet implemented.
-- Desktop/Home shortcut flow is not yet implemented.
-- Playtime tracking is not yet implemented.
-- Persistent release signing still needs to be configured and tested.
-- The current system menu is an initial navigation implementation and needs on-device verification.
+## 1. Home and system worlds
+
+- Console-inspired ECLIPSE home with system picker and 37 platform categories.
+- System landing pages generated from the selected platform and real library data.
+- Home widgets, page customization, library shelves, favorites, and search.
+- Phone-first responsive design.
+- Dual-display layouts: side-by-side layout for vertical hinge devices and top/bottom layout for horizontal hinge devices.
+- Auto-detection through AndroidX WindowManager when Android reports a separating fold feature.
+- Manual Auto / Single Screen / Dual Screen override for devices or previews that do not expose display-segment information.
+
+**Build status:** The Android APK workflow has compiled and uploaded a test APK. **Remaining:** Test on a normal phone, a foldable/dual-screen device, portrait/landscape, and app resize/posture changes. Do not claim hardware auto-detection works on every foldable until verified.
+
+## 2. Apps and game library
+
+- Android launchable-app discovery and native launch handoff through the Apps Library.
+- Pin installed apps to ECLIPSE Home and launch/remove those shortcuts.
+- Treat as Game labels saved locally.
+- Manual app session timer and locally saved playtime totals.
+- Folder picker and game-file scanning foundation.
+- System assignment and library organization.
+
+**Remaining:**
+- Reliable add/edit/remove game flows and duplicate-safe rescans.
+- Automatic foreground-app tracking only if Android permissions and platform behavior allow it.
+- End-to-end launch handoff for individually tested emulators and file types.
+- Clear unsupported-player and failed-launch messages.
+- Never invent app compatibility, playtime, metadata, or game entries.
+
+## 3. Players and emulator support
+
+- Platform/player assignment UI and platform-specific player suggestions are organizational starting points.
+- The user must be able to choose a player installed on their device.
+
+**Remaining:**
+- Connect a selected game content URI to a selected player's documented Android launch intent.
+- Verify one supported emulator and file type at a time.
+- Record tested versions and known limitations.
+- Keep unsupported or untested players clearly labelled.
+
+## 4. ECLIPSE Experience Studio
+
+Implemented in the current branch:
+- Theme presets and custom accent color.
+- Local wallpaper upload and reset.
+- Per-system accent themes.
+- Local player profiles.
+- Animation speed, reduced-motion, and lightweight visual preferences.
+- JSON export and restore for supported settings and library metadata.
+- ECLIPSE Hub links to releases, source, and bug reports.
+
+**Remaining:** Validate backup/restore on Android, malformed backup handling, large wallpaper storage, and profile switching across app restarts.
+
+## 5. Mascot and onboarding
+
+- ECLIPSE's mascot is the eclipse orb with eyes and a small hat.
+- First-run setup explains storage choices.
+- Setup includes Auto / Single / Dual display choice and an action to request ECLIPSE as the default Home app.
+- Android decides the final default-launcher confirmation.
+- Settings can request the Home-app chooser again and change display preference.
+
+**Build status:** Native launcher integration compiled into the test APK. **Remaining:** Device-test first launch, returning launch, cancel/skip paths, and default-Home selection on supported Android versions. Keep onboarding dismissible.
+
+## 6. Control Center and Game Mode
+
+Implemented foundation:
+- Wi-Fi shortcut opens Android's Wi-Fi panel/settings.
+- Bluetooth shortcut opens Android Bluetooth settings.
+- Volume shortcut opens the system volume UI.
+- Brightness slider adjusts the ECLIPSE app window only.
+- Battery status reads Android battery information.
+- Rotation shortcut opens Android display settings.
+- Do Not Disturb shortcut opens Android's DND access settings.
+- Game Mode reduces ECLIPSE interface effects.
+
+**Build status:** Native control bridge compiled into the test APK. **Important platform limits:** These shortcuts do not bypass Android restrictions. ECLIPSE cannot silently toggle restricted system settings or claim to boost device CPU/GPU performance. Test each shortcut on supported Android versions.
+
+## 7. Data, backups, and privacy
+
+- Folder access uses Android's document picker and persistable URI permissions where offered.
+- Experience Studio exports/imports supported ECLIPSE data as JSON.
+- Backup-folder storage is distinct from primary app storage.
+
+**Remaining:**
+- Test backup creation, restore, cancellation, permission revocation, malformed files, and version mismatch.
+- Confirm before overwriting an existing backup.
+- Explain exactly what is included in an export.
+- Avoid collecting account or device data that is not needed.
+
+## 8. Visual quality, accessibility, and stability
+
+- Consistent dark visual system, responsive panels, touch-friendly controls, and reduced-motion option.
+- Keep loading, empty, success, and error states explicit.
+- Keep navigation and settings usable on narrow screens and large displays.
+- Avoid heavy animations in Game Mode and when reduced motion is enabled.
+
+**Remaining:** Real-device QA for text scaling, contrast, keyboard/controller navigation, screen readers, orientation changes, and long library lists.
+
+## 9. Android build and stable releases
+
+- Keep application ID stable: `com.eclipse.launcher`.
+- Web CI must pass.
+- Android APK workflow must compile all native plugins and upload a test APK.
+- Test install, launch, default Home selection, app restart, backup/restore, and update-over-existing-install.
+- Stable tags require the persistent private signing key and GitHub Actions secrets.
+- Never publish a stable tag using a temporary debug signing key.
+- Keep the keystore and passwords out of the repository.
+- Keep release notes honest about implemented, build-verified, and device-verified features.
 
 ## Definition of done
-A feature is complete only when:
-- Its code is committed.
-- The Android CI build passes.
-- It has been tested on a real device or a clearly documented platform-appropriate test environment.
-- Bugs and limitations are recorded.
-- The app does not display fake games, fake metadata, fake player compatibility, or fake activity.
 
----
-**Roadmap status:** Planning document. Feature status must be updated as mini-updates are implemented and tested.
+A release is ready only when:
+1. Web CI passes on the exact release commit.
+2. Android APK build succeeds on the exact release commit.
+3. The APK installs and opens on a real Android phone.
+4. Default Home, storage, folder scan, settings panels, brightness, battery status, and backup/restore are tested where supported.
+5. Dual-display behavior is tested on actual foldable/dual-screen hardware before being advertised as device-verified.
+6. Known limitations are documented.
+7. A stable signing/update path is verified before publishing a stable release.
+
+**Current decision:** The latest web CI and Android APK build both pass. Keep this work in the existing feature branch and draft pull request until real-device checks are complete.

@@ -9,7 +9,7 @@ on:
         type: string
         default: ''
   push:
-    branches: [main]
+    branches: [main, 'redesign/**']
     tags: ['v*.*.*']
 
 permissions:
@@ -31,7 +31,7 @@ jobs:
           distribution: temurin
           java-version: '21'
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
       - name: Set build version
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
@@ -55,6 +55,9 @@ jobs:
         run: |
           mkdir -p android/app/src/main/java/com/eclipse/launcher
           cp android-native/FolderAccessPlugin.java android/app/src/main/java/com/eclipse/launcher/FolderAccessPlugin.java
+          cp android-native/LauncherSetupPlugin.java android/app/src/main/java/com/eclipse/launcher/LauncherSetupPlugin.java
+          cp android-native/DisplayInfoPlugin.java android/app/src/main/java/com/eclipse/launcher/DisplayInfoPlugin.java
+          cp android-native/SystemControlsPlugin.java android/app/src/main/java/com/eclipse/launcher/SystemControlsPlugin.java
           python3 - <<'PY'
           from pathlib import Path
           activity = Path("android/app/src/main/java/com/eclipse/launcher/MainActivity.java")
@@ -69,6 +72,9 @@ jobs:
               "    @Override\n"
               "    public void onCreate(Bundle savedInstanceState) {\n"
               "        registerPlugin(FolderAccessPlugin.class);\n"
+              "        registerPlugin(LauncherSetupPlugin.class);\n"
+              "        registerPlugin(DisplayInfoPlugin.class);\n"
+              "        registerPlugin(SystemControlsPlugin.class);\n"
               "        super.onCreate(savedInstanceState);\n"
               "    }\n"
               "}"
@@ -79,9 +85,13 @@ jobs:
           build = gradle.read_text()
           build = re.sub(r'versionCode\s+\d+', 'versionCode ' + os.environ["GITHUB_RUN_NUMBER"], build, count=1)
           build = re.sub(r'versionName\s+"[^"]+"', 'versionName "' + os.environ["ECLIPSE_VERSION"] + '"', build, count=1)
-          dependency = '    implementation "androidx.documentfile:documentfile:1.0.1"'
-          if dependency not in build:
-              build = build.replace("dependencies {", "dependencies {\n" + dependency, 1)
+          dependencies = [
+              '    implementation "androidx.documentfile:documentfile:1.0.1"',
+              '    implementation "androidx.window:window-java:1.3.0"',
+          ]
+          for dependency in dependencies:
+              if dependency not in build:
+                  build = build.replace("dependencies {", "dependencies {\n" + dependency, 1)
           gradle.write_text(build)
           import xml.etree.ElementTree as ET
           manifest = Path("android/app/src/main/AndroidManifest.xml")
@@ -96,6 +106,16 @@ jobs:
               category = ET.SubElement(intent, "category")
               category.set("{http://schemas.android.com/apk/res/android}name", "android.intent.category.LAUNCHER")
               root.insert(0, queries)
+          ns = "{http://schemas.android.com/apk/res/android}"
+          for activity_node in root.iter("activity"):
+              if activity_node.get(ns + "name", "").endswith("MainActivity"):
+                  home_filter = ET.SubElement(activity_node, "intent-filter")
+                  home_action = ET.SubElement(home_filter, "action")
+                  home_action.set(ns + "name", "android.intent.action.MAIN")
+                  for category_name in ("android.intent.category.HOME", "android.intent.category.DEFAULT"):
+                      home_category = ET.SubElement(home_filter, "category")
+                      home_category.set(ns + "name", category_name)
+                  break
           tree.write(manifest, encoding="utf-8", xml_declaration=True)
           PY
       - name: Configure persistent release signing
