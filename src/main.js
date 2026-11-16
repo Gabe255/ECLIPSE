@@ -105,6 +105,7 @@ let systemFolders = load('eclipse-system-folders', {});
 let preferences = load('eclipse-preferences', {showHero:true,compactRows:false,systemCounts:true,startPage:'home'});
 let installedApps = load('eclipse-installed-apps', []);
 let emulatorAssignments = load('eclipse-emulator-assignments', {});
+let favorites = load('eclipse-favorites', []);
 document.documentElement.dataset.theme = activeTheme;
 
 document.querySelector('#app').innerHTML = `
@@ -131,6 +132,7 @@ document.querySelector('#app').innerHTML = `
       </section>
       <div class="page-toolbar"><div class="page-tabs" id="pageTabs"></div><div class="page-actions"><button class="subtle-btn" id="addPage">+ PAGE</button><button class="subtle-btn" id="editWidgets">EDIT HOME</button></div></div>
       <section class="dashboard-grid" id="widgetGrid"></section>
+      <section class="home-games-shelf hidden" id="homeGamesShelf"></section>
       <section class="feature-hero hidden" id="homeLibraryHero" aria-label="Your game library">
         <div class="feature-art"><span class="feature-glow"></span><span class="feature-symbol">E</span><span class="feature-kicker">YOUR COLLECTION</span></div>
         <div class="feature-copy"><p class="eyebrow">YOUR VAULT</p><h2 id="homeHeroTitle">YOUR GAMES</h2><p id="homeHeroMeta">Games you scan will appear here.</p><button class="primary-btn" id="homeScanBtn">ADD GAME FOLDER ↗</button></div>
@@ -197,6 +199,7 @@ document.querySelector('#app').innerHTML = `
 <div class="modal-backdrop hidden" id="widgetModal"><div class="widget-modal"><div class="modal-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>HOME WIDGETS</h2></div><button class="close-modal" id="closeWidgetModal">×</button></div><p class="settings-note">Add widgets, change their order, or remove the ones you don't use.</p><div id="widgetChoices" class="widget-choices"></div><button class="primary-btn" id="doneWidgets">DONE</button></div></div>
 <div class="system-boot hidden" id="systemBoot" aria-live="polite"><div class="boot-orbit"><span></span></div><p class="eyebrow">ECLIPSE SYSTEM STARTUP</p><h2 id="bootSystemName">STARTING SYSTEM</h2><div class="boot-progress"><span></span></div><small>PREPARING YOUR GAME SPACE</small></div>
 <div class="mascot-welcome hidden" id="mascotWelcome" role="dialog" aria-modal="true" aria-labelledby="mascotTitle"><div class="mascot-card"><div class="mascot-art" aria-hidden="true"><div class="mascot-hat"></div><div class="mascot-face"><span class="mascot-eye left"></span><span class="mascot-eye right"></span><span class="mascot-shadow"></span></div><div class="mascot-body"><span class="mascot-lapel left"></span><span class="mascot-lapel right"></span><span class="mascot-tie"></span></div></div><p class="eyebrow">YOUR NEW GAME SPACE</p><h2 id="mascotTitle">WELCOME TO <em>ECLIPSE.</em></h2><p class="mascot-message">I’ll show you around. Your systems, game shelves and collections all live here. Set things up your way and make this space yours.</p><div class="mascot-tips"><span><b>01</b> Pick a system</span><span><b>02</b> Build your library</span><span><b>03</b> Make it yours</span></div><div class="mascot-actions"><button class="primary-btn" id="mascotStart">SHOW ME AROUND ↗</button><button class="subtle-btn" id="mascotSkip">SKIP FOR NOW</button></div></div></div>
+<div class="modal-backdrop hidden" id="gameDetailModal"><div class="widget-modal game-detail-modal"><div class="modal-head"><div><p class="eyebrow">GAME DETAILS</p><h2 id="gameDetailTitle">GAME</h2></div><button class="close-modal" id="closeGameDetail" aria-label="Close game details">×</button></div><p class="game-detail-meta" id="gameDetailMeta"></p><div class="game-detail-file"><small>FILE LOCATION</small><p id="gameDetailPath"></p><small>PLAYER</small><p id="gameDetailPlayer"></p></div><div class="game-detail-actions"><button class="primary-btn" id="gameDetailFavorite">☆ ADD TO FAVORITES</button><button class="subtle-btn" id="gameDetailRemove">REMOVE FROM LIBRARY</button></div><p class="settings-note">ECLIPSE has indexed this file. Direct game launching is still being connected to each player's supported file handoff.</p></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>`;
 
 const $ = s => document.querySelector(s);
@@ -216,7 +219,7 @@ function widgetContent(id){
  const recent=games.length?games[games.length-1]:null;
  if(id==='recent')return `<div class="widget-heading"><small>LAST ADDED</small><span>↗</span></div><div class="widget-large">${recent?recent.title:'NO GAMES YET'}</div><p class="widget-caption">${recent?recent.system+' · '+(recent.year||'YOUR LIBRARY'):'Scan a folder to start your collection'}</p>`;
  if(id==='systems')return `<div class="widget-heading"><small>MY SYSTEMS</small><span>↗</span></div><div class="system-mini-list">${systems.slice(0,3).map(s=>`<span>${s.icon} ${s.name}</span>`).join('')}</div>`;
- if(id==='favorites')return `<div class="widget-heading"><small>FAVORITES</small><span>✦</span></div><div class="widget-large">YOUR FAVORITES</div><p class="widget-caption">${games.length?'Pin games from their options menu':'No games to pin yet'}</p>`;
+ if(id==='favorites'){const favoriteGames=games.filter(game=>favorites.includes(game.id));return `<div class="widget-heading"><small>FAVORITES</small><span>✦</span></div><div class="widget-large">${favoriteGames.length?favoriteGames.length+' SAVED':'NO FAVORITES YET'}</div><p class="widget-caption">${favoriteGames[0]?.title||'Save games from their details panel'}</p>`;}
  if(id==='playtime')return `<div class="widget-heading"><small>PLAYTIME</small><span>◷</span></div><div class="widget-large">NOT TRACKING YET</div><p class="widget-caption">Accurate sessions need native game-launch tracking</p>`;
  if(id==='achievements')return `<div class="widget-heading"><small>ACHIEVEMENTS</small><span>✧</span></div><div class="widget-large">READY</div><p class="widget-caption">Connect a supported achievement service later</p>`;
  return `<div class="widget-heading"><small>QUICK LAUNCH</small><span>↗</span></div><div class="quick-links"><button data-jump="library">LIBRARY</button><button data-jump="android">ANDROID</button></div>`;
@@ -245,6 +248,12 @@ function renderHomeHero(){
  const hero=$('#homeLibraryHero');if(!hero)return;
  hero.classList.toggle('hidden',games.length===0||!preferences.showHero);
  if(games.length){$('#homeHeroTitle').textContent=games[games.length-1].title;$('#homeHeroMeta').textContent=games[games.length-1].system+' · '+games.length+' GAMES IN YOUR LIBRARY';}
+ const shelf=$('#homeGamesShelf');if(!shelf)return;
+ shelf.classList.toggle('hidden',games.length===0);
+ if(games.length){
+  shelf.innerHTML='<div class="home-shelf-heading"><div><p class="eyebrow">YOUR VAULT</p><h2>ALL GAMES</h2></div><span>'+games.length+' TITLES</span></div><div class="home-game-row">'+games.slice().reverse().slice(0,12).map(game=>'<button class="home-game-tile" data-home-game="'+games.indexOf(game)+'"><span class="home-game-art">✦</span><b>'+game.title+'</b><small>'+game.system+'</small></button>').join('')+'</div>';
+  shelf.querySelectorAll('[data-home-game]').forEach(button=>button.addEventListener('click',()=>showGameDetails(games[Number(button.dataset.homeGame)])));
+ }
 }
 function renderLibrary(){
  $('#libraryCount').textContent=games.length+' GAMES';
@@ -264,7 +273,7 @@ function openConsolePage(name){
  },1050);
 }
 function renderConsoleHome(system){
- const name=system.name;
+ const name=system.name;activeConsoleName=name;
  const titles=gamesForSystem(name);
  $('#consoleTitle')?.remove();
  $('#consoleGeneration').textContent=system.family.toUpperCase()+' PLATFORM';
@@ -304,9 +313,18 @@ function renderGames(){
  $('#gameGrid').querySelectorAll('[data-game]').forEach(card=>card.addEventListener('click',()=>{selectedGame=Number(card.dataset.game);showGameDetails(games[selectedGame]);}));
  $('#emptyScanBtn')?.addEventListener('click',chooseGameFolder);
 }
+let activeConsoleName='';
+let selectedGameDetailId=null;
 function showGameDetails(game){
  if(!game)return;
- notify(game.title+' · '+game.system+' · File: '+game.fileName+'. Player assignment and launch integration are next.');
+ selectedGameDetailId=game.id;
+ $('#gameDetailTitle').textContent=game.title;
+ $('#gameDetailMeta').textContent=game.system+' · '+(game.tag||'GAME FILE')+' · '+(game.size?Math.round(game.size/1024/1024*10)/10+' MB':'SIZE UNKNOWN');
+ $('#gameDetailPath').textContent=game.relativePath||game.fileName||'File path unavailable';
+ const player=installedApps.find(app=>app.packageName===emulatorAssignments[game.system]);
+ $('#gameDetailPlayer').textContent=player?player.name:'No player selected for '+game.system;
+ $('#gameDetailFavorite').textContent=favorites.includes(game.id)?'★ REMOVE FROM FAVORITES':'☆ ADD TO FAVORITES';
+ $('#gameDetailModal').classList.remove('hidden');
 }
 function inferGameSystem(file){
  const path=(file.webkitRelativePath||file.relativePath||file.name).toLowerCase().replace(/\\/g,'/');
@@ -500,6 +518,24 @@ $('#rescanFolders').addEventListener('click',rescanGameFolder);
 $('#resetAllDefaults').addEventListener('click',()=>{if(!confirm('Restore ECLIPSE default settings?'))return;activeTheme='violet';localStorage.setItem('eclipse-theme',activeTheme);document.documentElement.dataset.theme=activeTheme;$('#themeSelect').value=activeTheme;widgets=['recent','systems','favorites'];pageNames=['Home','Discover','Collections'];currentPage=0;preferences={showHero:true,compactRows:false,systemCounts:true,startPage:'home'};localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));saveLayout();renderWidgets();renderSettings();document.querySelector('.feature-hero').classList.remove('hidden');notify('Default settings restored.');});
 document.querySelectorAll('[data-settings-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-settings-tab]').forEach(x=>x.classList.toggle('active',x===b));['personal','library','controls','players','system'].forEach(k=>$('#settings'+k[0].toUpperCase()+k.slice(1)).classList.toggle('hidden',k!==b.dataset.settingsTab));}));
 $('#scanInstalledPlayers').addEventListener('click',()=>scanInstalledApps());
+$('#closeGameDetail').addEventListener('click',()=>$('#gameDetailModal').classList.add('hidden'));
+$('#gameDetailModal').addEventListener('click',event=>{if(event.target.id==='gameDetailModal')$('#gameDetailModal').classList.add('hidden');});
+$('#gameDetailFavorite').addEventListener('click',()=>{
+ const game=games.find(item=>item.id===selectedGameDetailId);if(!game)return;
+ favorites=favorites.includes(game.id)?favorites.filter(id=>id!==game.id):[...favorites,game.id];
+ localStorage.setItem('eclipse-favorites',JSON.stringify(favorites));
+ $('#gameDetailFavorite').textContent=favorites.includes(game.id)?'★ REMOVE FROM FAVORITES':'☆ ADD TO FAVORITES';
+ renderWidgets();renderHomeHero();notify(favorites.includes(game.id)?'Added to favorites.':'Removed from favorites.');
+});
+$('#gameDetailRemove').addEventListener('click',()=>{
+ const index=games.findIndex(item=>item.id===selectedGameDetailId);if(index<0)return;
+ const title=games[index].title;
+ games.splice(index,1);favorites=favorites.filter(id=>id!==selectedGameDetailId);
+ localStorage.setItem('eclipse-games',JSON.stringify(games));localStorage.setItem('eclipse-favorites',JSON.stringify(favorites));
+ $('#gameDetailModal').classList.add('hidden');renderLibrary();renderWidgets();renderHomeHero();
+ if(activePage==='console'&&activeConsoleName)renderConsoleHome(systems.find(system=>system.name===activeConsoleName)||{name:activeConsoleName,icon:'✦',family:'Platform'});
+ notify(title+' removed from your ECLIPSE library.');
+});
 $('#checkUpdates').addEventListener('click',checkUpdates);
 $('#checkCompatibility').addEventListener('click',checkCompatibility);
 $('#androidInfo').addEventListener('click',()=>notify('Android app detection needs a native Android bridge and package visibility permission.'));
