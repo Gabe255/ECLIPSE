@@ -206,7 +206,7 @@ document.querySelector('#app').innerHTML = `
           <div class="settings-grid">
             <article class="settings-card"><p class="eyebrow">APPEARANCE</p><h3>THEME</h3><label>Built-in theme<select id="settingsTheme">${themes.map(([id,name])=>`<option value="${id}" ${id===activeTheme?'selected':''}>${name}</option>`).join('')}</select></label><p class="settings-note">Choose a visual preset. Your selection is saved on this device.</p></article>
             <article class="settings-card"><p class="eyebrow">HOME SCREEN</p><h3>LAYOUT OPTIONS</h3><label class="setting-toggle"><input type="checkbox" id="showHeroSetting" checked><span>Show featured hero</span></label><label class="setting-toggle"><input type="checkbox" id="compactRowsSetting"><span>Compact home rows</span></label><label class="setting-toggle"><input type="checkbox" id="systemCountsSetting" checked><span>Show game counts on systems</span></label><label>Start page<select id="startPageSetting"><option value="home">Home</option><option value="library">Library</option><option value="android">Android games</option></select></label><label>Interface style<select id="interfaceModeSetting"><option value="console">Console Interface</option><option value="konsoru">Konsoru Console</option><option value="cocoon">Cocoon-style Interface</option><option value="hybrid">Hybrid · Both</option></select></label><p class="settings-note">Hybrid keeps your unified home, folders and collections alongside a dedicated page for every system.</p><label>Games per shelf row<select id="systemShelfRowsSetting"><option value="1">1 row</option><option value="2">2 rows</option><option value="3">3 rows</option><option value="4">4 rows</option></select></label><label>Display layout<select id="settingsDisplayLayout"><option value="auto">Auto detect</option><option value="single">Single screen</option><option value="dual">Dual screen / foldable</option></select></label></article>
-            <article class="settings-card"><p class="eyebrow">HOME PAGES</p><h3>YOUR PAGES</h3><p class="settings-note">Add up to five pages and arrange the widgets on each page.</p><button class="subtle-btn" id="settingsAddPage">+ ADD PAGE</button><div id="settingsPageList" class="settings-page-list"></div></article>
+            <article class="settings-card"><p class="eyebrow">ARTWORK PROVIDER</p><h3>STEAMGRIDDB</h3><label>API key<input id="sgdbApiKey" type="password" autocomplete="off" placeholder="Paste your SteamGridDB API key"></label><div class="sgdb-settings-actions"><button class="primary-btn" id="saveSgdbKey">SAVE API KEY</button><button class="subtle-btn" id="clearSgdbKey">CLEAR</button></div><p class="settings-note" id="sgdbKeyStatus">Your key is saved only in this browser's local app storage. Don't put it in the GitHub source code.</p><p class="settings-note">Get your own key from your SteamGridDB profile preferences. Artwork is optional; the rest of ECLIPSE works without it.</p></article><article class="settings-card"><p class="eyebrow">HOME PAGES</p><h3>YOUR PAGES</h3><p class="settings-note">Add up to five pages and arrange the widgets on each page.</p><button class="subtle-btn" id="settingsAddPage">+ ADD PAGE</button><div id="settingsPageList" class="settings-page-list"></div></article>
             <article class="settings-card"><p class="eyebrow">WIDGETS</p><h3>HOME CONTENT</h3><p class="settings-note">Choose which shelves appear and change their order.</p><button class="primary-btn" id="settingsEditWidgets">EDIT HOME WIDGETS</button><button class="subtle-btn" id="resetWidgets">RESET WIDGETS</button></article>
           </div>
         </div>
@@ -257,7 +257,7 @@ document.querySelector('#app').innerHTML = `
 <div class="modal-backdrop hidden" id="widgetModal"><div class="widget-modal"><div class="modal-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>HOME WIDGETS</h2></div><button class="close-modal" id="closeWidgetModal">×</button></div><p class="settings-note">Add widgets, change their order, or remove the ones you don't use.</p><div id="widgetChoices" class="widget-choices"></div><button class="primary-btn" id="doneWidgets">DONE</button></div></div>
 <div class="system-boot hidden" id="systemBoot" aria-live="polite"><div class="boot-orbit"><span></span></div><p class="eyebrow">ECLIPSE SYSTEM STARTUP</p><h2 id="bootSystemName">STARTING SYSTEM</h2><div class="boot-progress"><span></span></div><small>PREPARING YOUR GAME SPACE</small></div>
 <div class="mascot-welcome hidden" id="mascotWelcome" role="dialog" aria-modal="true" aria-labelledby="mascotTitle"><div class="mascot-card"><div class="mascot-art" aria-hidden="true"><div class="eclipse-mascot"><div class="eclipse-mascot-hat"></div><div class="eclipse-mascot-orb"><i></i><i></i><span></span></div><div class="eclipse-mascot-ring"></div></div></div><p class="eyebrow">YOUR NEW GAME SPACE</p><h2 id="mascotTitle">WELCOME TO <em>ECLIPSE.</em></h2><p class="mascot-message">I’ll show you around. Your systems, game shelves and collections all live here. Set things up your way and make this space yours.</p><div class="mascot-tips"><span><b>01</b> Pick a system</span><span><b>02</b> Build your library</span><span><b>03</b> Make it yours</span></div><div class="mascot-actions"><button class="primary-btn" id="mascotStart">SHOW ME AROUND ↗</button><button class="subtle-btn" id="mascotSkip">SKIP FOR NOW</button></div></div></div>
-<div class="modal-backdrop hidden" id="gameDetailModal"><div class="widget-modal game-detail-modal"><div class="modal-head"><div><p class="eyebrow">GAME DETAILS</p><h2 id="gameDetailTitle">GAME</h2></div><button class="close-modal" id="closeGameDetail" aria-label="Close game details">×</button></div><p class="game-detail-meta" id="gameDetailMeta"></p><div class="game-detail-file"><small>FILE LOCATION</small><p id="gameDetailPath"></p><small>PLAYER</small><p id="gameDetailPlayer"></p></div><div class="game-detail-actions"><button class="primary-btn" id="gameDetailLaunch">▶ PLAY GAME</button><button class="subtle-btn" id="gameDetailFavorite">☆ ADD TO FAVORITES</button><button class="subtle-btn" id="gameDetailRemove">REMOVE FROM LIBRARY</button></div><p class="settings-note">Choose a player for this system, then launch the original game file directly through that app.</p></div></div>
+<div class="modal-backdrop hidden" id="gameDetailModal"><div class="widget-modal game-detail-modal"><div class="modal-head"><div><p class="eyebrow">GAME DETAILS</p><h2 id="gameDetailTitle">GAME</h2></div><button class="close-modal" id="closeGameDetail" aria-label="Close game details">×</button></div><p class="game-detail-meta" id="gameDetailMeta"></p><div class="game-detail-file"><small>FILE LOCATION</small><p id="gameDetailPath"></p><small>PLAYER</small><p id="gameDetailPlayer"></p></div><div class="game-detail-actions"><button class="primary-btn" id="gameDetailLaunch">▶ PLAY GAME</button><button class="subtle-btn" id="gameDetailFavorite">☆ ADD TO FAVORITES</button><button class="subtle-btn" id="gameDetailRemove">REMOVE FROM LIBRARY</button></div><div class="sgdb-launch-row"><div><p class="eyebrow">STEAMGRIDDB ARTWORK</p><h3>MAKE THIS GAME LOOK RIGHT.</h3></div><button class="subtle-btn" id="openArtworkBrowser">BROWSE ARTWORK ↗</button></div><div class="sgdb-browser hidden" id="sgdbBrowser"><div class="sgdb-search-row"><input id="sgdbSearchInput" type="search" placeholder="Search SteamGridDB for this game…"><button class="primary-btn" id="sgdbSearchButton">SEARCH</button></div><p class="settings-note" id="sgdbStatus">Search for the matching game, then choose its artwork.</p><div class="sgdb-matches" id="sgdbMatches"></div><div class="sgdb-category-tabs" id="sgdbCategoryTabs"><button class="active" data-sgdb-type="grids">COVERS</button><button data-sgdb-type="heroes">BANNERS</button><button data-sgdb-type="logos">LOGOS</button><button data-sgdb-type="icons">ICONS</button></div><div class="sgdb-results" id="sgdbResults"></div></div><p class="settings-note">Choose a player for this system, then launch the original game file directly through that app.</p></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>`;
 
 const $ = s => document.querySelector(s);
@@ -359,6 +359,7 @@ function renderSettings(){
  renderPlayerSettings();
  ['showHeroSetting','compactRowsSetting','systemCountsSetting','startPageSetting'].forEach((id)=>{const el=$('#'+id);if(el){const key={showHeroSetting:'showHero',compactRowsSetting:'compactRows',systemCountsSetting:'systemCounts',startPageSetting:'startPage'}[id];el.value=preferences[key];if(el.type==='checkbox')el.checked=!!preferences[key];}});const rowsSelect=$('#systemShelfRowsSetting');if(rowsSelect)rowsSelect.value=String(systemShelfRows);const modeSelect=$('#interfaceModeSetting');if(modeSelect)modeSelect.value=interfaceMode;applyInterfaceMode();
  renderFolderPaths();renderSettingsPages();
+ const sgdbInput=$('#sgdbApiKey');if(sgdbInput)sgdbInput.value=sgdbKey();const sgdbStatus=$('#sgdbKeyStatus');if(sgdbStatus)sgdbStatus.textContent=sgdbKey()?'API key saved on this device.':'No API key saved yet.';
  const dataStatus=$('#dataFolderStatus');if(dataStatus&&!Capacitor.isNativePlatform())dataStatus.textContent='External backup folders require the Android APK. Local app data is still saved automatically on this device.';
 }
 function savePreferences(){localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));document.querySelector('.feature-hero')?.classList.toggle('hidden',!preferences.showHero);document.documentElement.classList.toggle('eclipse-compact-rows',!!preferences.compactRows);renderLibrary();renderWidgets();}
@@ -558,6 +559,69 @@ function renderGames(){
 }
 let activeConsoleName='';
 let selectedGameDetailId=null;
+let sgdbCurrentGameId=null;
+let sgdbCurrentType='grids';
+function sgdbKey(){return localStorage.getItem('eclipse-steamgriddb-key')||'';}
+function sgdbSafeUrl(value){try{const url=new URL(value);return url.protocol==='https:'?url.href:'';}catch{return '';}}
+async function sgdbFetch(path){
+ const key=sgdbKey();if(!key)throw new Error('Add your SteamGridDB API key in Settings → Personalize → SteamGridDB first.');
+ const response=await fetch('https://www.steamgriddb.com/api/v2/'+path,{headers:{Authorization:'Bearer '+key,Accept:'application/json'}});
+ if(response.status===401||response.status===403)throw new Error('SteamGridDB rejected that API key. Check it in Settings.');
+ if(response.status===429)throw new Error('SteamGridDB rate limit reached. Wait a little and try again.');
+ if(!response.ok)throw new Error('SteamGridDB request failed ('+response.status+').');
+ const payload=await response.json();if(!payload.success)throw new Error('SteamGridDB could not complete that request.');
+ return Array.isArray(payload.data)?payload.data:[];
+}
+function setSgdbStatus(message,isError=false){const el=$('#sgdbStatus');if(el){el.textContent=message;el.classList.toggle('error',isError);}}
+function renderSgdbMatches(items){
+ const root=$('#sgdbMatches');if(!root)return;root.replaceChildren();
+ items.forEach(item=>{const button=document.createElement('button');button.className='sgdb-match';button.type='button';const name=document.createElement('b');name.textContent=item.name||'Unknown game';const type=document.createElement('small');type.textContent=(item.types||[]).join(' · ')||'GAME';button.append(name,type);button.addEventListener('click',()=>selectSgdbGame(item));root.append(button);});
+}
+async function searchSgdbGames(){
+ const query=$('#sgdbSearchInput')?.value.trim();if(!query){setSgdbStatus('Type a game title to search.',true);return;}
+ if(!sgdbKey()){setSgdbStatus('Add your API key in Settings → Personalize → SteamGridDB.',true);return;}
+ setSgdbStatus('SEARCHING STEAMGRIDDB…');$('#sgdbMatches')?.replaceChildren();$('#sgdbResults')?.replaceChildren();
+ try{const items=await sgdbFetch('search/autocomplete/'+encodeURIComponent(query));renderSgdbMatches(items.slice(0,12));setSgdbStatus(items.length?'Choose the exact game below.':'No matching games found. Try another title.',!items.length);}
+ catch(error){setSgdbStatus(error.message,true);}
+}
+async function selectSgdbGame(item){
+ sgdbCurrentGameId=item.id;setSgdbStatus('MATCHED: '+item.name+' · LOADING ARTWORK…');renderSgdbMatches([item]);await loadSgdbAssets(sgdbCurrentType);
+}
+async function loadSgdbAssets(type){
+ if(!sgdbCurrentGameId)return;sgdbCurrentType=type;
+ $('#sgdbCategoryTabs')?.querySelectorAll('[data-sgdb-type]').forEach(button=>button.classList.toggle('active',button.dataset.sgdbType===type));
+ const root=$('#sgdbResults');root?.replaceChildren();setSgdbStatus('LOADING '+type.toUpperCase()+'…');
+ try{const assets=await sgdbFetch(type+'/game/'+sgdbCurrentGameId+'?types=static');renderSgdbAssets(assets,type);setSgdbStatus(assets.length?assets.length+' '+type.toUpperCase()+' FOUND. Select one to apply it.':'No '+type+' artwork found for this game. Try another category.');}
+ catch(error){setSgdbStatus(error.message,true);}
+}
+function renderSgdbAssets(assets,type){
+ const root=$('#sgdbResults');if(!root)return;root.replaceChildren();
+ assets.slice(0,36).forEach(asset=>{const url=sgdbSafeUrl(asset.url),thumb=sgdbSafeUrl(asset.thumb)||url;if(!url||!thumb)return;
+  const button=document.createElement('button');button.className='sgdb-art-card';button.type='button';button.title='Apply this '+type+' artwork';
+  const img=document.createElement('img');img.loading='lazy';img.src=thumb;img.alt='SteamGridDB community artwork';button.append(img);
+  const meta=document.createElement('small');meta.textContent=(asset.width&&asset.height?asset.width+' × '+asset.height:'ARTWORK')+' · '+(asset.style||'COMMUNITY');button.append(meta);
+  button.addEventListener('click',()=>applySgdbArtwork(type,url));root.append(button);
+ });
+}
+function applySgdbArtwork(type,url){
+ const game=games.find(item=>item.id===selectedGameDetailId);if(!game)return;
+ const safe=sgdbSafeUrl(url);if(!safe){setSgdbStatus('That artwork URL is not a secure HTTPS image.',true);return;}
+ const field={grids:'grid',heroes:'hero',logos:'logo',icons:'icon'}[type];
+ game.artwork={...(game.artwork||{}),[field]:safe,source:'SteamGridDB',gameId:sgdbCurrentGameId};
+ try{localStorage.setItem('eclipse-games',JSON.stringify(games));}
+ catch(error){setSgdbStatus('Could not save artwork. Device storage may be full.',true);return;}
+ setSgdbStatus('APPLIED! '+type.toUpperCase()+' saved to '+game.title+'.');renderKonsoruHome();renderHomeHero();renderLibrary();
+ if(activePage==='console'&&activeConsoleName)renderConsoleHome(systems.find(item=>item.name===activeConsoleName)||{name:activeConsoleName,icon:'✦',family:'Platform'});
+ notify('SteamGridDB '+type+' applied to '+game.title+'.');
+}
+function openSgdbBrowser(){
+ const game=games.find(item=>item.id===selectedGameDetailId);if(!game)return;
+ $('#sgdbBrowser')?.classList.remove('hidden');$('#sgdbSearchInput').value=game.title;$('#sgdbMatches')?.replaceChildren();$('#sgdbResults')?.replaceChildren();
+ sgdbCurrentGameId=null;sgdbCurrentType='grids';
+ $('#sgdbCategoryTabs')?.querySelectorAll('[data-sgdb-type]').forEach(button=>button.classList.toggle('active',button.dataset.sgdbType==='grids'));
+ if(sgdbKey())searchSgdbGames();else setSgdbStatus('Add your SteamGridDB API key in Settings → Personalize → SteamGridDB, then search again.',true);
+}
+
 function showGameDetails(game){
  if(!game)return;
  selectedGameDetailId=game.id;
@@ -850,6 +914,12 @@ document.querySelectorAll('[data-settings-tab]').forEach(b=>b.addEventListener('
 $('#scanInstalledPlayers').addEventListener('click',()=>scanInstalledApps());
 $('#scanAppsPage')?.addEventListener('click',()=>scanInstalledApps());
 $('#appLibrarySearch')?.addEventListener('input',renderAndroidApps);
+$('#saveSgdbKey')?.addEventListener('click',()=>{const value=$('#sgdbApiKey')?.value.trim();if(!value){notify('Paste your SteamGridDB API key first.');return;}localStorage.setItem('eclipse-steamgriddb-key',value);$('#sgdbKeyStatus').textContent='API key saved on this device.';notify('SteamGridDB key saved locally.');});
+$('#clearSgdbKey')?.addEventListener('click',()=>{localStorage.removeItem('eclipse-steamgriddb-key');if($('#sgdbApiKey'))$('#sgdbApiKey').value='';if($('#sgdbKeyStatus'))$('#sgdbKeyStatus').textContent='No API key saved yet.';notify('SteamGridDB key cleared.');});
+$('#openArtworkBrowser')?.addEventListener('click',openSgdbBrowser);
+$('#sgdbSearchButton')?.addEventListener('click',searchSgdbGames);
+$('#sgdbSearchInput')?.addEventListener('keydown',event=>{if(event.key==='Enter')searchSgdbGames();});
+$('#sgdbCategoryTabs')?.addEventListener('click',event=>{const button=event.target.closest('[data-sgdb-type]');if(button)loadSgdbAssets(button.dataset.sgdbType);});
 $('#closeGameDetail').addEventListener('click',()=>$('#gameDetailModal').classList.add('hidden'));
 $('#gameDetailLaunch').addEventListener('click',launchSelectedGame);
 $('#gameDetailModal').addEventListener('click',event=>{if(event.target.id==='gameDetailModal')$('#gameDetailModal').classList.add('hidden');});
