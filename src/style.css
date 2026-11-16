@@ -523,3 +523,40 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .home-app-launch b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
 .home-app-remove{position:absolute;top:4px;right:5px;width:20px;height:20px;border:1px solid #ffffff20;border-radius:50%;background:#111b18;color:#a9b9ae;font-size:14px;line-height:1}
 .app-card-actions .pin-home-button.selected{border-color:#a8f2c766;background:#a8f2c71b;color:#baffd4}
+
+
+/* ECLIPSE 4.0.1 — richer atmosphere, clearer shelves, living guide */
+body{background-color:#080b13;background-image:radial-gradient(ellipse at 12% 7%,#7456bf26,transparent 34%),radial-gradient(ellipse at 88% 18%,#39b6a51d,transparent 31%),radial-gradient(ellipse at 50% 100%,#273d7a22,transparent 45%),linear-gradient(145deg,#080b13,#0b101a 55%,#080d12);background-attachment:fixed}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.24;background-image:radial-gradient(1px 1px at 8% 18%,#e9f6ff 55%,transparent 100%),radial-gradient(1px 1px at 72% 12%,#c8dcff 55%,transparent 100%),radial-gradient(1px 1px at 34% 76%,#e9f6ff 55%,transparent 100%),radial-gradient(1px 1px at 91% 64%,#c8dcff 55%,transparent 100%),radial-gradient(1px 1px at 54% 42%,#e9f6ff 55%,transparent 100%);background-size:390px 330px}
+.system-game-row{display:grid;grid-auto-flow:column;grid-template-rows:repeat(var(--system-shelf-rows,2),minmax(138px,auto));grid-auto-columns:minmax(148px,190px);gap:12px;overflow-x:auto;overflow-y:hidden;padding:8px 2px 13px;scroll-snap-type:x proximity;align-items:stretch}
+.system-game-card{min-width:0;scroll-snap-align:start}
+.settings-layout{grid-template-columns:190px minmax(0,1fr);gap:18px}
+.settings-nav{position:sticky;top:18px;align-self:start;padding:9px;border:1px solid #ffffff18;border-radius:18px;background:linear-gradient(160deg,#17202be8,#101721e8);box-shadow:0 18px 48px #0005;backdrop-filter:blur(18px)}
+.settings-tab{width:100%;display:flex;align-items:center;justify-content:flex-start;gap:9px;padding:13px 12px;border:1px solid transparent;border-radius:11px;text-align:left;letter-spacing:.5px;transition:background .18s,border-color .18s}
+.settings-tab:before{content:"";width:6px;height:6px;border-radius:50%;background:#8a9aaa;opacity:.7}
+.settings-tab.active{border-color:#a8f2c744;background:linear-gradient(90deg,#a8f2c71b,#a8f2c706);color:#e8fff0}
+.settings-tab.active:before{background:var(--accent);box-shadow:0 0 12px var(--accent);opacity:1}
+.settings-panel{min-width:0}
+.settings-card{border-color:#ffffff1b;background:linear-gradient(145deg,#18222be0,#101720e8);box-shadow:0 12px 34px #0003}
+.settings-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.settings-card label{display:flex;flex-direction:column;gap:7px;margin:11px 0;color:#b9c7d1;font-size:11px}
+.settings-card select{width:100%;max-width:100%;padding:10px 12px;border:1px solid #ffffff22;border-radius:10px;background:#0b121c;color:#eef7ff}
+.mascot-companion{position:fixed;z-index:80;right:17px;bottom:calc(17px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:9px;padding:8px 12px 8px 8px;border:1px solid #b8a2ff55;border-radius:999px;background:linear-gradient(135deg,#1a1930ed,#111923ed);color:#f2efff;box-shadow:0 12px 34px #0008,0 0 24px #9277ff24;backdrop-filter:blur(15px)}
+.mascot-companion-orb{position:relative;width:37px;height:37px;border:1px solid #c5b3ff;border-radius:50%;background:radial-gradient(circle at 48% 48%,#e7ddff 0 7%,#9274e8 9% 29%,#201a3c 31% 58%,#080b13 60%);box-shadow:0 0 18px #9c83ff77;animation:mascotHover 2.8s ease-in-out infinite}
+.mascot-companion-orb:after{content:"";position:absolute;inset:-5px;border:1px solid #b8a2ff55;border-radius:50%;transform:rotate(-18deg) scaleX(1.45)}
+.mascot-companion-orb i{position:absolute;top:15px;width:4px;height:5px;border-radius:50%;background:#f6f0ff;box-shadow:0 0 6px #fff}
+.mascot-companion-orb i:first-child{left:11px}.mascot-companion-orb i:last-child{right:11px}
+.mascot-companion-label{font:9px 'DM Mono',monospace;letter-spacing:1.2px}
+.mascot-art .eclipse-mascot,.mascot-stage .eclipse-mascot{animation:mascotHover 2.5s ease-in-out infinite}
+.mascot-art .eclipse-mascot-orb,.mascot-stage .eclipse-mascot-orb{animation:mascotBlink 4.2s infinite}
+.mascot-art .eclipse-mascot-ring,.mascot-stage .eclipse-mascot-ring{animation:mascotOrbit 7s linear infinite}
+.mascot-sound-toggle{padding:9px 12px;border:1px solid #b8a2ff55;border-radius:999px;background:#9b7be81b;color:#e8ddff;font:9px 'DM Mono',monospace;letter-spacing:.8px}
+.mascot-message{min-height:50px;padding:13px 15px;border:1px solid #b8a2ff55;border-radius:12px;background:#0a0c17;color:#f1ecff;font:12px 'DM Mono',monospace;line-height:1.7;box-shadow:inset 0 0 22px #9473ff10}
+.mascot-message:after{content:"▌";display:inline-block;margin-left:3px;color:#c7b5ff;animation:mascotCursor .8s steps(2,end) infinite}
+.mascot-card{background:radial-gradient(ellipse at 50% 0%,#9277ff22,transparent 50%),linear-gradient(150deg,#151a2a,#0b1119)!important;border-color:#b8a2ff55!important}
+@keyframes mascotHover{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes mascotBlink{0%,45%,49%,100%{transform:scaleY(1)}47%{transform:scaleY(.12)}}
+@keyframes mascotOrbit{to{transform:rotate(342deg)}}
+@keyframes mascotCursor{50%{opacity:0}}
+@media(max-width:700px){.settings-layout{grid-template-columns:minmax(0,1fr);gap:12px}.settings-nav{position:static;display:flex;gap:6px;overflow-x:auto;padding:6px}.settings-tab{flex:0 0 auto;width:auto;white-space:nowrap;padding:10px 12px}.settings-tab:before{display:none}.system-game-row{grid-template-rows:repeat(var(--system-shelf-rows,2),minmax(125px,auto));grid-auto-columns:minmax(132px,160px);gap:9px}.mascot-companion{right:11px;bottom:calc(11px + env(safe-area-inset-bottom))}}
+@media(prefers-reduced-motion:reduce){.mascot-companion-orb,.mascot-art .eclipse-mascot,.mascot-stage .eclipse-mascot,.mascot-art .eclipse-mascot-ring,.mascot-stage .eclipse-mascot-ring{animation:none!important}}
