@@ -771,3 +771,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .system-game-card .game-art .sgdb-cover-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
 .system-game-card .game-art .art-glow,.system-game-card .game-art .art-mark,.system-game-card .game-art .art-caption{position:relative;z-index:2;text-shadow:0 2px 8px #000}
 @media(max-width:520px){.sgdb-results{grid-template-columns:repeat(2,minmax(0,1fr))}.sgdb-art-card img{height:125px}.sgdb-launch-row{align-items:flex-start;flex-direction:column}.sgdb-search-row{flex-wrap:wrap}.sgdb-search-row input{flex-basis:100%}}
+
+.game-detail-logo{display:flex;align-items:center;min-height:0;margin-top:7px}
+.game-detail-logo:empty{display:none}
+.game-detail-logo img{display:block;max-width:min(230px,60vw);max-height:54px;object-fit:contain;object-position:left center;filter:drop-shadow(0 2px 8px #0009)}
+.sgdb-art-card:focus-visible,.sgdb-match:focus-visible{outline:2px solid #c4b2ff;outline-offset:2px}
