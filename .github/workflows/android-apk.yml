@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    tags: ['v*-beta*']
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -40,3 +41,19 @@ jobs:
           name: eclipse-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+      - name: Publish beta GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ECLIPSE ${{ github.ref_name }}
+          prerelease: true
+          generate_release_notes: true
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          body: |
+            **ECLIPSE Beta**
+
+            Early Android dashboard build for testing on the AYN Odin 3.
+            This is a debug APK and is not a finished emulator launcher.
+
+            Please report bugs and compatibility issues before using this as a daily launcher.
