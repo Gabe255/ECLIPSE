@@ -306,3 +306,25 @@ button{color:#f4f2ff}
 .player-setting-row b{color:#f5f3ff;font-size:11px}
 .player-setting-row small{overflow-wrap:anywhere;color:#b9b7ca;font:9px 'DM Mono'}
 @media(max-width:520px){.player-setting-row{grid-template-columns:1fr;gap:9px}.library-actions{width:100%;justify-content:space-between}.library-actions .primary-btn{font-size:9px;padding:10px 11px}}
+
+
+/* Library shelves and game details */
+.home-games-shelf{margin:8px 0 32px;padding:18px 0 8px;border-top:1px solid #ffffff18}
+.home-shelf-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
+.home-shelf-heading h2{margin:3px 0 0;color:#f8f6ff;font-size:20px;letter-spacing:1px}
+.home-shelf-heading>span{color:#b9b7ca;font:9px 'DM Mono';letter-spacing:1px}
+.home-game-row{display:flex;gap:11px;overflow-x:auto;padding:3px 2px 13px;scroll-snap-type:x mandatory}
+.home-game-tile{flex:0 0 145px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:0 0 12px;overflow:hidden;border:1px solid #ffffff1c;border-radius:9px;background:#ffffff08;color:#f8f6ff;text-align:left;scroll-snap-align:start;transition:transform .16s ease,border-color .16s ease}
+.home-game-tile:hover{transform:translateY(-3px);border-color:var(--accent)}
+.home-game-art{width:100%;height:100px;display:grid;place-items:center;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--accent) 40%,#29283d),#10111d 70%);color:#fff;font-size:42px}
+.home-game-tile b,.home-game-tile small{padding:0 10px}
+.home-game-tile b{font-size:10px;line-height:1.3}
+.home-game-tile small{color:#c0bed0;font:8px 'DM Mono'}
+.game-detail-modal{width:min(560px,100%)}
+.game-detail-meta{margin:10px 0 18px;color:#d4d2e1;font:10px 'DM Mono';letter-spacing:.7px}
+.game-detail-file{padding:15px;border:1px solid #ffffff1b;border-radius:8px;background:#ffffff07}
+.game-detail-file small{color:#a9a7bc;font:9px 'DM Mono';letter-spacing:1px}
+.game-detail-file p{margin:6px 0 14px;color:#f0eef8;font:11px 'DM Mono';overflow-wrap:anywhere}
+.game-detail-file p:last-child{margin-bottom:0}
+.game-detail-actions{display:flex;gap:9px;flex-wrap:wrap;margin:17px 0}
+@media(max-width:520px){.home-game-tile{flex-basis:128px}.home-game-art{height:88px}.game-detail-actions>*{flex:1 1 100%}}
