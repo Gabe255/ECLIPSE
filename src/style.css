@@ -510,3 +510,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 :root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView>.page-toolbar{grid-column:1;grid-row:3}
 :root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView>.dashboard-grid{grid-column:1;grid-row:4;grid-template-columns:repeat(3,minmax(0,1fr))}
 :root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView>.home-games-shelf,:root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView>.feature-hero{grid-column:1}
+
+.app-card-actions .launch-app-button{border-color:#a8f2c766;background:#a8f2c71a;color:#dfffee}
+.app-card-actions .launch-app-button:disabled{opacity:.55;cursor:wait}
+@media(max-width:720px){.app-library-card{grid-template-columns:42px minmax(0,1fr)}.app-card-actions{grid-column:1/-1;justify-content:flex-start}.app-card-actions button{min-height:36px}}
