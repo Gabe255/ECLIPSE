@@ -94,6 +94,13 @@ document.querySelector('#app').innerHTML = `
       <nav class="systems" id="systemFilters" aria-label="Filter games"></nav>
       <div class="game-grid" id="gameGrid"></div>
     </section>
+    <section id="consoleView" class="view hidden">
+      <div class="console-detail-top"><button class="subtle-btn" id="backToLibrary">← ALL SYSTEMS</button><span class="collection-count" id="consoleGeneration">PLATFORM</span></div>
+      <section class="console-banner" id="consoleBanner"></section>
+      <div class="console-detail-toolbar"><div><p class="eyebrow">YOUR COLLECTION</p><h2 id="consoleTitle">SYSTEM</h2></div><span class="collection-count" id="consoleGameCount">0 GAMES</span></div>
+      <div class="game-grid" id="consoleGameGrid"></div>
+      <div class="console-empty-note" id="consoleEmptyNote">Your games for this system will appear here when imported.</div>
+    </section>
     <section id="androidView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">NATIVE ANDROID</p><h2>ANDROID GAMES</h2></div><span class="collection-count">DEVICE LIBRARY</span></div>
       <div class="empty-state"><div class="empty-icon">▣</div><h3>YOUR ANDROID SPACE</h3><p>Installed Android games will appear here once ECLIPSE has its native app-scanning bridge.</p><button class="subtle-btn" id="androidInfo">HOW THIS WORKS</button></div>
@@ -144,8 +151,20 @@ function renderWidgetChoices(){
 }
 function renderLibrary(){
  $('#consoleStrip').innerHTML=systems.map(s=>`<button class="console-card" data-console="${s.name}"><span>${s.icon}</span><b>${s.name}</b><small>${gamesForSystem(s.name).length ? gamesForSystem(s.name)+' IN LIBRARY' : 'READY FOR IMPORT'}</small></button>`).join('');
- $('#consoleStrip').querySelectorAll('[data-console]').forEach(b=>b.addEventListener('click',()=>{activeSystem=b.dataset.console;renderFilters();renderGames();}));
+ $('#consoleStrip').querySelectorAll('[data-console]').forEach(b=>b.addEventListener('click',()=>openConsolePage(b.dataset.console)));
  renderFilters();renderGames();
+}
+function openConsolePage(name){
+ const system=systems.find(s=>s.name===name)||{name,icon:'✦',family:'Platform'};
+ const titles=gamesForSystem(name);
+ $('#consoleTitle').textContent=system.name.toUpperCase();
+ $('#consoleGeneration').textContent=system.family.toUpperCase()+' PLATFORM';
+ $('#consoleGameCount').textContent=String(titles.length).padStart(2,'0')+' GAMES';
+ $('#consoleBanner').innerHTML='<div class="console-banner-mark">'+system.icon+'</div><div class="console-banner-copy"><p class="eyebrow">ECLIPSE SYSTEM PROFILE</p><h1>'+system.name.toUpperCase()+'</h1><p>Your '+system.name+' collection, all in one place.</p></div><div class="console-banner-index">SYSTEM / '+String(systems.indexOf(system)+1).padStart(2,'0')+'</div>';
+ $('#consoleGameGrid').innerHTML=titles.map(g=>{const i=games.indexOf(g);return '<button class="game-card" data-console-game="'+i+'"><div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">'+['M','Z','Ⅲ','S'][i]+'</span><span class="art-caption">'+g.tag+'</span></div><div class="game-meta"><div><h3>'+g.title+'</h3><p>'+g.system+' · '+g.year+'</p></div><span class="game-arrow">↗</span></div></button>';}).join('');
+ $('#consoleEmptyNote').classList.toggle('hidden',titles.length>0);
+ $('#consoleGameGrid').querySelectorAll('[data-console-game]').forEach(card=>card.addEventListener('click',()=>{selectedGame=Number(card.dataset.consoleGame);notify(games[selectedGame].title+' selected · Game launching is coming later.');}));
+ showView('console');
 }
 function gamesForSystem(name){
  if(name==='Nintendo')return games.filter(g=>g.system==='NINTENDO'||g.system==='GAMECUBE');
@@ -182,6 +201,7 @@ async function checkUpdates(){
 $('#themeSelect').addEventListener('change',e=>setTheme(e.target.value));
 $('#settingsTheme').addEventListener('change',e=>setTheme(e.target.value));
 document.querySelectorAll('.rail-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+$('#backToLibrary').addEventListener('click',()=>showView('library'));
 $('#continueBtn').addEventListener('click',()=>{playCount++;localStorage.setItem('eclipse-play-count',JSON.stringify(playCount));notify('METROID PRIME selected · Add your game file after library import is implemented.');});
 $('#editWidgets').addEventListener('click',()=>{$('#widgetModal').classList.remove('hidden');renderWidgetChoices();});
 $('#closeWidgetModal').addEventListener('click',()=>{$('#widgetModal').classList.add('hidden');renderWidgets();});
