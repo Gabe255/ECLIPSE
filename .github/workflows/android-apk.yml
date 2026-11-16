@@ -48,11 +48,11 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
       - name: Publish beta GitHub Release
-        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '')
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
-          name: ECLIPSE ${{ github.event.inputs.release_tag || github.ref_name }}
+          tag_name: ${{ github.event.inputs.release_tag || (github.ref == 'refs/heads/main' && 'v0.2.0-alpha') || github.ref_name }}
+          name: ECLIPSE ${{ github.event.inputs.release_tag || (github.ref == 'refs/heads/main' && 'v0.2.0-alpha') || github.ref_name }}
           prerelease: true
           overwrite_files: true
           generate_release_notes: true
@@ -65,4 +65,4 @@ jobs:
 
             Please report bugs and compatibility issues before using this as a daily launcher.
 
-            **Download APK:** [app-debug.apk](https://github.com/Gabe255/ECLIPSE/releases/download/${{ github.event.inputs.release_tag || github.ref_name }}/app-debug.apk)
+            **Download APK:** [app-debug.apk](https://github.com/Gabe255/ECLIPSE/releases/download/${{ github.event.inputs.release_tag || (github.ref == 'refs/heads/main' && 'v0.2.0-alpha') || github.ref_name }}/app-debug.apk)
