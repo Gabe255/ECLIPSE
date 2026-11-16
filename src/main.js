@@ -144,6 +144,11 @@ document.querySelector('#app').innerHTML = `
       </section>
       <section class="system-stage" aria-label="Choose a gaming system">
         <div class="stage-heading"><div><p class="eyebrow">THE MULTIVERSE</p><h2>CHOOSE YOUR <em>WORLD.</em></h2><p>One tap takes you into that system's own space.</p></div><span class="stage-index">01 <i>/</i> SYSTEMS</span></div>
+        <section class="system-feature" id="systemFeature" aria-live="polite">
+          <div class="system-feature-art"><span class="system-feature-orbit"></span><strong id="systemFeatureMark">✦</strong><small id="systemFeatureFamily">PLATFORM</small></div>
+          <div class="system-feature-copy"><p class="eyebrow">SELECTED SYSTEM</p><h2 id="systemFeatureName">NINTENDO</h2><p id="systemFeatureMeta">Your platform library</p><button class="primary-btn" id="enterFeaturedSystem">ENTER SYSTEM ↗</button></div>
+          <div class="system-feature-count"><b id="systemFeatureCount">0</b><small>GAMES IN LIBRARY</small></div>
+        </section>
         <div class="system-carousel-shell">
           <button class="carousel-arrow" id="systemPrev" aria-label="Previous systems">‹</button>
           <div class="system-picker" id="systemPicker" tabindex="0" aria-label="Available systems"></div>
@@ -348,12 +353,31 @@ function renderSettings(){
 function savePreferences(){localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));document.querySelector('.feature-hero')?.classList.toggle('hidden',!preferences.showHero);document.documentElement.classList.toggle('eclipse-compact-rows',!!preferences.compactRows);renderLibrary();renderWidgets();}
 function renderFolderPaths(){const list=$('#folderList');if(!list)return;list.innerHTML=folderPaths.length?folderPaths.map((p,i)=>{const name=typeof p==='string'?p:(p.name||'Game folder');return '<div class="folder-item"><span>▰ '+escapeHTML(name)+'</span><button data-folder-remove="'+i+'" aria-label="Remove '+escapeHTML(name)+'">×</button></div>';}).join(''):'<p class="settings-note">No folders added yet. Add a parent folder or a platform folder below.</p>';list.querySelectorAll('[data-folder-remove]').forEach(b=>b.addEventListener('click',()=>{const removed=folderPaths.splice(Number(b.dataset.folderRemove),1)[0];const uri=typeof removed==='string'?removed:removed?.uri;if(uri&&localStorage.getItem('eclipse-folder-uri')===uri)localStorage.removeItem('eclipse-folder-uri');localStorage.setItem('eclipse-folders',JSON.stringify(folderPaths));renderFolderPaths();}));}
 function renderSettingsPages(){const list=$('#settingsPageList');if(!list)return;list.innerHTML=pageNames.map((p,i)=>'<div class="settings-page-item"><span>'+p+'</span><button data-page-rename="'+i+'">RENAME</button><button data-page-delete="'+i+'">×</button></div>').join('');list.querySelectorAll('[data-page-rename]').forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.pageRename),name=prompt('Name this home page',pageNames[i]);if(name?.trim()){pageNames[i]=name.trim().slice(0,24);saveLayout();renderPages();renderSettingsPages();}}));list.querySelectorAll('[data-page-delete]').forEach(b=>b.addEventListener('click',()=>{if(pageNames.length===1){notify('Keep at least one home page.');return;}pageNames.splice(Number(b.dataset.pageDelete),1);currentPage=Math.min(currentPage,pageNames.length-1);saveLayout();renderWidgets();renderSettingsPages();}));}
+let featuredSystemIndex=Math.max(0,systems.findIndex(item=>item.name===localStorage.getItem('eclipse-featured-system')));
+function selectFeaturedSystem(index,scroll=true){
+ featuredSystemIndex=(index+systems.length)%systems.length;
+ const system=systems[featuredSystemIndex];
+ localStorage.setItem('eclipse-featured-system',system.name);
+ const marks={Nintendo:'✦',PlayStation:'△',Xbox:'◉',Sega:'◈',Atari:'▥',Arcade:'✧',PC:'⌘','PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
+ const mark=marks[system.family]||system.icon;
+ const name=$('#systemFeatureName'),family=$('#systemFeatureFamily'),meta=$('#systemFeatureMeta'),count=$('#systemFeatureCount'),symbol=$('#systemFeatureMark');
+ if(name)name.textContent=system.name.toUpperCase();
+ if(family)family.textContent=system.family.toUpperCase();
+ if(meta)meta.textContent='Explore your '+system.name+' collection and player setup.';
+ if(count)count.textContent=String(gamesForSystem(system.name));
+ if(symbol)symbol.textContent=mark;
+ const picker=$('#systemPicker');
+ picker?.querySelectorAll('[data-system-index]').forEach(card=>{const active=Number(card.dataset.systemIndex)===featuredSystemIndex;card.classList.toggle('selected',active);card.setAttribute('aria-pressed',String(active));});
+ if(scroll){const card=picker?.querySelector('[data-system-index="'+featuredSystemIndex+'"]');card?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});}
+}
 function renderSystemPicker(){
  const picker=$('#systemPicker');if(!picker)return;
  const marks={Nintendo:'✦',PlayStation:'△',Xbox:'◉',Sega:'◈',Atari:'▥',Arcade:'✧',PC:'⌘', 'PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
- picker.innerHTML=systems.map((system,index)=>'<button class="system-pick-card" data-pick-system="'+escapeHTML(system.name)+'" style="--card-index:'+index+'" aria-label="Open '+escapeHTML(system.name)+'"><span class="system-card-top"><small>'+String(index+1).padStart(2,'0')+'</small><i>'+escapeHTML(system.family.toUpperCase())+'</i></span><span class="system-cube"><span class="cube-face cube-front">'+(marks[system.family]||system.icon)+'</span><span class="cube-face cube-side"></span><span class="cube-face cube-top"></span></span><span class="system-card-bottom"><b>'+escapeHTML(system.name)+'</b><small>'+gamesForSystem(system.name)+' TITLES <i>↗</i></small></span></button>').join('');
+ picker.innerHTML=systems.map((system,index)=>'<button class="system-pick-card" data-system-index="'+index+'" data-pick-system="'+escapeHTML(system.name)+'" style="--card-index:'+index+'" aria-label="Select '+escapeHTML(system.name)+'" aria-pressed="false"><span class="system-card-top"><small>'+String(index+1).padStart(2,'0')+'</small><i>'+escapeHTML(system.family.toUpperCase())+'</i></span><span class="system-cube"><span class="cube-face cube-front">'+(marks[system.family]||system.icon)+'</span><span class="cube-face cube-side"></span><span class="cube-face cube-top"></span></span><span class="system-card-bottom"><b>'+escapeHTML(system.name)+'</b><small>'+gamesForSystem(system.name)+' TITLES <i>•</i></small></span></button>').join('');
  $('#systemPickerCount').textContent=systems.length+' WORLDS AVAILABLE';
- picker.querySelectorAll('[data-pick-system]').forEach(card=>card.addEventListener('click',()=>openConsolePage(card.dataset.pickSystem)));
+ picker.querySelectorAll('[data-pick-system]').forEach(card=>card.addEventListener('click',()=>selectFeaturedSystem(Number(card.dataset.systemIndex))));
+ $('#enterFeaturedSystem')?.addEventListener('click',()=>openConsolePage(systems[featuredSystemIndex].name),{once:true});
+ selectFeaturedSystem(featuredSystemIndex,false);
 }
 let nativeDisplayInfo = null;
 function detectDisplaySegments(){
@@ -729,9 +753,9 @@ function checkCompatibility(){
  const update=document.createElement('p');update.textContent='For an in-place APK update, Android requires the same application ID, a higher versionCode, and the same signing certificate. The current CI debug APK may not have a persistent signing key, so an update may require uninstalling the old build first; uninstalling can erase local app data.';result.append(update);
 }
 
-$('#systemPrev')?.addEventListener('click',()=>$('#systemPicker')?.scrollBy({left:-250,behavior:'smooth'}));
-$('#systemNext')?.addEventListener('click',()=>$('#systemPicker')?.scrollBy({left:250,behavior:'smooth'}));
-$('#systemPicker')?.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){$('#systemPicker').scrollBy({left:event.key==='ArrowRight'?220:-220,behavior:'smooth'});}});
+$('#systemPrev')?.addEventListener('click',()=>selectFeaturedSystem(featuredSystemIndex-1));
+$('#systemNext')?.addEventListener('click',()=>selectFeaturedSystem(featuredSystemIndex+1));
+$('#systemPicker')?.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();selectFeaturedSystem(featuredSystemIndex+(event.key==='ArrowRight'?1:-1));}if(event.key==='Enter'){event.preventDefault();openConsolePage(systems[featuredSystemIndex].name);}});
 $('#displayLayoutSelect')?.addEventListener('change',event=>{localStorage.setItem('eclipse-display-layout',event.target.value);const result=applyDisplayLayout(event.target.value);if(event.target.value==='auto')refreshDisplayLayout();notify(result.effective==='dual'?'Dual-screen layout enabled.':'Single-screen layout enabled.');});
 $('#makeDefaultHome')?.addEventListener('click',requestDefaultHome);
 $('#defaultHomeSettings')?.addEventListener('click',requestDefaultHome);
@@ -862,5 +886,13 @@ refreshDisplayLayout();
 mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
 mountControlCenter({ notify });
 renderSystemPicker();renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();
+// Polished launcher startup: keep the first frame intentional while local UI initializes.
+(function showLauncherBoot(){
+ const boot=document.createElement('div');boot.className='eclipse-launch-boot';boot.innerHTML='<div class="launch-boot-mark">E<span>.</span></div><p class="eyebrow">YOUR WORLD IS LOADING</p><h1>ECLIPSE</h1><div class="launch-boot-track"><i></i></div><small>PREPARING YOUR SYSTEMS</small>';
+ document.body.append(boot);
+ const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+ window.setTimeout(()=>{boot.classList.add('ready');window.setTimeout(()=>boot.remove(),reduced?0:480);},reduced?350:1050);
+})();
+
 if(Capacitor.isNativePlatform())window.setTimeout(()=>scanInstalledApps(),900);
-window.setTimeout(openOnboarding,450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
+window.setTimeout(openOnboarding,1450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
