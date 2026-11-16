@@ -335,3 +335,12 @@ button{color:#f4f2ff}
 .library-actions input[type="search"]{width:min(220px,42vw);min-width:120px;padding:10px 12px;border:1px solid #ffffff24;border-radius:20px;background:#171827;color:#f7f5ff;font:10px 'DM Mono'}
 .library-actions input[type="search"]:focus{outline:1px solid var(--accent);border-color:var(--accent)}
 @media(max-width:520px){.library-actions input[type="search"]{flex:1 1 130px;width:auto}}
+
+
+/* Per-system launcher navigation inspired by console frontends */
+.system-menu{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:0 0 14px;margin:-8px 0 22px;border-bottom:1px solid #ffffff18;scrollbar-width:thin}
+.system-menu-item{flex:0 0 auto;padding:12px 16px;border:1px solid #ffffff1b;border-radius:7px;background:#ffffff07;color:#a8a7bb;font:10px 'DM Mono';letter-spacing:1px;white-space:nowrap;transition:background .18s,border-color .18s,color .18s}
+.system-menu-item:hover,.system-menu-item.active{border-color:color-mix(in srgb,var(--accent) 65%,transparent);background:color-mix(in srgb,var(--accent) 16%,#10111d);color:#fff}
+.data-folder-card{border-color:color-mix(in srgb,var(--accent) 35%,#ffffff18);background:linear-gradient(120deg,color-mix(in srgb,var(--accent) 8%,#ffffff08),#ffffff05)}
+.data-folder-card .folder-add-row{flex-wrap:wrap}
+@media(max-width:520px){.system-menu{gap:6px}.system-menu-item{padding:11px 13px;font-size:9px}.data-folder-card .folder-add-row>*{width:100%}}
