@@ -562,22 +562,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 @media(prefers-reduced-motion:reduce){.mascot-companion-orb,.mascot-art .eclipse-mascot,.mascot-stage .eclipse-mascot,.mascot-art .eclipse-mascot-ring,.mascot-stage .eclipse-mascot-ring{animation:none!important}}
 
 
-/* ECLIPSE interface modes: keep both experiences available in Hybrid. */
-:root[data-interface-mode="hybrid"] #homeView>.system-stage,
-:root[data-interface-mode="hybrid"] #homeView>.page-toolbar,
-:root[data-interface-mode="hybrid"] #homeView>.dashboard-grid,
-:root[data-interface-mode="hybrid"] #homeView>.home-games-shelf,
-:root[data-interface-mode="hybrid"] #homeView>.home-apps-shelf,
-:root[data-interface-mode="hybrid"] #homeView>.feature-hero{display:block}
+/* ECLIPSE interface modes: Hybrid preserves both home experiences. */
 :root[data-interface-mode="cocoon"] #homeView>.system-stage{display:none}
 :root[data-interface-mode="console"] #homeView>.page-toolbar,
 :root[data-interface-mode="console"] #homeView>.dashboard-grid,
 :root[data-interface-mode="console"] #homeView>.home-games-shelf,
 :root[data-interface-mode="console"] #homeView>.home-apps-shelf,
 :root[data-interface-mode="console"] #homeView>.feature-hero{display:none}
-:root[data-interface-mode="cocoon"] #homeView>.page-toolbar,
-:root[data-interface-mode="cocoon"] #homeView>.dashboard-grid,
-:root[data-interface-mode="cocoon"] #homeView>.home-games-shelf,
-:root[data-interface-mode="cocoon"] #homeView>.home-apps-shelf,
-:root[data-interface-mode="cocoon"] #homeView>.feature-hero{display:block}
-:root[data-interface-mode="console"] #homeView>.system-stage{display:block}
