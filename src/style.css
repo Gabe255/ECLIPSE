@@ -514,3 +514,12 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .app-card-actions .launch-app-button{border-color:#a8f2c766;background:#a8f2c71a;color:#dfffee}
 .app-card-actions .launch-app-button:disabled{opacity:.55;cursor:wait}
 @media(max-width:720px){.app-library-card{grid-template-columns:42px minmax(0,1fr)}.app-card-actions{grid-column:1/-1;justify-content:flex-start}.app-card-actions button{min-height:36px}}
+
+.home-apps-shelf{margin:20px 0 28px;padding:18px;border:1px solid #a8f2c72a;border-radius:20px;background:linear-gradient(130deg,#a8f2c710,#ffffff04)}
+.home-app-row{display:flex;gap:10px;overflow-x:auto;padding:5px 2px 9px;scrollbar-width:thin}
+.home-app-tile{position:relative;flex:0 0 104px;min-height:100px;display:grid;place-items:center;padding:10px;border:1px solid #ffffff19;border-radius:15px;background:#ffffff08}
+.home-app-launch{width:100%;display:grid;justify-items:center;gap:7px;border:0;background:transparent;color:#edfff4}
+.home-app-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#c4ffe0,#5bb98e);color:#0a2b1d;font-size:18px;font-weight:900}
+.home-app-launch b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
+.home-app-remove{position:absolute;top:4px;right:5px;width:20px;height:20px;border:1px solid #ffffff20;border-radius:50%;background:#111b18;color:#a9b9ae;font-size:14px;line-height:1}
+.app-card-actions .pin-home-button.selected{border-color:#a8f2c766;background:#a8f2c71b;color:#baffd4}
