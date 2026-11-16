@@ -328,3 +328,6 @@ button{color:#f4f2ff}
 .game-detail-file p:last-child{margin-bottom:0}
 .game-detail-actions{display:flex;gap:9px;flex-wrap:wrap;margin:17px 0}
 @media(max-width:520px){.home-game-tile{flex-basis:128px}.home-game-art{height:88px}.game-detail-actions>*{flex:1 1 100%}}
+
+/* Let the mascot's pointing arm animate outside the suit silhouette */
+.mascot-body{overflow:visible}
