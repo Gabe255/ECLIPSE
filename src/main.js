@@ -139,7 +139,7 @@ document.querySelector('#app').innerHTML = `
       </section>
     </section>
     <section id="libraryView" class="view hidden">
-      <div class="section-head"><div><p class="eyebrow">THE VAULT</p><h2>YOUR LIBRARY</h2></div><div class="library-actions"><span class="collection-count" id="libraryCount">0 GAMES</span><button class="primary-btn" id="scanGamesBtn">＋ ADD GAME FOLDER</button><input id="gameFolderPicker" type="file" webkitdirectory directory multiple hidden></div></div>
+      <div class="section-head"><div><p class="eyebrow">THE VAULT</p><h2>YOUR LIBRARY</h2></div><div class="library-actions"><span class="collection-count" id="libraryCount">0 GAMES</span><input id="librarySearch" type="search" placeholder="Search your games…" aria-label="Search your games"><button class="primary-btn" id="scanGamesBtn">＋ ADD GAME FOLDER</button><input id="gameFolderPicker" type="file" webkitdirectory directory multiple hidden></div></div>
       <div class="scan-status" id="scanStatus" aria-live="polite">Choose the folder that contains your game folders. ECLIPSE only adds files it can identify.</div>
       <div class="console-strip" id="consoleStrip"></div>
       <nav class="systems" id="systemFilters" aria-label="Filter games"></nav>
@@ -315,10 +315,13 @@ function renderFilters(){
  $('#systemFilters').querySelectorAll('[data-system]').forEach(b=>b.addEventListener('click',()=>{activeSystem=b.dataset.system;renderFilters();renderGames();}));
 }
 function renderGames(){
- const visible=activeSystem==='All Games'?games:gamesForSystem(activeSystem);
- $('#gameGrid').innerHTML=visible.length?visible.map(g=>{const i=games.indexOf(g);return `<button class="game-card ${i===selectedGame?'focused':''}" data-game="${i}"><div class="game-art art-generic"><span class="art-glow"></span><span class="art-mark">✦</span><span class="art-caption">${escapeHTML(g.tag||'GAME FILE')}</span></div><div class="game-meta"><div><h3>${escapeHTML(g.title)}</h3><p>${escapeHTML(g.system)} · ${escapeHTML(g.fileName||'Imported file')}</p></div><span class="game-arrow">↗</span></div></button>`;}).join(''):'<div class="empty-state system-empty"><div class="empty-icon">✦</div><h3>NO GAMES FOUND</h3><p>Choose a game folder and scan it. ECLIPSE will only show files it can identify for this platform.</p><button class="primary-btn" id="emptyScanBtn">CHOOSE GAME FOLDER</button></div>';
+ const platformGames=activeSystem==='All Games'?games:gamesForSystem(activeSystem);
+ const query=($('#librarySearch')?.value||'').trim().toLowerCase();
+ const visible=platformGames.filter(game=>!query||[game.title,game.system,game.fileName,game.relativePath].join(' ').toLowerCase().includes(query));
+ $('#gameGrid').innerHTML=visible.length?visible.map(g=>{const i=games.indexOf(g);return `<button class="game-card ${i===selectedGame?'focused':''}" data-game="${i}"><div class="game-art art-generic"><span class="art-glow"></span><span class="art-mark">✦</span><span class="art-caption">${escapeHTML(g.tag||'GAME FILE')}</span></div><div class="game-meta"><div><h3>${escapeHTML(g.title)}</h3><p>${escapeHTML(g.system)} · ${escapeHTML(g.fileName||'Imported file')}</p></div><span class="game-arrow">↗</span></div></button>`;}).join(''):query?'<div class="empty-state system-empty"><div class="empty-icon">⌕</div><h3>NO MATCHES</h3><p>Try another title or file name.</p><button class="subtle-btn" id="clearLibrarySearch">CLEAR SEARCH</button></div>':'<div class="empty-state system-empty"><div class="empty-icon">✦</div><h3>NO GAMES FOUND</h3><p>Choose a game folder and scan it. ECLIPSE will only show files it can identify for this platform.</p><button class="primary-btn" id="emptyScanBtn">CHOOSE GAME FOLDER</button></div>';
  $('#gameGrid').querySelectorAll('[data-game]').forEach(card=>card.addEventListener('click',()=>{selectedGame=Number(card.dataset.game);showGameDetails(games[selectedGame]);}));
  $('#emptyScanBtn')?.addEventListener('click',chooseGameFolder);
+ $('#clearLibrarySearch')?.addEventListener('click',()=>{$('#librarySearch').value='';renderGames();});
 }
 let activeConsoleName='';
 let selectedGameDetailId=null;
@@ -506,6 +509,7 @@ $('#settingsTheme').addEventListener('change',e=>setTheme(e.target.value));
 document.querySelectorAll('.rail-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
 $('#backToLibrary').addEventListener('click',()=>showView('library'));
 $('#scanGamesBtn').addEventListener('click',chooseGameFolder);
+$('#librarySearch').addEventListener('input',renderGames);
 $('#homeScanBtn').addEventListener('click',()=>{showView('library');chooseGameFolder();});
 $('#gameFolderPicker').addEventListener('change',e=>{if(e.target.files?.length)scanSelectedFolder(e.target.files,'browser');e.target.value='';});
 
