@@ -215,11 +215,18 @@ function saveLayout(){localStorage.setItem('eclipse-widgets',JSON.stringify(widg
 function setTheme(id){activeTheme=id;document.documentElement.dataset.theme=id;localStorage.setItem('eclipse-theme',id);$('#themeSelect').value=id;$('#settingsTheme').value=id;notify('Theme changed: '+themes.find(t=>t[0]===id)[1]);}
 function showView(name){activePage=name;document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));$('#'+name+'View').classList.remove('hidden');document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));window.scrollTo({top:0,behavior:'smooth'});if(name==='library')renderLibrary();if(name==='settings')renderSettings();renderHomeHero();}
 function renderPages(){$('#pageTabs').innerHTML=pageNames.map((p,i)=>`<button class="page-tab ${i===currentPage?'selected':''}" data-page="${i}">${p}</button>`).join('');$('#pageTabs').querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{currentPage=Number(b.dataset.page);renderPages();renderWidgets();}));}
+function escapeHTML(value){
+ const entities={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+ return String(value??'').replace(/[&<>"']/g,char=>entities[char]);
+}
+function playerSystemForGame(game){
+ return systems.find(system=>system.name.toUpperCase()===game.system)?.name||game.system;
+}
 function widgetContent(id){
  const recent=games.length?games[games.length-1]:null;
- if(id==='recent')return `<div class="widget-heading"><small>LAST ADDED</small><span>↗</span></div><div class="widget-large">${recent?recent.title:'NO GAMES YET'}</div><p class="widget-caption">${recent?recent.system+' · '+(recent.year||'YOUR LIBRARY'):'Scan a folder to start your collection'}</p>`;
+ if(id==='recent')return `<div class="widget-heading"><small>LAST ADDED</small><span>↗</span></div><div class="widget-large">${recent?escapeHTML(recent.title):'NO GAMES YET'}</div><p class="widget-caption">${recent?escapeHTML(recent.system)+' · '+(recent.year||'YOUR LIBRARY'):'Scan a folder to start your collection'}</p>`;
  if(id==='systems')return `<div class="widget-heading"><small>MY SYSTEMS</small><span>↗</span></div><div class="system-mini-list">${systems.slice(0,3).map(s=>`<span>${s.icon} ${s.name}</span>`).join('')}</div>`;
- if(id==='favorites'){const favoriteGames=games.filter(game=>favorites.includes(game.id));return `<div class="widget-heading"><small>FAVORITES</small><span>✦</span></div><div class="widget-large">${favoriteGames.length?favoriteGames.length+' SAVED':'NO FAVORITES YET'}</div><p class="widget-caption">${favoriteGames[0]?.title||'Save games from their details panel'}</p>`;}
+ if(id==='favorites'){const favoriteGames=games.filter(game=>favorites.includes(game.id));return `<div class="widget-heading"><small>FAVORITES</small><span>✦</span></div><div class="widget-large">${favoriteGames.length?favoriteGames.length+' SAVED':'NO FAVORITES YET'}</div><p class="widget-caption">${escapeHTML(favoriteGames[0]?.title||'Save games from their details panel')}</p>`;}
  if(id==='playtime')return `<div class="widget-heading"><small>PLAYTIME</small><span>◷</span></div><div class="widget-large">NOT TRACKING YET</div><p class="widget-caption">Accurate sessions need native game-launch tracking</p>`;
  if(id==='achievements')return `<div class="widget-heading"><small>ACHIEVEMENTS</small><span>✧</span></div><div class="widget-large">READY</div><p class="widget-caption">Connect a supported achievement service later</p>`;
  return `<div class="widget-heading"><small>QUICK LAUNCH</small><span>↗</span></div><div class="quick-links"><button data-jump="library">LIBRARY</button><button data-jump="android">ANDROID</button></div>`;
@@ -251,7 +258,7 @@ function renderHomeHero(){
  const shelf=$('#homeGamesShelf');if(!shelf)return;
  shelf.classList.toggle('hidden',games.length===0);
  if(games.length){
-  shelf.innerHTML='<div class="home-shelf-heading"><div><p class="eyebrow">YOUR VAULT</p><h2>ALL GAMES</h2></div><span>'+games.length+' TITLES</span></div><div class="home-game-row">'+games.slice().reverse().slice(0,12).map(game=>'<button class="home-game-tile" data-home-game="'+games.indexOf(game)+'"><span class="home-game-art">✦</span><b>'+game.title+'</b><small>'+game.system+'</small></button>').join('')+'</div>';
+  shelf.innerHTML='<div class="home-shelf-heading"><div><p class="eyebrow">YOUR VAULT</p><h2>ALL GAMES</h2></div><span>'+games.length+' TITLES</span></div><div class="home-game-row">'+games.slice().reverse().slice(0,12).map(game=>'<button class="home-game-tile" data-home-game="'+games.indexOf(game)+'"><span class="home-game-art">✦</span><b>'+escapeHTML(game.title)+'</b><small>'+escapeHTML(game.system)+'</small></button>').join('')+'</div>';
   shelf.querySelectorAll('[data-home-game]').forEach(button=>button.addEventListener('click',()=>showGameDetails(games[Number(button.dataset.homeGame)])));
  }
 }
@@ -284,7 +291,7 @@ populatePlayerSelect($('#systemPlayerSelect'),name);
 $('#scanSystemPlayers').addEventListener('click',()=>scanInstalledApps(name));
 $('#systemPlayerSelect').addEventListener('change',event=>savePlayerAssignment(name,event.target.value));
 $('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
- const artFor=g=>'<div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">'+(['M','Z','Ⅲ','S'][games.indexOf(g)]||'✦')+'</span><span class="art-caption">'+g.tag+'</span></div>';
+ const artFor=g=>'<div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">✦</span><span class="art-caption">'+escapeHTML(g.tag)+'</span></div>';
  const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+g.title+'</b><small>'+g.tag+' · '+g.fileName+'</small></div></button>';
  const featured=titles[0];
  const folderNames=['ALL GAMES'];
@@ -309,7 +316,7 @@ function renderFilters(){
 }
 function renderGames(){
  const visible=activeSystem==='All Games'?games:gamesForSystem(activeSystem);
- $('#gameGrid').innerHTML=visible.length?visible.map(g=>{const i=games.indexOf(g);return `<button class="game-card ${i===selectedGame?'focused':''}" data-game="${i}"><div class="game-art art-generic"><span class="art-glow"></span><span class="art-mark">✦</span><span class="art-caption">${g.tag||'GAME FILE'}</span></div><div class="game-meta"><div><h3>${g.title}</h3><p>${g.system} · ${g.fileName||'Imported file'}</p></div><span class="game-arrow">↗</span></div></button>`;}).join(''):'<div class="empty-state system-empty"><div class="empty-icon">✦</div><h3>NO GAMES FOUND</h3><p>Choose a game folder and scan it. ECLIPSE will only show files it can identify for this platform.</p><button class="primary-btn" id="emptyScanBtn">CHOOSE GAME FOLDER</button></div>';
+ $('#gameGrid').innerHTML=visible.length?visible.map(g=>{const i=games.indexOf(g);return `<button class="game-card ${i===selectedGame?'focused':''}" data-game="${i}"><div class="game-art art-generic"><span class="art-glow"></span><span class="art-mark">✦</span><span class="art-caption">${escapeHTML(g.tag||'GAME FILE')}</span></div><div class="game-meta"><div><h3>${escapeHTML(g.title)}</h3><p>${escapeHTML(g.system)} · ${escapeHTML(g.fileName||'Imported file')}</p></div><span class="game-arrow">↗</span></div></button>`;}).join(''):'<div class="empty-state system-empty"><div class="empty-icon">✦</div><h3>NO GAMES FOUND</h3><p>Choose a game folder and scan it. ECLIPSE will only show files it can identify for this platform.</p><button class="primary-btn" id="emptyScanBtn">CHOOSE GAME FOLDER</button></div>';
  $('#gameGrid').querySelectorAll('[data-game]').forEach(card=>card.addEventListener('click',()=>{selectedGame=Number(card.dataset.game);showGameDetails(games[selectedGame]);}));
  $('#emptyScanBtn')?.addEventListener('click',chooseGameFolder);
 }
@@ -321,8 +328,9 @@ function showGameDetails(game){
  $('#gameDetailTitle').textContent=game.title;
  $('#gameDetailMeta').textContent=game.system+' · '+(game.tag||'GAME FILE')+' · '+(game.size?Math.round(game.size/1024/1024*10)/10+' MB':'SIZE UNKNOWN');
  $('#gameDetailPath').textContent=game.relativePath||game.fileName||'File path unavailable';
- const player=installedApps.find(app=>app.packageName===emulatorAssignments[game.system]);
- $('#gameDetailPlayer').textContent=player?player.name:'No player selected for '+game.system;
+ const playerSystem=playerSystemForGame(game);
+ const player=installedApps.find(app=>app.packageName===emulatorAssignments[playerSystem]);
+ $('#gameDetailPlayer').textContent=player?player.name:'No player selected for '+playerSystem;
  $('#gameDetailFavorite').textContent=favorites.includes(game.id)?'★ REMOVE FROM FAVORITES':'☆ ADD TO FAVORITES';
  $('#gameDetailModal').classList.remove('hidden');
 }
