@@ -15,7 +15,10 @@ const systems = [
   { name: 'Wii', icon: '◎', family: 'Nintendo' },
   { name: 'Wii U', icon: '▣', family: 'Nintendo' },
   { name: 'Nintendo Switch', icon: '▥', family: 'Nintendo' },
+  { name: 'Nintendo Switch 2', icon: '▥', family: 'Nintendo' },
   { name: 'PlayStation', icon: '△', family: 'PlayStation' },
+  { name: 'PlayStation 4 / Pro', icon: '△', family: 'PlayStation' },
+  { name: 'PlayStation 5 / Pro', icon: '△', family: 'PlayStation' },
   { name: 'PlayStation 2', icon: '△', family: 'PlayStation' },
   { name: 'PlayStation 3', icon: '△', family: 'PlayStation' },
   { name: 'PSP', icon: '▰', family: 'PlayStation' },
@@ -24,6 +27,11 @@ const systems = [
   { name: 'Xbox 360', icon: '✕', family: 'Xbox' },
   { name: 'Xbox One', icon: '✕', family: 'Xbox' },
   { name: 'Xbox Series X|S', icon: '✕', family: 'Xbox' },
+  { name: 'Windows PC', icon: '▣', family: 'PC' },
+  { name: 'SteamOS / Steam Deck', icon: '▣', family: 'PC' },
+  { name: 'Linux PC', icon: '▣', family: 'PC' },
+  { name: 'macOS', icon: '▣', family: 'PC' },
+  { name: 'iPhone / iPad', icon: '▣', family: 'Mobile' },
   { name: 'Master System', icon: '◫', family: 'Sega' },
   { name: 'Genesis / Mega Drive', icon: '◫', family: 'Sega' },
   { name: 'Saturn', icon: '◉', family: 'Sega' },
@@ -32,6 +40,22 @@ const systems = [
   { name: 'Arcade', icon: '✦', family: 'Arcade' },
   { name: 'Android', icon: '▣', family: 'Android' }
 ];
+const emulatorOptions = {
+  'Nintendo Switch': { items: ['Eden'], note: 'Switch 1 emulator. Availability and compatibility depend on the device.' },
+  'Nintendo Switch 2': { items: ['Banana Native'], note: 'Experimental Android compatibility layer; not a traditional emulator.' },
+  'PlayStation 4 / Pro': { items: ['shadPS4'], note: 'Experimental PC emulator; not an Android emulator.' },
+  'PlayStation 5 / Pro': { items: ['CapyPS5'], note: 'Experimental project; compatibility and supported devices are limited.' },
+  'Xbox': { items: ['xemu', 'hakuX'], note: 'Original Xbox emulator options; support varies by device.' },
+  'Xbox 360': { items: ['XenDroid'], note: 'Experimental Xbox 360 emulator option.' },
+  'Xbox One': { items: ['No established general-purpose emulator'], note: 'Use native console features or supported streaming; ECLIPSE will not claim emulation support.' },
+  'Xbox Series X|S': { items: ['No established general-purpose emulator'], note: 'Use native console features or supported streaming; ECLIPSE will not claim emulation support.' },
+  'Windows PC': { items: ['Native Windows launch'], note: 'PC games run directly on Windows; no emulator is normally needed.' },
+  'SteamOS / Steam Deck': { items: ['Steam + Proton'], note: 'Proton is a compatibility layer, not an emulator.' },
+  'Linux PC': { items: ['Native Linux launch', 'Wine / Proton'], note: 'Wine and Proton are compatibility layers, not console emulators.' },
+  'macOS': { items: ['Native macOS launch'], note: 'Native Mac games launch directly; compatibility tools vary by game.' },
+  'iPhone / iPad': { items: ['Native iOS / iPadOS apps'], note: 'ECLIPSE can organize apps; launching depends on iOS permissions.' },
+  'Android': { items: ['Native Android apps'], note: 'Installed-app detection requires the Android integration and user permission.' }
+};
 const games = [
   { title: 'METROID PRIME', system: 'GAMECUBE', year: '2002', art: 'metroid', tag: 'ADVENTURE' },
   { title: 'THE LEGEND OF ZELDA', system: 'NINTENDO', year: '2006', art: 'zelda', tag: 'ACTION' },
@@ -99,6 +123,7 @@ document.querySelector('#app').innerHTML = `
     <section id="consoleView" class="view hidden">
       <div class="console-detail-top"><button class="subtle-btn" id="backToLibrary">← ALL SYSTEMS</button><span class="collection-count" id="consoleGeneration">PLATFORM</span></div>
       <section class="console-banner" id="consoleBanner"></section>
+      <section class="emulator-panel" id="emulatorPanel"></section>
       <div class="console-detail-toolbar"><div><p class="eyebrow">YOUR COLLECTION</p><h2 id="consoleTitle">SYSTEM</h2></div><span class="collection-count" id="consoleGameCount">0 GAMES</span></div>
       <div class="game-grid" id="consoleGameGrid"></div>
       <div class="console-empty-note" id="consoleEmptyNote">Your games for this system will appear here when imported.</div>
@@ -192,6 +217,8 @@ function openConsolePage(name){
  $('#consoleGeneration').textContent=system.family.toUpperCase()+' PLATFORM';
  $('#consoleGameCount').textContent=String(titles.length).padStart(2,'0')+' GAMES';
  $('#consoleBanner').innerHTML='<div class="console-banner-mark">'+system.icon+'</div><div class="console-banner-copy"><p class="eyebrow">ECLIPSE SYSTEM PROFILE</p><h1>'+system.name.toUpperCase()+'</h1><p>Your '+system.name+' collection, all in one place.</p></div><div class="console-banner-index">SYSTEM / '+String(systems.indexOf(system)+1).padStart(2,'0')+'</div>';
+ const profile=emulatorOptions[name];
+ $('#emulatorPanel').innerHTML='<div class="emulator-panel-head"><div><p class="eyebrow">COMPATIBILITY PROFILE</p><h3>EMULATORS & LAUNCHERS</h3></div><span class="feature-tag">'+(profile?'OPTIONS LISTED':'PROFILE PENDING')+'</span></div>'+(profile?'<div class="emulator-option-list">'+profile.items.map(item=>'<span class="emulator-option">'+item+'</span>').join('')+'</div><p class="settings-note">'+profile.note+'</p>':'<p class="settings-note">No emulator or launcher profile has been added for this platform yet.</p>');
  $('#consoleGameGrid').innerHTML=titles.map(g=>{const i=games.indexOf(g);return '<button class="game-card" data-console-game="'+i+'"><div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">'+['M','Z','Ⅲ','S'][i]+'</span><span class="art-caption">'+g.tag+'</span></div><div class="game-meta"><div><h3>'+g.title+'</h3><p>'+g.system+' · '+g.year+'</p></div><span class="game-arrow">↗</span></div></button>';}).join('');
  $('#consoleEmptyNote').classList.toggle('hidden',titles.length>0);
  $('#consoleGameGrid').querySelectorAll('[data-console-game]').forEach(card=>card.addEventListener('click',()=>{selectedGame=Number(card.dataset.consoleGame);notify(games[selectedGame].title+' selected · Game launching is coming later.');}));
