@@ -798,6 +798,45 @@ document.addEventListener('keydown',e=>{
   renderGames();$('#gameGrid').querySelector('[data-game="'+selectedGame+'"]')?.focus();
  }
 });
+
+/* Physical gamepad navigation for Android handhelds (AYN Odin and similar). */
+(function enableGamepadNavigation(){
+ let lastMove=0,wasA=false,wasB=false;
+ const isVisible=el=>!!(el&&el.getClientRects().length&&!el.closest('.hidden'));
+ const focusables=()=>[...document.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(isVisible);
+ function moveFocus(direction){
+  const items=focusables();if(!items.length)return;
+  let current=document.activeElement;
+  if(!items.includes(current)){items[0].focus();items[0].scrollIntoView({block:'nearest',inline:'nearest'});return;}
+  const a=current.getBoundingClientRect(),ax=a.left+a.width/2,ay=a.top+a.height/2;
+  const candidates=items.filter(el=>el!==current).map(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,dx=x-ax,dy=y-ay;const primary=direction==='left'?-dx:direction==='right'?dx:direction==='up'?-dy:dy;const cross=direction==='left'||direction==='right'?Math.abs(dy):Math.abs(dx);return {el,primary,cross,score:primary>2?primary+cross*1.8:Infinity};}).filter(x=>Number.isFinite(x.score)).sort((x,y)=>x.score-y.score);
+  const next=candidates[0]?.el;if(next){next.focus({preventScroll:true});next.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'});}
+ }
+ function back(){const modal=document.querySelector('.modal-backdrop:not(.hidden),.mascot-welcome:not(.hidden),.onboarding-backdrop:not(.hidden),.control-center-backdrop:not(.hidden)');if(modal){modal.classList.add('hidden');return;}if(activePage!=='home'){showView('home');return;}}
+ function poll(){
+  const pads=navigator.getGamepads?.();if(!pads)return;
+  const pad=[...pads].find(Boolean);if(!pad)return;
+  const b=pad.buttons||[],axis=pad.axes||[];
+  const pressed=i=>!!b[i]?.pressed;
+  const now=Date.now();
+  let direction=null;
+  if(pressed(14)||axis[0]<-.55)direction='left';
+  else if(pressed(15)||axis[0]>.55)direction='right';
+  else if(pressed(12)||axis[1]<-.55)direction='up';
+  else if(pressed(13)||axis[1]>.55)direction='down';
+  if(direction&&now-lastMove>190){moveFocus(direction);lastMove=now;}
+  const a=pressed(0),altA=pressed( ButtonIndex?.A ?? 999);
+  const confirm=a||altA;
+  if(confirm&&!wasA){const active=document.activeElement;if(active&&active!==document.body&&typeof active.click==='function')active.click();else focusables()[0]?.click();}
+  const cancel=pressed(1)||pressed(2);
+  if(cancel&&!wasB)back();
+  wasA=confirm;wasB=cancel;
+ }
+ let ButtonIndex=null;
+ window.addEventListener('gamepadconnected',()=>{if(!document.activeElement||document.activeElement===document.body)focusables()[0]?.focus();});
+ window.setInterval(poll,80);
+})();
+
 applyInterfaceMode();
 applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
 refreshDisplayLayout();
