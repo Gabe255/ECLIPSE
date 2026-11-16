@@ -3,6 +3,8 @@ package com.eclipse.launcher;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 
 import androidx.activity.result.ActivityResult;
 import androidx.documentfile.provider.DocumentFile;
@@ -16,6 +18,9 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 import org.json.JSONException;
+
+import java.util.Collections;
+import java.util.List;
 
 @CapacitorPlugin(name = "FolderAccess")
 public class FolderAccessPlugin extends Plugin {
@@ -48,6 +53,38 @@ public class FolderAccessPlugin extends Plugin {
         } catch (Exception error) {
             call.reject("Could not scan this folder: " + error.getMessage(), error);
         }
+    }
+
+    @PluginMethod
+    public void getInstalledApps(PluginCall call) {
+        PackageManager manager = getContext().getPackageManager();
+        Intent launcherIntent = new Intent(Intent.ACTION_MAIN);
+        launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> matches = manager.queryIntentActivities(launcherIntent, 0);
+        Collections.sort(matches, (left, right) ->
+            String.CASE_INSENSITIVE_ORDER.compare(
+                left.loadLabel(manager).toString(),
+                right.loadLabel(manager).toString()
+            )
+        );
+
+        JSArray apps = new JSArray();
+        for (ResolveInfo match : matches) {
+            if (match.activityInfo == null) continue;
+            String packageName = match.activityInfo.packageName;
+            if (getContext().getPackageName().equals(packageName)) continue;
+            JSObject app = new JSObject();
+            try {
+                app.put("name", match.loadLabel(manager).toString());
+                app.put("packageName", packageName);
+                apps.put(app);
+            } catch (JSONException ignored) {
+                // Ignore malformed app labels.
+            }
+        }
+        JSObject response = new JSObject();
+        response.put("apps", apps);
+        call.resolve(response);
     }
 
     @PluginMethod
