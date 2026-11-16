@@ -36,7 +36,8 @@
 
 ## 2. Apps and game library
 
-- Android launchable-app discovery through the native bridge.
+- Android launchable-app discovery and native launch handoff through the Apps Library.
+- Pin installed apps to ECLIPSE Home and launch/remove those shortcuts.
 - Treat as Game labels saved locally.
 - Manual app session timer and locally saved playtime totals.
 - Folder picker and game-file scanning foundation.
