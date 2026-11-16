@@ -299,8 +299,15 @@ function renderAndroidApps(){
  if(!filtered.length){list.innerHTML='<div class="app-library-empty"><span>▣</span><b>'+(total?'NO MATCHING APPS':'NO APPS DISCOVERED YET')+'</b><p>'+(total?'Try another search.':'Tap SCAN DEVICE in the Android APK to discover installed apps.')+'</p></div>';return;}
  list.innerHTML=filtered.map(app=>{
   const isGame=!!appGameFlags[app.packageName],secondsForApp=trackedSeconds(app.packageName),isActive=activeAppSession?.packageName===app.packageName;
-  return '<article class="app-library-card"><div class="app-icon">'+escapeHTML((app.name||'?').slice(0,1).toUpperCase())+'</div><div class="app-card-info"><b>'+escapeHTML(app.name)+'</b><small>'+escapeHTML(app.packageName)+'</small><span>'+formatPlaytime(secondsForApp)+' TRACKED '+(isGame?' · GAME':' · APP')+'</span></div><div class="app-card-actions"><button class="treat-game '+(isGame?'selected':'')+'" data-treat-game="'+escapeHTML(app.packageName)+'">'+(isGame?'★ GAME':'＋ TREAT AS GAME')+'</button><button class="session-button '+(isActive?'running':'')+'" data-session-app="'+escapeHTML(app.packageName)+'">'+(isActive?'STOP SESSION':'START SESSION')+'</button></div></article>';
+  return '<article class="app-library-card"><div class="app-icon">'+escapeHTML((app.name||'?').slice(0,1).toUpperCase())+'</div><div class="app-card-info"><b>'+escapeHTML(app.name)+'</b><small>'+escapeHTML(app.packageName)+'</small><span>'+formatPlaytime(secondsForApp)+' TRACKED '+(isGame?' · GAME':' · APP')+'</span></div><div class="app-card-actions"><button class="launch-app-button" data-launch-app="'+escapeHTML(app.packageName)+'" type="button">LAUNCH</button><button class="treat-game '+(isGame?'selected':'')+'" data-treat-game="'+escapeHTML(app.packageName)+'">'+(isGame?'★ GAME':'＋ TREAT AS GAME')+'</button><button class="session-button '+(isActive?'running':'')+'" data-session-app="'+escapeHTML(app.packageName)+'">'+(isActive?'STOP SESSION':'START SESSION')+'</button></div></article>';
  }).join('');
+ list.querySelectorAll('[data-launch-app]').forEach(button=>button.addEventListener('click',async()=>{
+  if(!Capacitor.isNativePlatform()){notify('App launching is available in the Android APK.');return;}
+  button.disabled=true;
+  try{await FolderAccess.launchApp({packageName:button.dataset.launchApp});notify('Launching app…');}
+  catch(error){notify(error?.message||'Could not launch this app.');}
+  finally{button.disabled=false;}
+ }));
  list.querySelectorAll('[data-treat-game]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.treatGame;if(appGameFlags[id])delete appGameFlags[id];else appGameFlags[id]=true;saveAppTracking();renderAndroidApps();notify(appGameFlags[id]?'Added to games.':'Removed game label.');}));
  list.querySelectorAll('[data-session-app]').forEach(button=>button.addEventListener('click',()=>toggleAppSession(button.dataset.sessionApp)));
 }
