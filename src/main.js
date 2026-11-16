@@ -704,5 +704,6 @@ document.addEventListener('keydown',e=>{
   renderGames();$('#gameGrid').querySelector('[data-game="'+selectedGame+'"]')?.focus();
  }
 });
+applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
 mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
 renderSystemPicker();renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();window.setTimeout(openOnboarding,450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
