@@ -111,6 +111,7 @@ let installedApps = load('eclipse-installed-apps', []);
 let emulatorAssignments = load('eclipse-emulator-assignments', {});
 let favorites = load('eclipse-favorites', []);
 let appGameFlags = load('eclipse-app-games', {});
+let appHomePins = load('eclipse-home-app-pins', []);
 let appPlaytime = load('eclipse-app-playtime', {});
 let activeAppSession = load('eclipse-active-app-session', null);
 document.documentElement.dataset.theme = activeTheme;
@@ -149,6 +150,7 @@ document.querySelector('#app').innerHTML = `
       <div class="page-toolbar"><div class="page-tabs" id="pageTabs"></div><div class="page-actions"><button class="subtle-btn" id="addPage">+ PAGE</button><button class="subtle-btn" id="editWidgets">EDIT HOME</button></div></div>
       <section class="dashboard-grid" id="widgetGrid"></section>
       <section class="home-games-shelf hidden" id="homeGamesShelf"></section>
+      <section class="home-apps-shelf hidden" id="homeAppsShelf" aria-label="Pinned Android apps"></section>
       <section class="feature-hero hidden" id="homeLibraryHero" aria-label="Your game library">
         <div class="feature-art"><span class="feature-glow"></span><span class="feature-symbol">E</span><span class="feature-kicker">YOUR COLLECTION</span></div>
         <div class="feature-copy"><p class="eyebrow">YOUR VAULT</p><h2 id="homeHeroTitle">YOUR GAMES</h2><p id="homeHeroMeta">Games you scan will appear here.</p><button class="primary-btn" id="homeScanBtn">ADD MORE GAMES ↗</button></div>
@@ -299,14 +301,16 @@ function renderAndroidApps(){
  if(!filtered.length){list.innerHTML='<div class="app-library-empty"><span>▣</span><b>'+(total?'NO MATCHING APPS':'NO APPS DISCOVERED YET')+'</b><p>'+(total?'Try another search.':'Tap SCAN DEVICE in the Android APK to discover installed apps.')+'</p></div>';return;}
  list.innerHTML=filtered.map(app=>{
   const isGame=!!appGameFlags[app.packageName],secondsForApp=trackedSeconds(app.packageName),isActive=activeAppSession?.packageName===app.packageName;
-  return '<article class="app-library-card"><div class="app-icon">'+escapeHTML((app.name||'?').slice(0,1).toUpperCase())+'</div><div class="app-card-info"><b>'+escapeHTML(app.name)+'</b><small>'+escapeHTML(app.packageName)+'</small><span>'+formatPlaytime(secondsForApp)+' TRACKED '+(isGame?' · GAME':' · APP')+'</span></div><div class="app-card-actions"><button class="launch-app-button" data-launch-app="'+escapeHTML(app.packageName)+'" type="button">LAUNCH</button><button class="treat-game '+(isGame?'selected':'')+'" data-treat-game="'+escapeHTML(app.packageName)+'">'+(isGame?'★ GAME':'＋ TREAT AS GAME')+'</button><button class="session-button '+(isActive?'running':'')+'" data-session-app="'+escapeHTML(app.packageName)+'">'+(isActive?'STOP SESSION':'START SESSION')+'</button></div></article>';
+  const isPinned=appHomePins.includes(app.packageName);
+  return '<article class="app-library-card"><div class="app-icon">'+escapeHTML((app.name||'?').slice(0,1).toUpperCase())+'</div><div class="app-card-info"><b>'+escapeHTML(app.name)+'</b><small>'+escapeHTML(app.packageName)+'</small><span>'+formatPlaytime(secondsForApp)+' TRACKED '+(isGame?' · GAME':' · APP')+'</span></div><div class="app-card-actions"><button class="launch-app-button" data-launch-app="'+escapeHTML(app.packageName)+'" type="button">LAUNCH</button><button class="pin-home-button '+(isPinned?'selected':'')+'" data-pin-home="'+escapeHTML(app.packageName)+'" type="button">'+(isPinned?'✓ ON HOME':'＋ ADD TO HOME')+'</button><button class="treat-game '+(isGame?'selected':'')+'" data-treat-game="'+escapeHTML(app.packageName)+'">'+(isGame?'★ GAME':'＋ TREAT AS GAME')+'</button><button class="session-button '+(isActive?'running':'')+'" data-session-app="'+escapeHTML(app.packageName)+'">'+(isActive?'STOP SESSION':'START SESSION')+'</button></div></article>';
  }).join('');
- list.querySelectorAll('[data-launch-app]').forEach(button=>button.addEventListener('click',async()=>{
-  if(!Capacitor.isNativePlatform()){notify('App launching is available in the Android APK.');return;}
-  button.disabled=true;
-  try{await FolderAccess.launchApp({packageName:button.dataset.launchApp});notify('Launching app…');}
-  catch(error){notify(error?.message||'Could not launch this app.');}
-  finally{button.disabled=false;}
+ list.querySelectorAll('[data-launch-app]').forEach(button=>button.addEventListener('click',()=>launchInstalledApp(button.dataset.launchApp)));
+ list.querySelectorAll('[data-pin-home]').forEach(button=>button.addEventListener('click',()=>{
+  const packageName=button.dataset.pinHome;
+  appHomePins=appHomePins.includes(packageName)?appHomePins.filter(item=>item!==packageName):[...appHomePins,packageName];
+  localStorage.setItem('eclipse-home-app-pins',JSON.stringify(appHomePins));
+  renderAndroidApps();renderHomeAppsShelf();
+  notify(appHomePins.includes(packageName)?'App added to ECLIPSE Home.':'App removed from ECLIPSE Home.');
  }));
  list.querySelectorAll('[data-treat-game]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.treatGame;if(appGameFlags[id])delete appGameFlags[id];else appGameFlags[id]=true;saveAppTracking();renderAndroidApps();notify(appGameFlags[id]?'Added to games.':'Removed game label.');}));
  list.querySelectorAll('[data-session-app]').forEach(button=>button.addEventListener('click',()=>toggleAppSession(button.dataset.sessionApp)));
@@ -397,6 +401,20 @@ function renderHomeHero(){
   shelf.innerHTML='<div class="home-shelf-heading"><div><p class="eyebrow">YOUR VAULT</p><h2>ALL GAMES</h2></div><span>'+games.length+' TITLES</span></div><div class="home-game-row">'+games.slice().reverse().slice(0,12).map(game=>'<button class="home-game-tile" data-home-game="'+games.indexOf(game)+'"><span class="home-game-art">✦</span><b>'+escapeHTML(game.title)+'</b><small>'+escapeHTML(game.system)+'</small></button>').join('')+'</div>';
   shelf.querySelectorAll('[data-home-game]').forEach(button=>button.addEventListener('click',()=>showGameDetails(games[Number(button.dataset.homeGame)])));
  }
+}
+function renderHomeAppsShelf(){
+ const shelf=$('#homeAppsShelf');if(!shelf)return;
+ const pinned=appHomePins.map(packageName=>installedApps.find(app=>app.packageName===packageName)).filter(Boolean);
+ shelf.classList.toggle('hidden',pinned.length===0);
+ if(!pinned.length)return;
+ shelf.innerHTML='<div class="home-shelf-heading"><div><p class="eyebrow">QUICK LAUNCH</p><h2>YOUR APPS</h2></div><span>'+pinned.length+' PINNED</span></div><div class="home-app-row">'+pinned.map(app=>'<div class="home-app-tile"><button class="home-app-launch" data-home-app-launch="'+escapeHTML(app.packageName)+'" type="button"><span class="home-app-icon">'+escapeHTML((app.name||'?').slice(0,1).toUpperCase())+'</span><b>'+escapeHTML(app.name)+'</b></button><button class="home-app-remove" data-home-app-remove="'+escapeHTML(app.packageName)+'" type="button" aria-label="Remove '+escapeHTML(app.name)+' from Home">×</button></div>').join('')+'</div>';
+ shelf.querySelectorAll('[data-home-app-launch]').forEach(button=>button.addEventListener('click',()=>launchInstalledApp(button.dataset.homeAppLaunch)));
+ shelf.querySelectorAll('[data-home-app-remove]').forEach(button=>button.addEventListener('click',()=>{appHomePins=appHomePins.filter(item=>item!==button.dataset.homeAppRemove);localStorage.setItem('eclipse-home-app-pins',JSON.stringify(appHomePins));renderHomeAppsShelf();renderAndroidApps();notify('App removed from Home.');}));
+}
+async function launchInstalledApp(packageName){
+ if(!Capacitor.isNativePlatform()){notify('App launching is available in the Android APK.');return;}
+ try{await FolderAccess.launchApp({packageName});notify('Launching app…');}
+ catch(error){notify(error?.message||'Could not launch this app.');}
 }
 function renderLibrary(){
  $('#libraryCount').textContent=games.length+' GAMES';
