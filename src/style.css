@@ -235,3 +235,13 @@ body{background:radial-gradient(ellipse at 80% 8%,color-mix(in srgb,var(--accent
 .mascot-actions .primary-btn{width:100%;justify-content:center}
 .mascot-actions .subtle-btn{border:0}
 @media(max-width:420px){.mascot-card{padding:22px 17px}.mascot-art{height:145px}.mascot-tips{gap:5px}.mascot-tips span{font-size:8px}}
+
+
+/* Release history and device compatibility checks */
+.release-history{display:flex;flex-direction:column;gap:7px;margin-top:15px}
+.release-history-title{margin:0 0 3px;color:#85869c;font:9px 'DM Mono';letter-spacing:1.3px}
+.release-history-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid #ffffff16;border-radius:6px;background:#ffffff05;color:#c9c8d8;font:9px 'DM Mono'}
+.release-history-row span{min-width:0;overflow-wrap:anywhere}
+.release-history-row a{flex:0 0 auto;color:var(--accent);text-decoration:none}
+#compatibilityResult p{margin:7px 0}
+#compatibilityResult p:last-child{color:#c5c2d5}
