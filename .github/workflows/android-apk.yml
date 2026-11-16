@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Existing release tag to replace its APK (for example v0.2.0-alpha)'
+        description: 'Existing release tag to replace its APK (for example v3.0.0)'
         required: false
         type: string
         default: ''
   push:
     branches: [main]
-    tags: ['v*-beta*', 'v*-alpha*']
+    tags: ['v*.*.*']
 
 permissions:
   contents: write
@@ -37,9 +37,12 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             ECLIPSE_VERSION="${GITHUB_REF_NAME#v}"
           else
-            ECLIPSE_VERSION="0.3.0-beta.${GITHUB_RUN_NUMBER}"
+            ECLIPSE_VERSION="3.0.0"
           fi
           echo "ECLIPSE_VERSION=$ECLIPSE_VERSION" >> "$GITHUB_ENV"
+      - name: Validate stable version
+        run: |
+          case "$ECLIPSE_VERSION" in *-alpha*|-beta*|-rc*) echo "Stable version cannot contain a prerelease suffix."; exit 1 ;; esac
       - name: Build web app
         env:
           VITE_ECLIPSE_VERSION: ${{ env.ECLIPSE_VERSION }}
@@ -104,7 +107,8 @@ jobs:
         run: |
           if [ -z "$ECLIPSE_KEYSTORE_BASE64" ] || [ -z "$ECLIPSE_KEYSTORE_PASSWORD" ] || [ -z "$ECLIPSE_KEY_ALIAS" ] || [ -z "$ECLIPSE_KEY_PASSWORD" ]; then
             echo "ECLIPSE_SIGNED=false" >> "$GITHUB_ENV"
-            echo "No persistent signing key configured; building a debug APK for testing."
+            if [[ "$GITHUB_REF" == refs/tags/* ]]; then echo "Stable releases require the persistent ECLIPSE signing key."; exit 1; fi
+            echo "No persistent signing key configured; building a debug APK for testing only."
           else
             echo "$ECLIPSE_KEYSTORE_BASE64" | base64 --decode > android/app/eclipse-release.keystore
             python3 - <<'PY'
@@ -145,22 +149,21 @@ jobs:
           name: eclipse-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-      - name: Publish beta GitHub Release
-        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      - name: Publish stable GitHub Release
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.release_tag || (github.ref == 'refs/heads/main' && format('v0.3.0-beta.{0}', github.run_number)) || github.ref_name }}
-          name: ECLIPSE ${{ github.event.inputs.release_tag || (github.ref == 'refs/heads/main' && format('v0.3.0-beta.{0}', github.run_number)) || github.ref_name }}
-          prerelease: true
+          tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
+          name: ECLIPSE ${{ github.event.inputs.release_tag || github.ref_name }}
+          prerelease: false
           overwrite_files: true
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/app-debug.apk
           body: |
-            **ECLIPSE Beta**
+            **ECLIPSE Stable Release**
 
-            Early Android dashboard build for testing on the AYN Odin 3.
-            The APK uses a persistent release signature when ECLIPSE signing secrets are configured; otherwise it is a debug APK for testing. It is not yet a finished emulator launcher.
+            Stable versioned Android release, signed with ECLIPSE's persistent Android signing key for compatible future updates.
 
-            Please report bugs and compatibility issues before using this as a daily launcher.
+            Check the release notes for included features and known limitations.
 
-            **Download APK:** [app-debug.apk](https://github.com/Gabe255/ECLIPSE/releases/download/${{ github.event.inputs.release_tag || (github.ref == 'refs/heads/main' && format('v0.3.0-beta.{0}', github.run_number)) || github.ref_name }}/app-debug.apk)
+            **Download APK:** [app-debug.apk](https://github.com/Gabe255/ECLIPSE/releases/download/${{ github.event.inputs.release_tag || github.ref_name }}/app-debug.apk)
