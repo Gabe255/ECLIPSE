@@ -448,7 +448,13 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 :root[data-display-layout="dual"] .system-cube{width:68px;height:68px;flex:0 0 68px}
 :root[data-display-layout="dual"] .system-card-top{align-items:flex-start}
 :root[data-display-layout="dual"] .system-card-bottom{align-items:flex-start;text-align:left}
-:root[data-display-layout="dual"] .system-carousel-shell{align-items:stretch}
+:root[data-display-layout="dual"] .system-carousel-shell{align-items:stretch;flex-direction:column;gap:7px}
+:root[data-display-layout="dual"] .system-picker{width:100%;flex:1 1 auto}
+:root[data-display-layout="dual"] .system-stage{min-height:0}
+:root[data-display-layout="dual"] .system-stage .stage-footer{gap:8px;flex-wrap:wrap}
+:root[data-display-layout="dual"] .system-stage .stage-heading{align-items:flex-start}
+:root[data-display-layout="dual"] .system-stage .carousel-arrow{width:30px;height:30px;flex:0 0 30px;transform:rotate(90deg)}
+:root[data-display-layout="dual"] .system-stage .carousel-arrow:hover{transform:rotate(90deg) scale(1.07)}
 :root[data-display-layout="dual"] .carousel-arrow{align-self:center}
 .device-setup-block{margin:18px 0 16px;padding:14px;border:1px solid #9de9bd35;border-radius:15px;background:linear-gradient(135deg,#9de9bd0d,#ffffff04)}
 .device-setup-heading{display:flex;align-items:center;gap:11px;margin-bottom:13px}
