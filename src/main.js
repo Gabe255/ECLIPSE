@@ -652,7 +652,7 @@ $('#gameDetailRemove').addEventListener('click',()=>{
 });
 $('#checkUpdates').addEventListener('click',checkUpdates);
 $('#checkCompatibility').addEventListener('click',checkCompatibility);
-$('#androidInfo').addEventListener('click',()=>notify('Android app detection needs a native Android bridge and package visibility permission.'));
+$('#androidInfo')?.addEventListener('click',()=>notify('Android app detection needs a native Android bridge and package visibility permission.'));
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape'){$('#widgetModal').classList.add('hidden');if(activePage!=='home')showView('home');return;}
  if(['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','Enter',' '].includes(e.key)&&!e.target.matches('select,input,textarea,button')){
