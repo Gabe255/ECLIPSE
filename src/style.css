@@ -419,7 +419,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .studio-hub-grid a{display:flex;flex-direction:column;gap:8px;padding:16px;border:1px solid var(--line);border-radius:13px;background:#ffffff06;color:#eaf6ef;text-decoration:none}
 .studio-hub-grid a b{font:10px ui-monospace,monospace;color:var(--accent)}.studio-hub-grid a span{font-size:10px;line-height:1.5;color:#91a49b}
 .experience-foot{display:flex;justify-content:space-between;gap:10px;padding:14px 24px;border-top:1px solid var(--line);font:8px ui-monospace,monospace;letter-spacing:1px;color:#80948a}
-.eclipse-custom-accent{--accent:var(--custom-accent);--accent2:color-mix(in srgb,var(--custom-accent) 70%,#000)}
+:root.eclipse-custom-accent{--accent:var(--custom-accent);--accent2:color-mix(in srgb,var(--custom-accent) 70%,#000)}
 .eclipse-wallpaper-on body{background-image:linear-gradient(#080912b8,#080912d9),var(--eclipse-wallpaper),radial-gradient(ellipse at 80% 8%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 35%);background-size:cover;background-position:center;background-attachment:fixed}
 .eclipse-system-themed .console-banner{border-color:color-mix(in srgb,var(--system-accent) 50%,transparent);background:radial-gradient(ellipse at 75% 50%,color-mix(in srgb,var(--system-accent) 25%,transparent),transparent 48%),linear-gradient(120deg,#172b25,#10191d)}
 .eclipse-system-themed .console-banner-mark{color:var(--system-accent);border-color:var(--system-accent)}
@@ -428,3 +428,8 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 :root{--experience-speed:var(--eclipse-motion)}
 @media(prefers-reduced-motion:no-preference){.view{transition:opacity calc(180ms * var(--experience-speed)) ease,transform calc(180ms * var(--experience-speed)) ease}}
 @media(max-width:650px){.experience-backdrop{padding:0;align-items:end}.experience-panel{max-height:94dvh;border-radius:22px 22px 0 0}.experience-head{padding:18px}.experience-tabs{padding:0 18px 13px}.experience-content{padding:18px;min-height:55vh}.studio-theme-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.studio-hub-grid{grid-template-columns:1fr}.experience-foot{padding:13px 18px;font-size:7px}.studio-controls{align-items:stretch;flex-direction:column}.studio-controls>*{max-width:100%}}
+
+/* Smooth view transitions and adjustable animation timing */
+@keyframes eclipseViewEnter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.view:not(.hidden){animation:eclipseViewEnter calc(190ms * var(--eclipse-motion)) cubic-bezier(.2,.75,.25,1) both}
+@media(prefers-reduced-motion:reduce){.view:not(.hidden){animation:none!important;transition:none!important}}
