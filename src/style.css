@@ -569,3 +569,21 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 :root[data-interface-mode="console"] #homeView>.home-games-shelf,
 :root[data-interface-mode="console"] #homeView>.home-apps-shelf,
 :root[data-interface-mode="console"] #homeView>.feature-hero{display:none}
+
+
+/* Keep the mascot's dialogue visible on compact handheld and landscape screens. */
+.mascot-welcome{overflow-y:auto;overscroll-behavior:contain;align-items:start;padding:16px}
+.mascot-card{max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;margin:auto}
+.mascot-message{position:relative;z-index:1;display:block;width:100%;min-height:58px;padding:13px 15px;margin:12px auto 15px;border:1px solid #b8a2ff66;border-radius:12px;background:#17152a;color:#f4efff;line-height:1.65;text-align:left;overflow-wrap:anywhere}
+@media(max-height:620px) and (orientation:landscape){
+  .mascot-welcome{padding:8px;align-items:start}
+  .mascot-card{width:min(620px,100%);max-height:calc(100dvh - 16px);padding:12px 18px}
+  .mascot-art{height:66px;margin:0 auto 7px;transform:scale(.72);transform-origin:center bottom}
+  .mascot-card>.eyebrow{margin-bottom:4px}
+  .mascot-card h2{font-size:21px}
+  .mascot-message{min-height:48px;margin:7px auto 9px;padding:9px 12px;font-size:11px}
+  .mascot-tips{margin:8px 0 10px}
+  .mascot-tips span{padding:6px 4px}
+  .mascot-actions{gap:5px}
+  .mascot-actions .primary-btn{padding:9px 13px}
+}
