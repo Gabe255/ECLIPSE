@@ -128,5 +128,19 @@ export function mountControlCenter({ notify }) {
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !backdrop.classList.contains('hidden')) close();
   });
+  let gestureStart = null;
+  document.addEventListener('touchstart', event => {
+    const touch = event.touches[0];
+    if (!touch || touch.clientY > 26 || event.target.closest('input,textarea,select,[contenteditable="true"]')) return;
+    gestureStart = { x: touch.clientX, y: touch.clientY };
+  }, { passive: true });
+  document.addEventListener('touchend', event => {
+    if (!gestureStart) return;
+    const touch = event.changedTouches[0];
+    const distanceY = touch ? touch.clientY - gestureStart.y : 0;
+    const distanceX = touch ? touch.clientX - gestureStart.x : 0;
+    gestureStart = null;
+    if (distanceY > 80 && Math.abs(distanceX) < 65 && backdrop.classList.contains('hidden')) open();
+  }, { passive: true });
   applyGameMode();
 }
