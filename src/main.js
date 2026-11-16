@@ -108,7 +108,7 @@ let playCount = load('eclipse-play-count', 0);
 let folderPaths = load('eclipse-folders', []);
 let systemShelfRows = Math.max(1, Math.min(4, Number(load('eclipse-system-shelf-rows', 2)) || 2));
 let interfaceMode = load('eclipse-interface-mode', 'cocoon');
-if(!['console','cocoon','hybrid'].includes(interfaceMode)) interfaceMode='hybrid';
+if(!['console','konsoru','cocoon','hybrid'].includes(interfaceMode)) interfaceMode='hybrid';
 let systemFolders = load('eclipse-system-folders', {});
 let preferences = load('eclipse-preferences', {showHero:true,compactRows:false,systemCounts:true,startPage:'home'});
 let installedApps = load('eclipse-installed-apps', []);
@@ -141,6 +141,17 @@ document.querySelector('#app').innerHTML = `
       <section class="welcome-row">
         <div><p class="eyebrow">YOUR PERSONAL GAME SPACE</p><h1>WELCOME <em>BACK.</em></h1><p class="welcome-sub">Your games. Your setup. Your rules.</p></div>
         <div class="welcome-orb" aria-hidden="true"></div>
+      </section>
+      <section class="konsoru-home" id="konsoruHome" aria-label="Konsoru console home">
+        <div class="konsoru-welcome">
+          <div class="konsoru-welcome-copy"><p class="eyebrow">ECLIPSE OS · KONSORU</p><h1>YOUR WORLD.<br><em>YOUR NEXT GAME.</em></h1><p id="konsoruGreeting">Everything you play, one place.</p><div class="konsoru-hero-actions"><button class="konsoru-primary" id="konsoruResume">▶ &nbsp; CONTINUE PLAYING</button><button class="konsoru-secondary" id="konsoruOpenLibrary">OPEN LIBRARY</button></div></div>
+          <div class="konsoru-core-art" aria-hidden="true"><span class="konsoru-core-orbit orbit-one"></span><span class="konsoru-core-orbit orbit-two"></span><span class="konsoru-core">E</span><small>INFINITE PLAY</small></div>
+          <div class="konsoru-hero-stats"><div><b id="konsoruGameCount">0</b><small>GAMES</small></div><div><b id="konsoruSystemCount">0</b><small>SYSTEMS</small></div></div>
+        </div>
+        <nav class="konsoru-nav" aria-label="Konsoru shortcuts"><button class="selected" data-konsoru-jump="home">⌂ <span>HOME</span></button><button data-konsoru-jump="library">▤ <span>LIBRARY</span></button><button data-konsoru-jump="android">▣ <span>APPS</span></button><button data-konsoru-jump="settings">⚙ <span>SETTINGS</span></button></nav>
+        <section class="konsoru-section"><div class="konsoru-section-head"><div><p class="eyebrow">CHOOSE YOUR UNIVERSE</p><h2>GAMING WORLDS</h2></div><span>01 / SYSTEMS</span></div><div class="konsoru-world-grid" id="konsoruWorldGrid"></div></section>
+        <section class="konsoru-section"><div class="konsoru-section-head"><div><p class="eyebrow">BACK IN THE GAME</p><h2>RECENTLY ADDED</h2></div><button class="konsoru-text-button" id="konsoruAllGames">VIEW ALL ↗</button></div><div class="konsoru-recent-row" id="konsoruRecentRow"></div></section>
+        <section class="konsoru-bottom-grid"><article><p class="eyebrow">YOUR SPACE</p><h3>MAKE IT YOURS.</h3><p>Organize your collection, choose your players, and shape your ECLIPSE setup.</p><button class="konsoru-secondary" id="konsoruCustomize">CUSTOMIZE ECLIPSE ↗</button></article><article><p class="eyebrow">QUICK STATUS</p><div class="konsoru-status-line"><span>LIBRARY STATUS</span><b id="konsoruLibraryStatus">READY</b></div><div class="konsoru-status-line"><span>ACTIVE INTERFACE</span><b>KONSORU</b></div><div class="konsoru-status-line"><span>DEVICE MODE</span><b>HANDHELD</b></div></article></section>
       </section>
       <section class="system-stage" aria-label="Choose a gaming system">
         <div class="stage-heading"><div><p class="eyebrow">THE MULTIVERSE</p><h2>CHOOSE YOUR <em>WORLD.</em></h2><p>One tap takes you into that system's own space.</p></div><span class="stage-index">01 <i>/</i> SYSTEMS</span></div>
@@ -194,7 +205,7 @@ document.querySelector('#app').innerHTML = `
           <div class="settings-panel-head"><div><p class="eyebrow">MAKE ECLIPSE YOURS</p><h3>PERSONALIZE</h3></div><button class="subtle-btn" id="resetAllDefaults">RESTORE DEFAULTS</button></div>
           <div class="settings-grid">
             <article class="settings-card"><p class="eyebrow">APPEARANCE</p><h3>THEME</h3><label>Built-in theme<select id="settingsTheme">${themes.map(([id,name])=>`<option value="${id}" ${id===activeTheme?'selected':''}>${name}</option>`).join('')}</select></label><p class="settings-note">Choose a visual preset. Your selection is saved on this device.</p></article>
-            <article class="settings-card"><p class="eyebrow">HOME SCREEN</p><h3>LAYOUT OPTIONS</h3><label class="setting-toggle"><input type="checkbox" id="showHeroSetting" checked><span>Show featured hero</span></label><label class="setting-toggle"><input type="checkbox" id="compactRowsSetting"><span>Compact home rows</span></label><label class="setting-toggle"><input type="checkbox" id="systemCountsSetting" checked><span>Show game counts on systems</span></label><label>Start page<select id="startPageSetting"><option value="home">Home</option><option value="library">Library</option><option value="android">Android games</option></select></label><label>Interface style<select id="interfaceModeSetting"><option value="console">Console Interface</option><option value="cocoon">Cocoon-style Interface</option><option value="hybrid">Hybrid · Both</option></select></label><p class="settings-note">Hybrid keeps your unified home, folders and collections alongside a dedicated page for every system.</p><label>Games per shelf row<select id="systemShelfRowsSetting"><option value="1">1 row</option><option value="2">2 rows</option><option value="3">3 rows</option><option value="4">4 rows</option></select></label><label>Display layout<select id="settingsDisplayLayout"><option value="auto">Auto detect</option><option value="single">Single screen</option><option value="dual">Dual screen / foldable</option></select></label></article>
+            <article class="settings-card"><p class="eyebrow">HOME SCREEN</p><h3>LAYOUT OPTIONS</h3><label class="setting-toggle"><input type="checkbox" id="showHeroSetting" checked><span>Show featured hero</span></label><label class="setting-toggle"><input type="checkbox" id="compactRowsSetting"><span>Compact home rows</span></label><label class="setting-toggle"><input type="checkbox" id="systemCountsSetting" checked><span>Show game counts on systems</span></label><label>Start page<select id="startPageSetting"><option value="home">Home</option><option value="library">Library</option><option value="android">Android games</option></select></label><label>Interface style<select id="interfaceModeSetting"><option value="console">Console Interface</option><option value="konsoru">Konsoru Console</option><option value="cocoon">Cocoon-style Interface</option><option value="hybrid">Hybrid · Both</option></select></label><p class="settings-note">Hybrid keeps your unified home, folders and collections alongside a dedicated page for every system.</p><label>Games per shelf row<select id="systemShelfRowsSetting"><option value="1">1 row</option><option value="2">2 rows</option><option value="3">3 rows</option><option value="4">4 rows</option></select></label><label>Display layout<select id="settingsDisplayLayout"><option value="auto">Auto detect</option><option value="single">Single screen</option><option value="dual">Dual screen / foldable</option></select></label></article>
             <article class="settings-card"><p class="eyebrow">HOME PAGES</p><h3>YOUR PAGES</h3><p class="settings-note">Add up to five pages and arrange the widgets on each page.</p><button class="subtle-btn" id="settingsAddPage">+ ADD PAGE</button><div id="settingsPageList" class="settings-page-list"></div></article>
             <article class="settings-card"><p class="eyebrow">WIDGETS</p><h3>HOME CONTENT</h3><p class="settings-note">Choose which shelves appear and change their order.</p><button class="primary-btn" id="settingsEditWidgets">EDIT HOME WIDGETS</button><button class="subtle-btn" id="resetWidgets">RESET WIDGETS</button></article>
           </div>
@@ -428,6 +439,25 @@ function openOnboarding(){
  refreshDisplayLayout();
 }
 function finishOnboarding(){localStorage.setItem('eclipse-onboarding-complete','true');$('#onboardingModal')?.classList.add('hidden');}
+function renderKonsoruHome(){
+ const root=$('#konsoruHome');if(!root)return;
+ const count=$('#konsoruGameCount'),systemsCount=$('#konsoruSystemCount');if(count)count.textContent=games.length;
+ const activeSystems=[...new Set(games.map(game=>game.system))];if(systemsCount)systemsCount.textContent=activeSystems.length||systems.length;
+ const latest=games.length?games[games.length-1]:null;const resume=$('#konsoruResume');
+ if(resume){resume.textContent=latest?'▶  CONTINUE · '+latest.title:'＋  ADD YOUR FIRST GAME';resume.onclick=()=>latest?showGameDetails(latest):(showView('library'),chooseGameFolder());}
+ const status=$('#konsoruLibraryStatus');if(status)status.textContent=games.length?'COLLECTION READY':'AWAITING GAMES';
+ const families=[...new Set(systems.map(item=>item.family))];const marks={Nintendo:'◈',PlayStation:'△',Xbox:'✕',Sega:'◉',Atari:'▥',Arcade:'✦',PC:'⌘','PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
+ const worldGrid=$('#konsoruWorldGrid');
+ if(worldGrid)worldGrid.innerHTML=families.map((family,index)=>{const members=systems.filter(item=>item.family===family);const total=members.reduce((sum,item)=>sum+gamesForSystem(item.name).length,0);return '<button class="konsoru-world-card world-'+family.toLowerCase().replace(/[^a-z]+/g,'-')+'" data-konsoru-family="'+escapeHTML(family)+'" style="--world-index:'+index+'"><span class="konsoru-world-symbol">'+(marks[family]||'✦')+'</span><span class="konsoru-world-copy"><b>'+escapeHTML(family.toUpperCase())+'</b><small>'+members.length+' SYSTEMS · '+total+' GAMES</small></span><span class="konsoru-world-arrow">↗</span></button>';}).join('');
+ worldGrid?.querySelectorAll('[data-konsoru-family]').forEach(button=>button.addEventListener('click',()=>{const first=systems.find(item=>item.family===button.dataset.konsoruFamily);if(first)openConsolePage(first.name);}));
+ const recent=$('#konsoruRecentRow');
+ if(recent)recent.innerHTML=games.length?games.slice().reverse().slice(0,10).map(game=>'<button class="konsoru-recent-card" data-konsoru-game="'+games.indexOf(game)+'"><span class="konsoru-cover"><i>✦</i><small>'+escapeHTML(game.system)+'</small></span><b>'+escapeHTML(game.title)+'</b><small>'+escapeHTML(game.system)+'</small></button>').join(''):'<div class="konsoru-empty"><span>✦</span><b>YOUR COLLECTION STARTS HERE</b><p>Add a game folder to build your library.</p><button class="konsoru-secondary" id="konsoruEmptyScan">ADD GAMES ↗</button></div>';
+ recent?.querySelectorAll('[data-konsoru-game]').forEach(button=>button.addEventListener('click',()=>showGameDetails(games[Number(button.dataset.konsoruGame)])));
+ $('#konsoruEmptyScan')?.addEventListener('click',()=>{showView('library');chooseGameFolder();});
+ $('#konsoruOpenLibrary')?.addEventListener('click',()=>showView('library'));$('#konsoruAllGames')?.addEventListener('click',()=>showView('library'));
+ $('#konsoruCustomize')?.addEventListener('click',()=>{showView('settings');document.querySelector('[data-settings-tab="personal"]')?.click();});
+ root.querySelectorAll('[data-konsoru-jump]').forEach(button=>button.onclick=()=>showView(button.dataset.konsoruJump));
+}
 function renderHomeHero(){
  const hero=$('#homeLibraryHero');if(!hero)return;
  hero.classList.toggle('hidden',games.length===0||!preferences.showHero||interfaceMode==='cocoon');
@@ -806,7 +836,7 @@ $('#showHeroSetting').addEventListener('change',e=>{preferences.showHero=e.targe
 $('#compactRowsSetting').addEventListener('change',e=>{preferences.compactRows=e.target.checked;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));document.documentElement.classList.toggle('eclipse-compact-rows',preferences.compactRows);});
 $('#systemCountsSetting').addEventListener('change',e=>{preferences.systemCounts=e.target.checked;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));renderLibrary();});
 $('#startPageSetting').addEventListener('change',e=>{preferences.startPage=e.target.value;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));notify('Startup page saved.');});
-$('#interfaceModeSetting')?.addEventListener('change',e=>{interfaceMode=['console','cocoon','hybrid'].includes(e.target.value)?e.target.value:'hybrid';localStorage.setItem('eclipse-interface-mode',JSON.stringify(interfaceMode));applyInterfaceMode();notify(interfaceMode==='hybrid'?'Hybrid interface enabled. Both home styles are available.':interfaceMode==='cocoon'?'Cocoon-style home enabled.':'Console interface enabled.');});
+$('#interfaceModeSetting')?.addEventListener('change',e=>{interfaceMode=['console','cocoon','hybrid'].includes(e.target.value)?e.target.value:'hybrid';localStorage.setItem('eclipse-interface-mode',JSON.stringify(interfaceMode));applyInterfaceMode();notify(interfaceMode==='hybrid'?'Hybrid interface enabled.':interfaceMode==='cocoon'?'Cocoon-style home enabled.':interfaceMode==='konsoru'?'Konsoru console enabled.':'Console interface enabled.');});
  $('#systemShelfRowsSetting')?.addEventListener('change',e=>{systemShelfRows=Math.max(1,Math.min(4,Number(e.target.value)||2));localStorage.setItem('eclipse-system-shelf-rows',JSON.stringify(systemShelfRows));if(activePage==='console'&&activeConsoleName)renderConsoleHome(systems.find(item=>item.name===activeConsoleName)||{name:activeConsoleName,icon:'✦',family:'Platform'});notify('Game shelf layout saved.');});
 $('#addFolderPath').addEventListener('click',chooseGameFolder);
 
