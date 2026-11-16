@@ -7,7 +7,7 @@ import android.net.Uri;
 import androidx.activity.result.ActivityResult;
 import androidx.documentfile.provider.DocumentFile;
 
-import com.getcapacitor.ActivityCallback;
+import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
