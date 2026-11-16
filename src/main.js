@@ -58,7 +58,7 @@ const emulatorOptions = {
   'iPhone / iPad': { items: ['Native iOS / iPadOS apps'], note: 'ECLIPSE can organize apps; launching depends on iOS permissions.' },
   'Android': { items: ['Native Android apps'], note: 'Installed-app detection requires the Android integration and user permission.' }
 };
-const games = load('eclipse-games', []);
+const games = (()=>{try{return JSON.parse(localStorage.getItem('eclipse-games'))||[];}catch{return [];}})();
 const supportedGameTypes = [
   {system:'NES',ext:['nes'],dirs:['nes','nintendo entertainment system']},
   {system:'SNES',ext:['sfc','smc'],dirs:['snes','super nintendo']},
@@ -70,7 +70,7 @@ const supportedGameTypes = [
   {system:'GAMECUBE',ext:['gcm','rvz','gcz'],dirs:['gamecube','game cube','gc']},
   {system:'WII',ext:['wbfs','wia'],dirs:['wii']},
   {system:'PLAYSTATION',ext:['pbp','chd'],dirs:['psx','ps1','ps one','playstation','playstation 1']},
-  {system:'PLAYSTATION 2',ext:['iso','cso'],dirs:['ps2','playstation 2']},
+  {system:'PLAYSTATION 2',ext:['iso','cso','chd'],dirs:['ps2','playstation 2']},
   {system:'PSP',ext:['cso','pbp'],dirs:['psp','playstation portable']},
   {system:'PS VITA',ext:['vpk'],dirs:['ps vita','psvita','vita']},
   {system:'MASTER SYSTEM',ext:['sms'],dirs:['mastersystem','master system']},
