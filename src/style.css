@@ -117,3 +117,30 @@ body{background:radial-gradient(ellipse at 80% 8%,color-mix(in srgb,var(--accent
  .dashboard-widget .widget-caption{font-size:8px}
  .dashboard-widget .widget-controls{opacity:.8;right:7px;bottom:5px}
 }
+
+
+/* Cocoon-inspired settings workspace */
+.settings-layout{display:grid;grid-template-columns:190px minmax(0,1fr);gap:18px;margin:24px 0 45px;align-items:start}
+.settings-nav{position:sticky;top:18px;display:flex;flex-direction:column;gap:7px;padding:9px;border:1px solid #ffffff16;border-radius:10px;background:#ffffff05}
+.settings-tab{padding:13px 12px;text-align:left;border:1px solid transparent;border-radius:6px;background:transparent;color:#9999ad;font:10px 'DM Mono';letter-spacing:1px}
+.settings-tab.active,.settings-tab:hover{background:color-mix(in srgb,var(--accent) 13%,transparent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);color:#fff}
+.settings-panel{min-width:0;animation:settingsIn .18s ease-out}
+@keyframes settingsIn{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.settings-panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;padding:18px 20px;border:1px solid #ffffff18;border-radius:9px;background:linear-gradient(105deg,#ffffff0c,#ffffff03)}
+.settings-panel-head h3{margin:0;letter-spacing:1.5px}
+.settings-panel .settings-grid{margin:0;grid-template-columns:repeat(2,minmax(0,1fr))}
+.settings-panel .settings-card{min-height:0}
+.setting-toggle{display:flex!important;flex-direction:row!important;align-items:center;gap:10px!important;margin:12px 0!important;color:#d5d4e2!important;font:11px 'DM Mono'!important}
+.setting-toggle input{accent-color:var(--accent);width:16px;height:16px}
+.settings-page-list,.folder-list{display:flex;flex-direction:column;gap:7px;margin:13px 0}
+.settings-page-item,.folder-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid #ffffff15;border-radius:6px;background:#ffffff05;color:#d8d6e5;font:10px 'DM Mono';overflow-wrap:anywhere}
+.settings-page-item span,.folder-item span{flex:1;min-width:0}
+.settings-page-item button,.folder-item button{border:1px solid #ffffff20;border-radius:5px;background:#ffffff08;color:#c9c6d7;padding:6px 8px;font:9px 'DM Mono'}
+.folder-card{margin-bottom:13px}
+.folder-add-row{display:flex;gap:8px;margin:16px 0 8px}
+.folder-add-row input{flex:1;min-width:0;padding:12px;border:1px solid #ffffff25;border-radius:6px;background:#090b16;color:#fff;font:11px 'DM Mono'}
+.folder-add-row .primary-btn{white-space:nowrap}
+#settingsPersonal .settings-card>button{margin:5px 7px 0 0}
+.eclipse-compact-rows .dashboard-widget{min-height:82px;padding-top:11px;padding-bottom:11px}
+.eclipse-compact-rows .dashboard-grid{gap:7px}
+@media(max-width:700px){.settings-layout{grid-template-columns:1fr}.settings-nav{position:static;flex-direction:row;overflow:auto}.settings-tab{white-space:nowrap;padding:11px}.settings-panel .settings-grid{grid-template-columns:1fr}.settings-panel-head{align-items:flex-start;flex-direction:column}.folder-add-row{flex-direction:column}.folder-add-row .primary-btn{align-self:flex-start}}
