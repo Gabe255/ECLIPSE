@@ -107,7 +107,7 @@ let currentPage = 0;
 let playCount = load('eclipse-play-count', 0);
 let folderPaths = load('eclipse-folders', []);
 let systemShelfRows = Math.max(1, Math.min(4, Number(load('eclipse-system-shelf-rows', 2)) || 2));
-let interfaceMode = load('eclipse-interface-mode', 'hybrid');
+let interfaceMode = load('eclipse-interface-mode', 'cocoon');
 if(!['console','cocoon','hybrid'].includes(interfaceMode)) interfaceMode='hybrid';
 let systemFolders = load('eclipse-system-folders', {});
 let preferences = load('eclipse-preferences', {showHero:true,compactRows:false,systemCounts:true,startPage:'home'});
@@ -430,14 +430,17 @@ function openOnboarding(){
 function finishOnboarding(){localStorage.setItem('eclipse-onboarding-complete','true');$('#onboardingModal')?.classList.add('hidden');}
 function renderHomeHero(){
  const hero=$('#homeLibraryHero');if(!hero)return;
- hero.classList.toggle('hidden',games.length===0||!preferences.showHero);
+ hero.classList.toggle('hidden',games.length===0||!preferences.showHero||interfaceMode==='cocoon');
  if(games.length){$('#homeHeroTitle').textContent=games[games.length-1].title;$('#homeHeroMeta').textContent=games[games.length-1].system+' · '+games.length+' GAMES IN YOUR LIBRARY';}
  const shelf=$('#homeGamesShelf');if(!shelf)return;
  shelf.classList.toggle('hidden',games.length===0);
- if(games.length){
-  shelf.innerHTML='<div class="home-shelf-heading"><div><p class="eyebrow">YOUR VAULT</p><h2>ALL GAMES</h2></div><span>'+games.length+' TITLES</span></div><div class="home-game-row">'+games.slice().reverse().slice(0,12).map(game=>'<button class="home-game-tile" data-home-game="'+games.indexOf(game)+'"><span class="home-game-art">✦</span><b>'+escapeHTML(game.title)+'</b><small>'+escapeHTML(game.system)+'</small></button>').join('')+'</div>';
-  shelf.querySelectorAll('[data-home-game]').forEach(button=>button.addEventListener('click',()=>showGameDetails(games[Number(button.dataset.homeGame)])));
- }
+ if(!games.length){shelf.innerHTML='';return;}
+ const groups=[...new Set(games.map(game=>game.system))];
+ const makeTile=game=>'<button class="cocoon-game-tile" data-home-game="'+games.indexOf(game)+'" type="button"><span class="cocoon-game-cover"><i>✦</i><small>'+escapeHTML(game.system)+'</small></span><b>'+escapeHTML(game.title)+'</b><small class="cocoon-game-platform">'+escapeHTML(game.system)+'</small></button>';
+ const recent=games.slice().reverse().slice(0,14);
+ shelf.innerHTML='<section class="cocoon-shelf"><div class="home-shelf-heading"><div><p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p><h2>YOUR COLLECTION</h2></div><span>'+games.length+' GAMES</span></div><div class="cocoon-game-row">'+recent.map(makeTile).join('')+'</div></section>'+
+ groups.map(system=>{const items=games.filter(game=>game.system===system);return '<section class="cocoon-shelf"><div class="home-shelf-heading"><div><p class="eyebrow">YOUR LIBRARY</p><h2>'+escapeHTML(system)+'</h2></div><span>'+items.length+' '+(items.length===1?'GAME':'GAMES')+'</span></div><div class="cocoon-game-row">'+items.map(makeTile).join('')+'</div></section>';}).join('');
+ shelf.querySelectorAll('[data-home-game]').forEach(button=>button.addEventListener('click',()=>showGameDetails(games[Number(button.dataset.homeGame)])));
 }
 function renderHomeAppsShelf(){
  const shelf=$('#homeAppsShelf');if(!shelf)return;
