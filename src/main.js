@@ -106,6 +106,9 @@ let preferences = load('eclipse-preferences', {showHero:true,compactRows:false,s
 let installedApps = load('eclipse-installed-apps', []);
 let emulatorAssignments = load('eclipse-emulator-assignments', {});
 let favorites = load('eclipse-favorites', []);
+let appGameFlags = load('eclipse-app-games', {});
+let appPlaytime = load('eclipse-app-playtime', {});
+let activeAppSession = load('eclipse-active-app-session', null);
 document.documentElement.dataset.theme = activeTheme;
 
 document.querySelector('#app').innerHTML = `
@@ -162,8 +165,11 @@ document.querySelector('#app').innerHTML = `
       <section class="system-home" id="systemHome"></section>
     </section>
     <section id="androidView" class="view hidden">
-      <div class="section-head"><div><p class="eyebrow">NATIVE ANDROID</p><h2>ANDROID GAMES</h2></div><span class="collection-count">DEVICE LIBRARY</span></div>
-      <div class="empty-state"><div class="empty-icon">▣</div><h3>YOUR ANDROID SPACE</h3><p>Android launchable apps can be discovered from Settings → Players. This page becomes a game shelf once ECLIPSE can reliably categorize and launch those apps.</p><button class="subtle-btn" id="androidInfo">HOW THIS WORKS</button></div>
+      <div class="section-head"><div><p class="eyebrow">YOUR DEVICE</p><h2>APPS LIBRARY</h2><p class="settings-note">Apps Android exposes to ECLIPSE. Mark games and track your sessions.</p></div><button class="primary-btn" id="scanAppsPage">SCAN DEVICE</button></div>
+      <div class="app-library-summary"><div><b id="appCount">0</b><small>DISCOVERED APPS</small></div><div><b id="gameAppCount">0</b><small>TREATED AS GAMES</small></div><div><b id="trackedTime">0m</b><small>TRACKED PLAYTIME</small></div></div>
+      <div class="app-library-toolbar"><input id="appLibrarySearch" type="search" placeholder="Search apps…" aria-label="Search installed apps"><span id="appLibraryStatus">Scan your Android device to populate this library.</span></div>
+      <div class="app-library-list" id="appLibraryList"><div class="app-library-empty"><span>▣</span><b>YOUR APPS WILL APPEAR HERE</b><p>Run a device scan to find apps Android makes available to ECLIPSE.</p></div></div>
+      <p class="app-library-disclaimer">App discovery requires the Android APK. Treat as Game and session totals are saved locally. Session tracking is manual; ECLIPSE does not yet detect when another app is opened or closed, and app launching is not connected yet.</p>
     </section>
     <section id="settingsView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>SETTINGS</h2></div></div>
@@ -268,6 +274,38 @@ function eclipseBackupSnapshot(){const values={};ECLIPSE_BACKUP_KEYS.forEach(key
 async function chooseEclipseDataFolder(){const status=$('#dataFolderStatus');if(!Capacitor.isNativePlatform()){status.textContent='External folder selection is available in the Android APK. Browser data remains stored locally.';return;}status.textContent='Choose where ECLIPSE should keep its backup…';try{const result=await FolderAccess.pickDataFolder();status.textContent='Backup folder: '+(result.name||'Selected folder')+'. Saving your current ECLIPSE data…';const saved=await FolderAccess.saveData({data:eclipseBackupSnapshot()});status.textContent='Backup folder: '+(result.name||saved.name||'Selected folder')+'. Your current library and settings are backed up.';notify('ECLIPSE data folder connected.');}catch(error){const message=String(error?.message||error||'');if(!message.toLowerCase().includes('cancel'))status.textContent='Could not select the data folder: '+message;}}
 async function saveEclipseDataBackup(){const status=$('#dataFolderStatus');if(!Capacitor.isNativePlatform()){status.textContent='Open the Android APK to save a backup to a chosen folder.';return;}status.textContent='Saving ECLIPSE backup…';try{const result=await FolderAccess.saveData({data:eclipseBackupSnapshot()});status.textContent='Backup saved as '+result.name+'.';notify('ECLIPSE backup saved.');}catch(error){status.textContent='Backup not saved: '+(error?.message||'Choose a data folder first.');}}
 async function restoreEclipseDataBackup(){const status=$('#dataFolderStatus');if(!Capacitor.isNativePlatform()){status.textContent='Backup restore from a chosen folder is available in the Android APK.';return;}if(!confirm('Restore ECLIPSE data from the selected backup folder? This replaces the current local library and settings.'))return;status.textContent='Reading ECLIPSE backup…';try{const result=await FolderAccess.loadData();const backup=JSON.parse(result.data||'{}');if(backup.format!=='eclipse-backup'||!backup.values||typeof backup.values!=='object')throw new Error('This folder does not contain a valid ECLIPSE backup.');Object.entries(backup.values).forEach(([key,value])=>{if(ECLIPSE_BACKUP_KEYS.includes(key)&&typeof value==='string')localStorage.setItem(key,value);});status.textContent='Backup restored. Reloading ECLIPSE…';window.location.reload();}catch(error){status.textContent='Could not restore backup: '+(error?.message||'unknown error');}}
+function saveAppTracking(){localStorage.setItem('eclipse-app-games',JSON.stringify(appGameFlags));localStorage.setItem('eclipse-app-playtime',JSON.stringify(appPlaytime));}
+function formatPlaytime(seconds){const total=Math.max(0,Math.floor(seconds||0));const hours=Math.floor(total/3600),minutes=Math.floor((total%3600)/60);return hours?hours+'h '+minutes+'m':minutes+'m';}
+function trackedSeconds(packageName){const saved=Number(appPlaytime[packageName]||0);if(activeAppSession?.packageName===packageName)return saved+Math.floor((Date.now()-activeAppSession.startedAt)/1000);return saved;}
+function renderAndroidApps(){
+ const list=$('#appLibraryList');if(!list)return;
+ const query=($('#appLibrarySearch')?.value||'').trim().toLowerCase();
+ const filtered=installedApps.filter(app=>(app.name+' '+app.packageName).toLowerCase().includes(query));
+ const total=installedApps.length,marked=installedApps.filter(app=>appGameFlags[app.packageName]).length;
+ $('#appCount').textContent=total;$('#gameAppCount').textContent=marked;
+ const seconds=Object.values(appPlaytime).reduce((sum,value)=>sum+Number(value||0),0)+(activeAppSession?Math.floor((Date.now()-activeAppSession.startedAt)/1000):0);
+ $('#trackedTime').textContent=formatPlaytime(seconds);
+ $('#appLibraryStatus').textContent=Capacitor.isNativePlatform()?total+' apps discovered on this device.':'Device scanning is available in the Android APK.';
+ if(!filtered.length){list.innerHTML='<div class="app-library-empty"><span>▣</span><b>'+(total?'NO MATCHING APPS':'NO APPS DISCOVERED YET')+'</b><p>'+(total?'Try another search.':'Tap SCAN DEVICE in the Android APK to discover installed apps.')+'</p></div>';return;}
+ list.innerHTML=filtered.map(app=>{
+  const isGame=!!appGameFlags[app.packageName],secondsForApp=trackedSeconds(app.packageName),isActive=activeAppSession?.packageName===app.packageName;
+  return '<article class="app-library-card"><div class="app-icon">'+escapeHTML((app.name||'?').slice(0,1).toUpperCase())+'</div><div class="app-card-info"><b>'+escapeHTML(app.name)+'</b><small>'+escapeHTML(app.packageName)+'</small><span>'+formatPlaytime(secondsForApp)+' TRACKED '+(isGame?' · GAME':' · APP')+'</span></div><div class="app-card-actions"><button class="treat-game '+(isGame?'selected':'')+'" data-treat-game="'+escapeHTML(app.packageName)+'">'+(isGame?'★ GAME':'＋ TREAT AS GAME')+'</button><button class="session-button '+(isActive?'running':'')+'" data-session-app="'+escapeHTML(app.packageName)+'">'+(isActive?'STOP SESSION':'START SESSION')+'</button></div></article>';
+ }).join('');
+ list.querySelectorAll('[data-treat-game]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.treatGame;if(appGameFlags[id])delete appGameFlags[id];else appGameFlags[id]=true;saveAppTracking();renderAndroidApps();notify(appGameFlags[id]?'Added to games.':'Removed game label.');}));
+ list.querySelectorAll('[data-session-app]').forEach(button=>button.addEventListener('click',()=>toggleAppSession(button.dataset.sessionApp)));
+}
+function toggleAppSession(packageName){
+ if(activeAppSession?.packageName===packageName){
+  appPlaytime[packageName]=Number(appPlaytime[packageName]||0)+Math.max(0,Math.floor((Date.now()-activeAppSession.startedAt)/1000));
+  activeAppSession=null;localStorage.removeItem('eclipse-active-app-session');saveAppTracking();notify('Play session saved.');
+ }else{
+  if(activeAppSession){notify('Stop the current session before starting another.');return;}
+  activeAppSession={packageName,startedAt:Date.now()};localStorage.setItem('eclipse-active-app-session',JSON.stringify(activeAppSession));notify('Manual play session started.');
+ }
+ renderAndroidApps();
+}
+window.setInterval(()=>{if(activeAppSession&&activePage==='android')renderAndroidApps();},15000);
+
 function renderSettings(){
  renderPlayerSettings();
  ['showHeroSetting','compactRowsSetting','systemCountsSetting','startPageSetting'].forEach((id)=>{const el=$('#'+id);if(el){const key={showHeroSetting:'showHero',compactRowsSetting:'compactRows',systemCountsSetting:'systemCounts',startPageSetting:'startPage'}[id];el.value=preferences[key];if(el.type==='checkbox')el.checked=!!preferences[key];}});
@@ -475,6 +513,7 @@ async function scanInstalledApps(systemName){
   renderPlayerSettings();
   if(systemName)populatePlayerSelect($('#systemPlayerSelect'),systemName);
   const message='Found '+installedApps.length+' launchable apps. Choose a player for each system below.';
+  renderAndroidApps();
   if(status)status.textContent=message;if(localStatus)localStatus.textContent=message;
   notify('Installed app scan complete.');
  }catch(error){
@@ -590,6 +629,8 @@ $('#restoreDataBackup').addEventListener('click',restoreEclipseDataBackup);
 $('#resetAllDefaults').addEventListener('click',()=>{if(!confirm('Restore ECLIPSE default settings?'))return;activeTheme='violet';localStorage.setItem('eclipse-theme',activeTheme);document.documentElement.dataset.theme=activeTheme;$('#themeSelect').value=activeTheme;widgets=['recent','systems','favorites'];pageNames=['Home','Discover','Collections'];currentPage=0;preferences={showHero:true,compactRows:false,systemCounts:true,startPage:'home'};localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));saveLayout();renderWidgets();renderSettings();document.querySelector('.feature-hero').classList.remove('hidden');notify('Default settings restored.');});
 document.querySelectorAll('[data-settings-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-settings-tab]').forEach(x=>x.classList.toggle('active',x===b));['personal','library','controls','players','system'].forEach(k=>$('#settings'+k[0].toUpperCase()+k.slice(1)).classList.toggle('hidden',k!==b.dataset.settingsTab));}));
 $('#scanInstalledPlayers').addEventListener('click',()=>scanInstalledApps());
+$('#scanAppsPage')?.addEventListener('click',()=>scanInstalledApps());
+$('#appLibrarySearch')?.addEventListener('input',renderAndroidApps);
 $('#closeGameDetail').addEventListener('click',()=>$('#gameDetailModal').classList.add('hidden'));
 $('#gameDetailModal').addEventListener('click',event=>{if(event.target.id==='gameDetailModal')$('#gameDetailModal').classList.add('hidden');});
 $('#gameDetailFavorite').addEventListener('click',()=>{
@@ -621,4 +662,4 @@ document.addEventListener('keydown',e=>{
   renderGames();$('#gameGrid').querySelector('[data-game="'+selectedGame+'"]')?.focus();
  }
 });
-renderSystemPicker();renderWidgets();renderLibrary();renderHomeHero();window.setTimeout(openOnboarding,450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
+renderSystemPicker();renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();window.setTimeout(openOnboarding,450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
