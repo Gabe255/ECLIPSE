@@ -3,6 +3,7 @@ package com.eclipse.launcher;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.SharedPreferences;
@@ -35,6 +36,7 @@ public class FolderAccessPlugin extends Plugin {
     private static final int MAX_FILES = 900;
     private static final int MAX_DIRECTORIES = 1200;
     private static final int MAX_DEPTH = 18;
+    private static final long MAX_SCAN_MILLIS = 20000L;
     private static final String DATA_FILE = "eclipse-data.json";
     private static final String PREFS = "eclipse_native_storage";
     private final ExecutorService scanExecutor = Executors.newSingleThreadExecutor();
@@ -249,7 +251,12 @@ public class FolderAccessPlugin extends Plugin {
         pending.add(new ScanNode(root, rootName, 0));
         int visitedDirectories = 0;
         boolean truncated = false;
+        final long scanStartedAt = SystemClock.elapsedRealtime();
         while (!pending.isEmpty() && entries.length() < MAX_FILES && visitedDirectories < MAX_DIRECTORIES) {
+            if (SystemClock.elapsedRealtime() - scanStartedAt >= MAX_SCAN_MILLIS) {
+                truncated = true;
+                break;
+            }
             ScanNode node = pending.removeFirst();
             if (node.depth > MAX_DEPTH) { truncated = true; continue; }
             visitedDirectories++;
