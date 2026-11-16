@@ -301,7 +301,7 @@ function inferGameSystem(file){
  const extensionMatches=supportedGameTypes.filter(item=>item.ext.includes(ext));
  return extensionMatches.length===1?extensionMatches[0].system:null;
 }
-function titleFromFile(name){return name.replace(/\\.[^.]+$/,'').replace(/[._-]+/g,' ').replace(/\\s+/g,' ').trim().replace(/\\b\\w/g,ch=>ch.toUpperCase());}
+function titleFromFile(name){return name.replace(/\.[^.]+$/,'').replace(/[._-]+/g,' ').replace(/\s+/g,' ').trim().replace(/\b\w/g,ch=>ch.toUpperCase());}
 function scanSelectedFolder(fileList){
  const files=[...fileList].filter(file=>file&&file.size>0);
  const found=[];
