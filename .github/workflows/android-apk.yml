@@ -64,4 +64,4 @@ jobs:
 
             Please report bugs and compatibility issues before using this as a daily launcher.
 
-            **Download APK:** [app-debug.apk](https://github.com/Gabe255/ECLIPSE/releases/download/${{ github.ref_name }}/app-debug.apk)
+            **Download APK:** [app-debug.apk](https://github.com/Gabe255/ECLIPSE/releases/download/${{ github.event.inputs.release_tag || github.ref_name }}/app-debug.apk)
