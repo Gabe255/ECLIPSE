@@ -83,6 +83,7 @@ let pageNames = load('eclipse-pages', ['Home','Discover','Collections']);
 let currentPage = 0;
 let playCount = load('eclipse-play-count', 0);
 let folderPaths = load('eclipse-folders', []);
+let systemFolders = load('eclipse-system-folders', {});
 let preferences = load('eclipse-preferences', {showHero:true,compactRows:false,systemCounts:true,startPage:'home'});
 document.documentElement.dataset.theme = activeTheme;
 
@@ -233,16 +234,16 @@ function renderConsoleHome(system){
  const artFor=g=>'<div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">'+(['M','Z','Ⅲ','S'][games.indexOf(g)]||'✦')+'</span><span class="art-caption">'+g.tag+'</span></div>';
  const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+g.title+'</b><small>'+g.year+' · '+g.tag+'</small></div></button>';
  const featured=titles[0];
- const folderNames=['ALL GAMES','FAVORITES','RECENTLY PLAYED','UNSORTED'];
+ const folderNames=['ALL GAMES','FAVORITES','RECENTLY PLAYED','UNSORTED',...(systemFolders[name]||[])];
  $('#systemHome').innerHTML=
   '<div class="system-home-head"><div><p class="eyebrow">WELCOME TO YOUR SYSTEM</p><h2>'+name.toUpperCase()+' HOME</h2></div><span class="collection-count">'+titles.length+' TITLES</span></div>'+
-  '<div class="system-folder-row"><div class="system-row-label"><p class="eyebrow">YOUR FOLDERS</p><button class="subtle-btn" id="addSystemFolder">+ NEW FOLDER</button></div><div class="system-folders">'+folderNames.map((folder,i)=>'<button class="system-folder" data-system-folder="'+folder+'"><span>'+['▣','✦','◷','▰'][i]+'</span><b>'+folder+'</b><small>'+(i===0?titles.length+' ITEMS':i===1?'PINNED GAMES':i===2?'PLAY HISTORY':'UNSORTED ITEMS')+'</small></button>').join('')+'</div></div>'+
+  '<div class="system-folder-row"><div class="system-row-label"><p class="eyebrow">YOUR FOLDERS</p><button class="subtle-btn" id="addSystemFolder">+ NEW FOLDER</button></div><div class="system-folders">'+folderNames.map((folder,i)=>'<button class="system-folder" data-system-folder="'+folder+'"><span>'+['▣','✦','◷','▰'][i%4]+'</span><b>'+folder+'</b><small>'+(i===0?titles.length+' ITEMS':i===1?'PINNED GAMES':i===2?'PLAY HISTORY':i===3?'UNSORTED ITEMS':'CUSTOM FOLDER')+'</small></button>').join('')+'</div></div>'+
   (featured?'<section class="system-featured"><div class="system-featured-art">'+artFor(featured)+'</div><div class="system-featured-copy"><p class="eyebrow">FEATURED GAME</p><h2>'+featured.title+'</h2><p>'+name+' · '+featured.year+' · '+featured.tag+'</p><button class="primary-btn" data-system-game="'+games.indexOf(featured)+'">OPEN GAME ↗</button></div></section>':'<div class="system-empty-hero"><p class="eyebrow">YOUR SYSTEM IS READY</p><h2>MAKE THIS SPACE YOURS.</h2><p>Import games to see featured artwork, folders and game shelves here.</p></div>')+
   '<section class="system-shelf"><div class="system-row-label"><div><p class="eyebrow">YOUR COLLECTION</p><h3>ALL GAMES</h3></div><span>'+titles.length+' ITEMS</span></div><div class="system-game-row">'+(titles.length?titles.map(cardFor).join(''):'<p class="settings-note">No games added to this system yet.</p>')+'</div></section>'+
   '<section class="system-shelf"><div class="system-row-label"><div><p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p><h3>RECENTLY PLAYED</h3></div><span>PLAY HISTORY</span></div><div class="system-game-row">'+(titles.length?titles.slice(0,3).map(cardFor).join(''):'<p class="settings-note">Your recent games will show here.</p>')+'</div></section>';
  $('#systemHome').querySelectorAll('[data-system-game]').forEach(button=>button.addEventListener('click',()=>{const game=games[Number(button.dataset.systemGame)];if(!game)return;selectedGame=games.indexOf(game);playCount++;localStorage.setItem('eclipse-play-count',JSON.stringify(playCount));notify(game.title+' selected · Emulator launching is not connected yet.');}));
- $('#systemHome').querySelectorAll('[data-system-folder]').forEach(button=>button.addEventListener('click',()=>{const folder=button.dataset.systemFolder;if(folder==='ALL GAMES')$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth'});else notify(folder+' folder · Add folder management is coming next.');}));
- $('#addSystemFolder').addEventListener('click',()=>{const folder=prompt('Name your new '+name+' folder:');if(folder?.trim())notify('"'+folder.trim().slice(0,28)+'" folder idea saved for the next library update.');});
+ $('#systemHome').querySelectorAll('[data-system-folder]').forEach(button=>button.addEventListener('click',()=>{const folder=button.dataset.systemFolder;if(folder==='ALL GAMES')$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth'});else if(folder==='RECENTLY PLAYED')$('#systemHome').querySelectorAll('.system-shelf')[1]?.scrollIntoView({behavior:'smooth'});else if(folder==='FAVORITES')notify('Your favorites shelf will fill as you pin games.');else if(folder==='UNSORTED')notify('Showing games that have not been sorted into a folder.');else notify('"'+folder+'" is ready. Add games to it from the library when folder assignment is enabled.');}));
+ $('#addSystemFolder').addEventListener('click',()=>{const folder=prompt('Name your new '+name+' folder:');if(folder?.trim()){const clean=folder.trim().slice(0,28);systemFolders[name]=[...(systemFolders[name]||[]),clean];localStorage.setItem('eclipse-system-folders',JSON.stringify(systemFolders));renderConsoleHome(system);notify('Folder created: '+clean);}});
 }
 function gamesForSystem(name){
  if(name==='Nintendo')return games.filter(g=>g.system==='NINTENDO'||g.system==='GAMECUBE');
