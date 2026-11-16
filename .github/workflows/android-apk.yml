@@ -57,6 +57,7 @@ jobs:
           cp android-native/FolderAccessPlugin.java android/app/src/main/java/com/eclipse/launcher/FolderAccessPlugin.java
           cp android-native/LauncherSetupPlugin.java android/app/src/main/java/com/eclipse/launcher/LauncherSetupPlugin.java
           cp android-native/DisplayInfoPlugin.java android/app/src/main/java/com/eclipse/launcher/DisplayInfoPlugin.java
+          cp android-native/SystemControlsPlugin.java android/app/src/main/java/com/eclipse/launcher/SystemControlsPlugin.java
           python3 - <<'PY'
           from pathlib import Path
           activity = Path("android/app/src/main/java/com/eclipse/launcher/MainActivity.java")
@@ -73,6 +74,7 @@ jobs:
               "        registerPlugin(FolderAccessPlugin.class);\n"
               "        registerPlugin(LauncherSetupPlugin.class);\n"
               "        registerPlugin(DisplayInfoPlugin.class);\n"
+              "        registerPlugin(SystemControlsPlugin.class);\n"
               "        super.onCreate(savedInstanceState);\n"
               "    }\n"
               "}"
