@@ -148,6 +148,7 @@ document.querySelector('#app').innerHTML = `
     <section id="consoleView" class="view hidden">
       <div class="console-detail-top"><button class="subtle-btn" id="backToLibrary">← ALL SYSTEMS</button><span class="collection-count" id="consoleGeneration">PLATFORM</span></div>
       <section class="console-banner" id="consoleBanner"></section>
+      <nav class="system-menu" id="systemMenu" aria-label="System menu"></nav>
       <section class="emulator-panel" id="emulatorPanel"></section>
       <section class="system-home" id="systemHome"></section>
     </section>
@@ -170,6 +171,7 @@ document.querySelector('#app').innerHTML = `
         </div>
         <div class="settings-panel hidden" id="settingsLibrary">
           <div class="settings-panel-head"><div><p class="eyebrow">YOUR GAME LOCATIONS</p><h3>LIBRARY FOLDERS</h3></div><span class="feature-tag">LOCAL SETUP</span></div>
+          <article class="settings-card folder-card data-folder-card"><p class="eyebrow">PERSISTENT STORAGE</p><h3>ECLIPSE DATA FOLDER</h3><p class="settings-note">Choose a folder for a portable backup of your ECLIPSE library, settings, favorites, and player assignments. Android keeps access to this folder between app updates. Your original game files stay where they are.</p><div class="folder-add-row"><button class="primary-btn" id="chooseDataFolder">CHOOSE DATA FOLDER</button><button class="subtle-btn" id="saveDataBackup">SAVE BACKUP</button><button class="subtle-btn" id="restoreDataBackup">RESTORE BACKUP</button></div><div id="dataFolderStatus" class="update-result">No external data folder selected. ECLIPSE still keeps its normal local app data.</div></article>
           <article class="settings-card folder-card"><h3>GAME FOLDERS</h3><p class="settings-note">Choose the parent folder that contains your platform folders. On Android, ECLIPSE uses the system folder picker, keeps your folder permission, and scans nested files. Only recognized game files enter your library.</p><div class="folder-add-row"><button class="primary-btn" id="addFolderPath">CHOOSE GAME FOLDER</button></div><div id="folderList" class="folder-list"></div><button class="primary-btn" id="rescanFolders">↻ RESCAN FOLDERS</button><div id="scanResult" class="update-result">Choose a folder to scan your game files. Unsupported files are ignored.</div></article>
           <article class="settings-card"><p class="eyebrow">IMPORT STATUS</p><h3>SCAN RESULTS</h3><p class="settings-note">Android folder selection and recursive scanning are connected. ECLIPSE stores game details and file references, not copies of your game files. Artwork scraping, per-game player assignment and emulator launching are still being built.</p></article>
         </div>
@@ -243,10 +245,16 @@ function renderWidgetChoices(){
  $('#widgetChoices').innerHTML=widgetCatalog.map(([id,name,desc])=>`<label class="widget-choice"><input type="checkbox" value="${id}" ${widgets.includes(id)?'checked':''}><span><b>${name}</b><small>${desc}</small></span></label>`).join('');
  $('#widgetChoices').querySelectorAll('input').forEach(input=>input.addEventListener('change',()=>{widgets=input.checked?[...widgets,input.value]:widgets.filter(x=>x!==input.value);saveLayout();}));
 }
+const ECLIPSE_BACKUP_KEYS=['eclipse-games','eclipse-widgets','eclipse-pages','eclipse-theme','eclipse-preferences','eclipse-installed-apps','eclipse-emulator-assignments','eclipse-favorites','eclipse-folders','eclipse-system-folders','eclipse-play-count','eclipse-onboarding-complete','eclipse-folder-uri'];
+function eclipseBackupSnapshot(){const values={};ECLIPSE_BACKUP_KEYS.forEach(key=>{const value=localStorage.getItem(key);if(value!==null)values[key]=value;});return JSON.stringify({format:'eclipse-backup',version:1,savedAt:new Date().toISOString(),values});}
+async function chooseEclipseDataFolder(){const status=$('#dataFolderStatus');if(!Capacitor.isNativePlatform()){status.textContent='External folder selection is available in the Android APK. Browser data remains stored locally.';return;}status.textContent='Choose where ECLIPSE should keep its backup…';try{const result=await FolderAccess.pickDataFolder();status.textContent='Backup folder: '+(result.name||'Selected folder')+'. Saving your current ECLIPSE data…';const saved=await FolderAccess.saveData({data:eclipseBackupSnapshot()});status.textContent='Backup folder: '+(result.name||saved.name||'Selected folder')+'. Your current library and settings are backed up.';notify('ECLIPSE data folder connected.');}catch(error){const message=String(error?.message||error||'');if(!message.toLowerCase().includes('cancel'))status.textContent='Could not select the data folder: '+message;}}
+async function saveEclipseDataBackup(){const status=$('#dataFolderStatus');if(!Capacitor.isNativePlatform()){status.textContent='Open the Android APK to save a backup to a chosen folder.';return;}status.textContent='Saving ECLIPSE backup…';try{const result=await FolderAccess.saveData({data:eclipseBackupSnapshot()});status.textContent='Backup saved as '+result.name+'.';notify('ECLIPSE backup saved.');}catch(error){status.textContent='Backup not saved: '+(error?.message||'Choose a data folder first.');}}
+async function restoreEclipseDataBackup(){const status=$('#dataFolderStatus');if(!Capacitor.isNativePlatform()){status.textContent='Backup restore from a chosen folder is available in the Android APK.';return;}if(!confirm('Restore ECLIPSE data from the selected backup folder? This replaces the current local library and settings.'))return;status.textContent='Reading ECLIPSE backup…';try{const result=await FolderAccess.loadData();const backup=JSON.parse(result.data||'{}');if(backup.format!=='eclipse-backup'||!backup.values||typeof backup.values!=='object')throw new Error('This folder does not contain a valid ECLIPSE backup.');Object.entries(backup.values).forEach(([key,value])=>{if(ECLIPSE_BACKUP_KEYS.includes(key)&&typeof value==='string')localStorage.setItem(key,value);});status.textContent='Backup restored. Reloading ECLIPSE…';window.location.reload();}catch(error){status.textContent='Could not restore backup: '+(error?.message||'unknown error');}}
 function renderSettings(){
  renderPlayerSettings();
  ['showHeroSetting','compactRowsSetting','systemCountsSetting','startPageSetting'].forEach((id)=>{const el=$('#'+id);if(el){const key={showHeroSetting:'showHero',compactRowsSetting:'compactRows',systemCountsSetting:'systemCounts',startPageSetting:'startPage'}[id];el.value=preferences[key];if(el.type==='checkbox')el.checked=!!preferences[key];}});
  renderFolderPaths();renderSettingsPages();
+ const dataStatus=$('#dataFolderStatus');if(dataStatus&&!Capacitor.isNativePlatform())dataStatus.textContent='External backup folders require the Android APK. Local app data is still saved automatically on this device.';
 }
 function savePreferences(){localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));document.querySelector('.feature-hero')?.classList.toggle('hidden',!preferences.showHero);document.documentElement.classList.toggle('eclipse-compact-rows',!!preferences.compactRows);renderLibrary();renderWidgets();}
 function renderFolderPaths(){const list=$('#folderList');if(!list)return;list.innerHTML=folderPaths.length?folderPaths.map((p,i)=>'<div class="folder-item"><span>▰ '+p.replace(/</g,'&lt;')+'</span><button data-folder-remove="'+i+'" aria-label="Remove folder">×</button></div>').join(''):'<p class="settings-note">No folders added yet.</p>';list.querySelectorAll('[data-folder-remove]').forEach(b=>b.addEventListener('click',()=>{folderPaths.splice(Number(b.dataset.folderRemove),1);localStorage.setItem('eclipse-folders',JSON.stringify(folderPaths));renderFolderPaths();}));}
@@ -303,6 +311,17 @@ $('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
  $('#systemHome').querySelectorAll('[data-system-game]').forEach(button=>button.addEventListener('click',()=>{const game=games[Number(button.dataset.systemGame)];if(game)showGameDetails(game);}));
  $('#systemHome').querySelectorAll('[data-system-folder]').forEach(button=>button.addEventListener('click',()=>$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth'})));
  $('#systemHome').querySelector('[data-go-scan]')?.addEventListener('click',()=>{showView('library');chooseGameFolder();});
+ const menu=$('#systemMenu');
+ menu.innerHTML=[['overview','OVERVIEW'],['games','GAMES'],['players','PLAYERS'],['scan','SCAN GAMES'],['settings','SYSTEM SETTINGS']].map(([key,label],index)=>'<button class="system-menu-item '+(index===0?'active':'')+'" data-system-menu="'+key+'">'+label+'</button>').join('');
+ menu.querySelectorAll('[data-system-menu]').forEach(button=>button.addEventListener('click',()=>{
+  menu.querySelectorAll('[data-system-menu]').forEach(item=>item.classList.toggle('active',item===button));
+  const action=button.dataset.systemMenu;
+  if(action==='overview'){window.scrollTo({top:0,behavior:'smooth'});}
+  if(action==='games')$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth',block:'start'});
+  if(action==='players')$('#emulatorPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  if(action==='scan'){showView('library');chooseGameFolder();}
+  if(action==='settings'){showView('settings');document.querySelector('[data-settings-tab="players"]')?.click();}
+ }));
 }
 function gamesForSystem(name){
  if(name==='Nintendo')return games.filter(g=>['NES','SNES','NINTENDO 64','GAME BOY','GAME BOY ADVANCE','NINTENDO DS','NINTENDO 3DS','GAMECUBE','WII','WII U','NINTENDO SWITCH','NINTENDO SWITCH 2'].includes(g.system));
@@ -527,6 +546,9 @@ $('#startPageSetting').addEventListener('change',e=>{preferences.startPage=e.tar
 $('#addFolderPath').addEventListener('click',()=>{$('#gameFolderPicker').click();});
 
 $('#rescanFolders').addEventListener('click',rescanGameFolder);
+$('#chooseDataFolder').addEventListener('click',chooseEclipseDataFolder);
+$('#saveDataBackup').addEventListener('click',saveEclipseDataBackup);
+$('#restoreDataBackup').addEventListener('click',restoreEclipseDataBackup);
 $('#resetAllDefaults').addEventListener('click',()=>{if(!confirm('Restore ECLIPSE default settings?'))return;activeTheme='violet';localStorage.setItem('eclipse-theme',activeTheme);document.documentElement.dataset.theme=activeTheme;$('#themeSelect').value=activeTheme;widgets=['recent','systems','favorites'];pageNames=['Home','Discover','Collections'];currentPage=0;preferences={showHero:true,compactRows:false,systemCounts:true,startPage:'home'};localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));saveLayout();renderWidgets();renderSettings();document.querySelector('.feature-hero').classList.remove('hidden');notify('Default settings restored.');});
 document.querySelectorAll('[data-settings-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-settings-tab]').forEach(x=>x.classList.toggle('active',x===b));['personal','library','controls','players','system'].forEach(k=>$('#settings'+k[0].toUpperCase()+k.slice(1)).classList.toggle('hidden',k!==b.dataset.settingsTab));}));
 $('#scanInstalledPlayers').addEventListener('click',()=>scanInstalledApps());
