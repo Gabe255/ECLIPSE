@@ -121,10 +121,10 @@ jobs:
                   }
               }
           '''
-          source = source.replace("buildTypes {", signing + "\\n    buildTypes {", 1)
+          source = source.replace("buildTypes {", signing + "\n    buildTypes {", 1)
           start = source.index("buildTypes {")
           release = source.index("release {", start)
-          source = source[:release] + source[release:].replace("release {", "release {\\n            signingConfig signingConfigs.eclipseRelease", 1)
+          source = source[:release] + source[release:].replace("release {", "release {\n            signingConfig signingConfigs.eclipseRelease", 1)
           build_file.write_text(source)
           PY
             echo "ECLIPSE_SIGNED=true" >> "$GITHUB_ENV"
