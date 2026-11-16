@@ -5,6 +5,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.SharedPreferences;
+import android.webkit.MimeTypeMap;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 
 import androidx.activity.result.ActivityResult;
 import androidx.documentfile.provider.DocumentFile;
@@ -25,6 +31,8 @@ import java.util.Set;
 @CapacitorPlugin(name = "FolderAccess")
 public class FolderAccessPlugin extends Plugin {
     private static final int MAX_FILES = 5000;
+    private static final String DATA_FILE = "eclipse-data.json";
+    private static final String PREFS = "eclipse_native_storage";
 
     @PluginMethod
     public void pickAndScan(PluginCall call) {
@@ -95,6 +103,121 @@ public class FolderAccessPlugin extends Plugin {
             call.resolve(scanTree(Uri.parse(value)));
         } catch (Exception error) {
             call.reject("Could not rescan this folder: " + error.getMessage(), error);
+        }
+    }
+
+
+    @PluginMethod
+    public void pickDataFolder(PluginCall call) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        startActivityForResult(call, intent, "dataFolderPickerResult");
+    }
+
+    @ActivityCallback
+    private void dataFolderPickerResult(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null || result.getData().getData() == null) {
+            call.reject("Data folder selection cancelled.");
+            return;
+        }
+        Uri uri = result.getData().getData();
+        int flags = result.getData().getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        try {
+            getContext().getContentResolver().takePersistableUriPermission(uri, flags);
+            getContext().getSharedPreferences(PREFS, 0).edit().putString("dataFolderUri", uri.toString()).apply();
+            JSObject response = new JSObject();
+            response.put("uri", uri.toString());
+            response.put("name", DocumentFile.fromTreeUri(getContext(), uri).getName());
+            call.resolve(response);
+        } catch (Exception error) {
+            call.reject("Could not save access to this data folder: " + error.getMessage(), error);
+        }
+    }
+
+    @PluginMethod
+    public void saveData(PluginCall call) {
+        String data = call.getString("data");
+        String uriValue = getContext().getSharedPreferences(PREFS, 0).getString("dataFolderUri", null);
+        if (uriValue == null) { call.reject("Choose a data folder first."); return; }
+        try {
+            DocumentFile root = DocumentFile.fromTreeUri(getContext(), Uri.parse(uriValue));
+            if (root == null || !root.canWrite()) throw new SecurityException("Data folder is not writable.");
+            DocumentFile file = root.findFile(DATA_FILE);
+            if (file == null) file = root.createFile("application/json", DATA_FILE);
+            if (file == null) throw new IllegalStateException("Could not create the ECLIPSE backup file.");
+            try (OutputStream stream = getContext().getContentResolver().openOutputStream(file.getUri(), "wt")) {
+                if (stream == null) throw new IllegalStateException("Could not open the backup file.");
+                stream.write((data == null ? "{}" : data).getBytes(StandardCharsets.UTF_8));
+                stream.flush();
+            }
+            JSObject response = new JSObject();
+            response.put("saved", true);
+            response.put("name", file.getName());
+            call.resolve(response);
+        } catch (Exception error) {
+            call.reject("Could not save ECLIPSE data: " + error.getMessage(), error);
+        }
+    }
+
+    @PluginMethod
+    public void loadData(PluginCall call) {
+        String uriValue = getContext().getSharedPreferences(PREFS, 0).getString("dataFolderUri", null);
+        if (uriValue == null) { call.reject("No data folder has been selected."); return; }
+        try {
+            DocumentFile root = DocumentFile.fromTreeUri(getContext(), Uri.parse(uriValue));
+            DocumentFile file = root == null ? null : root.findFile(DATA_FILE);
+            if (file == null || !file.isFile()) { call.reject("No ECLIPSE backup exists in this folder yet."); return; }
+            try (InputStream stream = getContext().getContentResolver().openInputStream(file.getUri());
+                 ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+                if (stream == null) throw new IllegalStateException("Could not read the backup file.");
+                byte[] buffer = new byte[8192]; int count;
+                while ((count = stream.read(buffer)) != -1) output.write(buffer, 0, count);
+                JSObject response = new JSObject();
+                response.put("data", output.toString("UTF-8"));
+                response.put("name", file.getName());
+                call.resolve(response);
+            }
+        } catch (Exception error) {
+            call.reject("Could not load ECLIPSE data: " + error.getMessage(), error);
+        }
+    }
+
+    @PluginMethod
+    public void launchApp(PluginCall call) {
+        String packageName = call.getString("packageName");
+        if (packageName == null || packageName.trim().isEmpty()) { call.reject("An app package is required."); return; }
+        try {
+            Intent launch = getContext().getPackageManager().getLaunchIntentForPackage(packageName);
+            if (launch == null) throw new IllegalStateException("Android could not find a launch activity for this app.");
+            launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(launch);
+            JSObject response = new JSObject(); response.put("launched", true); call.resolve(response);
+        } catch (Exception error) {
+            call.reject("Could not launch this app: " + error.getMessage(), error);
+        }
+    }
+
+    @PluginMethod
+    public void launchGame(PluginCall call) {
+        String uriValue = call.getString("uri");
+        String packageName = call.getString("packageName");
+        if (uriValue == null || packageName == null || packageName.trim().isEmpty()) {
+            call.reject("A game file and an installed emulator are required."); return;
+        }
+        try {
+            Uri gameUri = Uri.parse(uriValue);
+            Intent launch = new Intent(Intent.ACTION_VIEW);
+            String path = gameUri.getLastPathSegment() == null ? "" : gameUri.getLastPathSegment();
+            String extension = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1).toLowerCase() : "";
+            String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+            launch.setDataAndType(gameUri, mime == null ? "application/octet-stream" : mime);
+            launch.setPackage(packageName);
+            launch.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(launch);
+            JSObject response = new JSObject(); response.put("launched", true); call.resolve(response);
+        } catch (Exception error) {
+            call.reject("This emulator did not accept the game file. Check its supported launch format and try another player. " + error.getMessage(), error);
         }
     }
 
