@@ -595,3 +595,38 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
  outline-offset:4px;
  box-shadow:0 0 0 5px color-mix(in srgb,var(--accent,#b8a2ff) 22%,transparent);
 }
+
+
+/* VIDEO-LED CONSOLE HOME REBUILD */
+#homeView>.welcome-row{display:none}
+#homeView>.system-stage{min-height:calc(100dvh - 120px);display:flex;flex-direction:column;justify-content:center;padding:clamp(18px,4vw,42px) 0}
+#homeView>.system-stage .stage-heading{margin-bottom:22px}
+.system-feature{position:relative;display:grid;grid-template-columns:minmax(150px,250px) minmax(0,1fr) minmax(100px,170px);align-items:center;gap:clamp(18px,4vw,48px);min-height:260px;padding:clamp(18px,4vw,42px);margin:0 0 22px;overflow:hidden;border:1px solid #a995ff42;border-radius:28px;background:radial-gradient(ellipse at 16% 45%,#9577ff38,transparent 42%),linear-gradient(115deg,#17172beF,#0c1420f2 68%,#101b29f2);box-shadow:0 24px 70px #0006}
+.system-feature:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 35%,#ffffff05 52%,transparent 70%);transform:translateX(-100%);animation:systemFeatureSweep 7s ease-in-out infinite}
+.system-feature-art{position:relative;display:grid;place-items:center;aspect-ratio:1;border-radius:24px;background:radial-gradient(circle,#c3b3ff 0 3%,#8c72ff 4% 16%,#4a3d91 17% 29%,#1a1b36 30% 60%,#101522 61%);box-shadow:0 0 65px #9278ff35,inset 0 0 35px #0008}
+.system-feature-art strong{z-index:1;font-size:clamp(76px,12vw,142px);line-height:1;color:#f5f1ff;text-shadow:0 0 28px #b7a4ffb0}
+.system-feature-art small{position:absolute;bottom:12px;font:9px 'DM Mono',monospace;letter-spacing:2px;color:#d7ccff}
+.system-feature-orbit{position:absolute;inset:12%;border:1px solid #c5b6ff77;border-radius:50%;transform:scaleX(1.35) rotate(-28deg);box-shadow:0 0 24px #a38aff33}
+.system-feature-copy{position:relative;z-index:1;min-width:0}
+.system-feature-copy h2{font-size:clamp(27px,5vw,54px);line-height:1.04;margin:8px 0 10px;letter-spacing:-1.8px}
+.system-feature-copy>p:not(.eyebrow){color:#b8c3d2;max-width:460px;line-height:1.6;margin:0 0 20px}
+.system-feature-count{position:relative;z-index:1;display:grid;gap:7px;justify-items:end;text-align:right}
+.system-feature-count b{font-size:clamp(30px,5vw,52px);font-weight:800;color:#f4f0ff}
+.system-feature-count small{font:9px 'DM Mono',monospace;letter-spacing:1.4px;color:#9daabd}
+.system-picker{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 4px 18px;scrollbar-width:thin}
+.system-pick-card{flex:0 0 clamp(130px,16vw,174px);min-height:164px;scroll-snap-align:center;transition:transform .22s,border-color .22s,background .22s,opacity .22s;opacity:.7}
+.system-pick-card.selected{transform:translateY(-5px);opacity:1;border-color:#b8a2ff;background:linear-gradient(155deg,#9277ff30,#ffffff0b);box-shadow:0 12px 32px #0005,0 0 0 1px #b8a2ff35}
+.system-pick-card.selected .system-cube{filter:drop-shadow(0 0 18px #a18bff88)}
+#homeView>.page-toolbar,#homeView>.dashboard-grid,#homeView>.home-games-shelf,#homeView>.home-apps-shelf,#homeView>.feature-hero{display:none!important}
+.eclipse-launch-boot{position:fixed;inset:0;z-index:9999;display:grid;align-content:center;justify-items:center;gap:12px;background:radial-gradient(ellipse at 50% 42%,#57418b55,transparent 42%),linear-gradient(145deg,#070912,#111729 58%,#080d16);color:#f6f2ff;opacity:1;transition:opacity .45s ease,visibility .45s ease}
+.eclipse-launch-boot.ready{opacity:0;visibility:hidden;pointer-events:none}
+.launch-boot-mark{font-size:clamp(62px,12vw,108px);font-weight:900;letter-spacing:-9px;text-shadow:0 0 45px #a28aff88}
+.launch-boot-mark span{color:#b8a2ff}
+.eclipse-launch-boot h1{font-size:clamp(20px,4vw,30px);letter-spacing:8px;margin:0}
+.eclipse-launch-boot>small{font:9px 'DM Mono',monospace;letter-spacing:2px;color:#a8aabd}
+.launch-boot-track{width:min(210px,55vw);height:3px;border-radius:5px;background:#ffffff20;overflow:hidden;margin-top:13px}
+.launch-boot-track i{display:block;width:38%;height:100%;background:linear-gradient(90deg,#9277ff,#d9ceff);box-shadow:0 0 15px #a18bff;animation:launchBootProgress 1s ease-in-out infinite alternate}
+@keyframes launchBootProgress{from{transform:translateX(-20%)}to{transform:translateX(190%)}}
+@keyframes systemFeatureSweep{0%,70%,100%{transform:translateX(-100%)}85%{transform:translateX(100%)}}
+@media(max-width:650px){.system-feature{grid-template-columns:110px minmax(0,1fr);gap:15px;min-height:170px;padding:16px;border-radius:20px}.system-feature-art{border-radius:17px}.system-feature-art strong{font-size:64px}.system-feature-art small{font-size:7px;bottom:7px}.system-feature-copy h2{font-size:25px}.system-feature-copy>p:not(.eyebrow){font-size:11px;margin-bottom:12px}.system-feature-copy .primary-btn{padding:10px 12px;font-size:9px}.system-feature-count{grid-column:1/-1;display:flex;justify-content:flex-end;align-items:baseline;gap:8px}.system-feature-count b{font-size:23px}.system-feature-count small{font-size:8px}.system-pick-card{flex-basis:126px;min-height:145px}}
+@media(prefers-reduced-motion:reduce){.eclipse-launch-boot,.system-feature:after,.launch-boot-track i{animation:none!important;transition:none!important}}
