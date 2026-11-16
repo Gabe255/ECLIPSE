@@ -42,7 +42,7 @@ jobs:
           echo "ECLIPSE_VERSION=$ECLIPSE_VERSION" >> "$GITHUB_ENV"
       - name: Validate stable version
         run: |
-          case "$ECLIPSE_VERSION" in *-alpha*|-beta*|-rc*) echo "Stable version cannot contain a prerelease suffix."; exit 1 ;; esac
+          case "$ECLIPSE_VERSION" in *-alpha*|*-beta*|*-rc*) echo "Stable version cannot contain a prerelease suffix."; exit 1 ;; esac
       - name: Build web app
         env:
           VITE_ECLIPSE_VERSION: ${{ env.ECLIPSE_VERSION }}
