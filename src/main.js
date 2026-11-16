@@ -375,7 +375,7 @@ function renderSystemPicker(){
  const marks={Nintendo:'✦',PlayStation:'△',Xbox:'◉',Sega:'◈',Atari:'▥',Arcade:'✧',PC:'⌘', 'PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
  picker.innerHTML=systems.map((system,index)=>'<button class="system-pick-card" data-system-index="'+index+'" data-pick-system="'+escapeHTML(system.name)+'" style="--card-index:'+index+'" aria-label="Select '+escapeHTML(system.name)+'" aria-pressed="false"><span class="system-card-top"><small>'+String(index+1).padStart(2,'0')+'</small><i>'+escapeHTML(system.family.toUpperCase())+'</i></span><span class="system-cube"><span class="cube-face cube-front">'+(marks[system.family]||system.icon)+'</span><span class="cube-face cube-side"></span><span class="cube-face cube-top"></span></span><span class="system-card-bottom"><b>'+escapeHTML(system.name)+'</b><small>'+gamesForSystem(system.name)+' TITLES <i>•</i></small></span></button>').join('');
  $('#systemPickerCount').textContent=systems.length+' WORLDS AVAILABLE';
- picker.querySelectorAll('[data-pick-system]').forEach(card=>card.addEventListener('click',()=>selectFeaturedSystem(Number(card.dataset.systemIndex))));
+ picker.querySelectorAll('[data-pick-system]').forEach(card=>{card.addEventListener('focus',()=>selectFeaturedSystem(Number(card.dataset.systemIndex),false));card.addEventListener('click',()=>selectFeaturedSystem(Number(card.dataset.systemIndex)));});
  $('#enterFeaturedSystem')?.addEventListener('click',()=>openConsolePage(systems[featuredSystemIndex].name),{once:true});
  selectFeaturedSystem(featuredSystemIndex,false);
 }
@@ -587,7 +587,7 @@ async function chooseGameFolder(){
     renderFolderPaths();
    }
    scanSelectedFolder(result.files||[],result.uri||'android');
-   if(result.truncated)status.textContent+=' Scan limit reached at 1,500 files; choose a smaller platform folder for the rest.';
+   if(result.truncated)status.textContent+=' Scan limit reached at 900 files; choose a smaller platform folder for the rest.';
   }catch(error){
    const message=String(error?.message||error||'');
    if(!message.toLowerCase().includes('cancel'))status.textContent='Folder scan failed: '+message;
@@ -601,7 +601,7 @@ async function rescanGameFolder(){
  const legacyUri=localStorage.getItem('eclipse-folder-uri');if(legacyUri&&!savedUris.includes(legacyUri))savedUris.push(legacyUri);
  if(Capacitor.isNativePlatform()&&savedUris.length){
   const status=$('#scanStatus');status.textContent='Rescanning '+savedUris.length+' saved game folder(s)…';let scanned=0,failed=0;
-  for(const uri of savedUris){try{const result=await FolderAccess.scanFolder({uri});scanSelectedFolder(result.files||[],uri);scanned++;if(result.truncated)status.textContent+=' A folder reached the 1,500-file safety limit.';}catch(error){failed++;console.warn('ECLIPSE folder rescan failed',error);}}
+  for(const uri of savedUris){try{const result=await FolderAccess.scanFolder({uri});scanSelectedFolder(result.files||[],uri);scanned++;if(result.truncated)status.textContent+=' A folder reached the 900-file safety limit.';}catch(error){failed++;console.warn('ECLIPSE folder rescan failed',error);}}
   status.textContent='Finished scanning '+scanned+' folder(s).'+(failed?' '+failed+' folder permission(s) need to be renewed.':'');if(failed)notify(failed+' folder(s) could not be opened. Re-select them in Settings.');
  }else chooseGameFolder();
 }
