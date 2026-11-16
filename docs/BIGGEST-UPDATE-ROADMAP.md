@@ -8,13 +8,13 @@
 
 | Area | Current status | Notes |
 |---|---|---|
-| Web dashboard and system picker | Implemented; web CI passing on recent commits | 37 system categories and system landing-page UI |
+| Web dashboard and system picker | Implemented; latest web CI passing | 37 system categories and system landing-page UI |
 | Experience Studio | Implemented | Themes, wallpaper, profiles, motion settings, JSON backup/restore |
 | Apps Library | Implemented foundation | Android app discovery, Treat as Game labels, manual playtime |
 | Folder scanning and backup folder | Native implementation present | Requires Android device testing and edge-case checks |
 | Mascot and first-run setup | Implemented | Eclipse orb mascot; display, default Home, and storage setup |
-| Single/dual display | Implemented in web and native code | AndroidX WindowManager detection; APK build and device validation required |
-| Default Android Home request | Implemented in native code | User must confirm through Android's system role picker |
+| Single/dual display | Implemented; Android APK build verified | AndroidX WindowManager detection; real foldable/phone validation still required |
+| Default Android Home request | Implemented; Android APK build verified | User must confirm through Android's system role picker; device behavior still needs validation |
 | Control Center | Implemented in web and native code | Android panels, app-window brightness, battery status; APK/device validation required |
 | Game Mode | Implemented as an ECLIPSE UI mode | Reduces interface effects only; no CPU/GPU tuning |
 | Third-party emulator launching | Not implemented end-to-end | Player assignment is not proof of compatibility |
@@ -32,7 +32,7 @@
 - Auto-detection through AndroidX WindowManager when Android reports a separating fold feature.
 - Manual Auto / Single Screen / Dual Screen override for devices or previews that do not expose display-segment information.
 
-**Remaining:** Test on a normal phone, a foldable/dual-screen device, portrait/landscape, and app resize/posture changes. Do not claim hardware auto-detection works on every foldable until verified.
+**Build status:** The Android APK workflow has compiled and uploaded a test APK. **Remaining:** Test on a normal phone, a foldable/dual-screen device, portrait/landscape, and app resize/posture changes. Do not claim hardware auto-detection works on every foldable until verified.
 
 ## 2. Apps and game library
 
@@ -82,7 +82,7 @@ Implemented in the current branch:
 - Android decides the final default-launcher confirmation.
 - Settings can request the Home-app chooser again and change display preference.
 
-**Remaining:** Device-test first launch, returning launch, cancel/skip paths, and default-Home selection on supported Android versions. Keep onboarding dismissible.
+**Build status:** Native launcher integration compiled into the test APK. **Remaining:** Device-test first launch, returning launch, cancel/skip paths, and default-Home selection on supported Android versions. Keep onboarding dismissible.
 
 ## 6. Control Center and Game Mode
 
@@ -96,7 +96,7 @@ Implemented foundation:
 - Do Not Disturb shortcut opens Android's DND access settings.
 - Game Mode reduces ECLIPSE interface effects.
 
-**Important platform limits:** These shortcuts do not bypass Android restrictions. ECLIPSE cannot silently toggle restricted system settings or claim to boost device CPU/GPU performance. Test each shortcut on supported Android versions.
+**Build status:** Native control bridge compiled into the test APK. **Important platform limits:** These shortcuts do not bypass Android restrictions. ECLIPSE cannot silently toggle restricted system settings or claim to boost device CPU/GPU performance. Test each shortcut on supported Android versions.
 
 ## 7. Data, backups, and privacy
 
@@ -141,4 +141,4 @@ A release is ready only when:
 6. Known limitations are documented.
 7. A stable signing/update path is verified before publishing a stable release.
 
-**Current decision:** Keep this work in the existing feature branch and draft pull request until the Android build and real-device checks are complete.
+**Current decision:** The latest web CI and Android APK build both pass. Keep this work in the existing feature branch and draft pull request until real-device checks are complete.
