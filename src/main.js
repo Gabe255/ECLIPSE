@@ -153,7 +153,7 @@ document.querySelector('#app').innerHTML = `
     </section>
     <section id="androidView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">NATIVE ANDROID</p><h2>ANDROID GAMES</h2></div><span class="collection-count">DEVICE LIBRARY</span></div>
-      <div class="empty-state"><div class="empty-icon">▣</div><h3>YOUR ANDROID SPACE</h3><p>Installed Android games will appear here once ECLIPSE has its native app-scanning bridge.</p><button class="subtle-btn" id="androidInfo">HOW THIS WORKS</button></div>
+      <div class="empty-state"><div class="empty-icon">▣</div><h3>YOUR ANDROID SPACE</h3><p>Android launchable apps can be discovered from Settings → Players. This page becomes a game shelf once ECLIPSE can reliably categorize and launch those apps.</p><button class="subtle-btn" id="androidInfo">HOW THIS WORKS</button></div>
     </section>
     <section id="settingsView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>SETTINGS</h2></div></div>
@@ -188,7 +188,7 @@ document.querySelector('#app').innerHTML = `
           <div class="settings-grid">
             <article class="settings-card"><p class="eyebrow">SOFTWARE</p><h3>UPDATES</h3><p class="settings-note">Installed version: ${VERSION}</p><button class="primary-btn" id="checkUpdates">CHECK FOR UPDATES</button><div id="updateResult" class="update-result">Check GitHub for the latest ECLIPSE release.</div><div id="releaseHistory" class="release-history"></div></article>
             <article class="settings-card"><p class="eyebrow">DEVICE CHECK</p><h3>COMPATIBILITY</h3><p class="settings-note">Check whether this device can run the current ECLIPSE web frontend and review update requirements.</p><button class="subtle-btn" id="checkCompatibility">CHECK THIS DEVICE</button><div id="compatibilityResult" class="update-result">Compatibility has not been checked yet.</div></article>
-            <article class="settings-card"><p class="eyebrow">ABOUT</p><h3>ECLIPSE ALPHA</h3><p class="settings-note">A personal gaming frontend prototype. Emulator launching, native app scanning and real game imports are still in development.</p></article>
+            <article class="settings-card"><p class="eyebrow">ABOUT</p><h3>ECLIPSE ALPHA</h3><p class="settings-note">ROM folder scanning and launchable-app discovery are available in the Android build. Per-game emulator handoff, artwork scraping, playtime tracking and Android game categorization are still in development.</p></article>
           </div>
         </div>
       </div>
@@ -284,9 +284,9 @@ function renderConsoleHome(system){
  const titles=gamesForSystem(name);
  $('#consoleTitle')?.remove();
  $('#consoleGeneration').textContent=system.family.toUpperCase()+' PLATFORM';
- $('#consoleBanner').innerHTML='<div class="console-banner-mark">'+system.icon+'</div><div class="console-banner-copy"><p class="eyebrow">SYSTEM HOME</p><h1>'+system.name.toUpperCase()+'</h1><p>Your '+system.name+' dashboard. Pick a folder or jump into a game.</p></div><div class="console-banner-index">SYSTEM / '+String(systems.indexOf(system)+1).padStart(2,'0')+'</div>';
+ $('#consoleBanner').innerHTML='<div class="console-banner-mark">'+system.icon+'</div><div class="console-banner-copy"><p class="eyebrow">SYSTEM HOME</p><h1>'+system.name.toUpperCase()+'</h1><p>Your '+system.name+' dashboard. Review imported games and choose the player for this system.</p></div><div class="console-banner-index">SYSTEM / '+String(systems.indexOf(system)+1).padStart(2,'0')+'</div>';
  const profile=emulatorOptions[name];
- $('#emulatorPanel').innerHTML='<div class="emulator-panel-head"><div><p class="eyebrow">PLAYER SETUP</p><h3>CHOOSE YOUR EMULATOR / APP</h3></div><span class="feature-tag">'+(profile?'SYSTEM PROFILE':'PLAYER ROUTING')+'</span></div>'+(profile?'<div class="emulator-option-list">'+profile.items.map(item=>'<span class="emulator-option">'+item+'</span>').join('')+'</div><p class="settings-note">'+profile.note+'</p>':'<p class="settings-note">Choose an installed app for this system.</p>')+'<div class="player-picker-row"><label>PLAYER FOR '+name.toUpperCase()+'<select id="systemPlayerSelect"><option value="">Choose an installed app…</option></select></label><button class="subtle-btn" id="scanSystemPlayers">SCAN APPS</button><button class="subtle-btn" id="autoSystemPlayer">AUTO-SELECT</button></div><p class="settings-note" id="systemPlayerStatus">Scan installed apps, then choose the player you want to use.</p>';
+ $('#emulatorPanel').innerHTML='<div class="emulator-panel-head"><div><p class="eyebrow">PLAYER SETUP</p><h3>CHOOSE YOUR EMULATOR / APP</h3></div><span class="feature-tag">'+(profile?'SYSTEM PROFILE':'PLAYER ROUTING')+'</span></div>'+(profile?'<p class="settings-note">Suggested player references only. These are not proof that an app is installed or compatible with every game.</p><div class="emulator-option-list">'+profile.items.map(item=>'<span class="emulator-option">'+item+'</span>').join('')+'</div><p class="settings-note">'+profile.note+'</p>':'<p class="settings-note">Choose an installed app for this system.</p>')+'<div class="player-picker-row"><label>PLAYER FOR '+name.toUpperCase()+'<select id="systemPlayerSelect"><option value="">Choose an installed app…</option></select></label><button class="subtle-btn" id="scanSystemPlayers">SCAN APPS</button><button class="subtle-btn" id="autoSystemPlayer">AUTO-SELECT</button></div><p class="settings-note" id="systemPlayerStatus">Scan installed apps, then choose the player you want to use.</p>';
 populatePlayerSelect($('#systemPlayerSelect'),name);
 $('#scanSystemPlayers').addEventListener('click',()=>scanInstalledApps(name));
 $('#systemPlayerSelect').addEventListener('change',event=>savePlayerAssignment(name,event.target.value));
