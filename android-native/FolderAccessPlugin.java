@@ -72,13 +72,9 @@ public class FolderAccessPlugin extends Plugin {
             String packageName = match.activityInfo.packageName;
             if (getContext().getPackageName().equals(packageName)) continue;
             JSObject app = new JSObject();
-            try {
-                app.put("name", match.loadLabel(manager).toString());
-                app.put("packageName", packageName);
-                apps.put(app);
-            } catch (JSONException ignored) {
-                // Ignore malformed app labels.
-            }
+            app.put("name", match.loadLabel(manager).toString());
+            app.put("packageName", packageName);
+            apps.put(app);
         }
         JSObject response = new JSObject();
         response.put("apps", apps);
