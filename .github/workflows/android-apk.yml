@@ -37,7 +37,7 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             ECLIPSE_VERSION="${GITHUB_REF_NAME#v}"
           else
-            ECLIPSE_VERSION="4.0.1"
+            ECLIPSE_VERSION="4.0.2"
           fi
           echo "ECLIPSE_VERSION=$ECLIPSE_VERSION" >> "$GITHUB_ENV"
       - name: Validate stable version
@@ -191,7 +191,7 @@ jobs:
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/ECLIPSE-v${{ env.ECLIPSE_VERSION }}.apk
           body: |
-            # ECLIPSE 4.0.1 — The Eclipse Experience
+            # ECLIPSE 4.0.2 — Stability & Discovery Update
 
             A major ECLIPSE update focused on making the launcher feel like a complete gaming home.
 

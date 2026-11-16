@@ -7,7 +7,7 @@ const UpdateDownload = registerPlugin('UpdateDownload');
 const LauncherSetup = registerPlugin('LauncherSetup');
 const DisplayInfo = registerPlugin('DisplayInfo');
 
-const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '3.0.0';
+const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '4.0.2';
 const REPO = 'Gabe255/ECLIPSE';
 const systems = [
   { name: 'Nintendo', icon: '◈', family: 'Nintendo' },
@@ -207,7 +207,7 @@ document.querySelector('#app').innerHTML = `
         </div>
         <div class="settings-panel hidden" id="settingsControls">
           <div class="settings-panel-head"><div><p class="eyebrow">NAVIGATION</p><h3>CONTROLS</h3></div></div>
-          <article class="settings-card"><h3>CONTROLLER & KEYBOARD</h3><p class="settings-note">D-pad / arrow keys move focus. A / Enter selects. B / Escape backs out. Native controller remapping is planned for a later Android integration.</p><span class="feature-tag">BASIC KEYBOARD NAVIGATION ACTIVE</span></article>
+          <article class="settings-card"><h3>CONTROLLER & KEYBOARD</h3><p class="settings-note">Physical gamepads use the D-pad or left stick to move, A / Cross to select, and B / Circle to go back. Arrow keys, Enter and Escape work with keyboards. Android button layouts can vary by controller.</p><span class="feature-tag">GAMEPAD + KEYBOARD NAVIGATION</span><p class="settings-note" id="controllerStatus" aria-live="polite">Connect a controller to test navigation. ECLIPSE reads standard browser Gamepad input while this screen is open.</p></article>
         </div>
         <div class="settings-panel hidden" id="settingsPlayers">
           <div class="settings-panel-head"><div><p class="eyebrow">EMULATOR & APP ROUTING</p><h3>YOUR PLAYERS</h3></div><button class="primary-btn" id="scanInstalledPlayers">SCAN INSTALLED APPS</button></div>
@@ -361,6 +361,7 @@ function selectFeaturedSystem(index,scroll=true){
  const marks={Nintendo:'✦',PlayStation:'△',Xbox:'◉',Sega:'◈',Atari:'▥',Arcade:'✧',PC:'⌘','PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
  const mark=marks[system.family]||system.icon;
  const name=$('#systemFeatureName'),family=$('#systemFeatureFamily'),meta=$('#systemFeatureMeta'),count=$('#systemFeatureCount'),symbol=$('#systemFeatureMark');
+ const feature=$('#systemFeature');if(feature){feature.dataset.family=system.family.toLowerCase().replace(/[^a-z0-9]+/g,'-');feature.dataset.system=system.name.toLowerCase().replace(/[^a-z0-9]+/g,'-');}
  if(name)name.textContent=system.name.toUpperCase();
  if(family)family.textContent=system.family.toUpperCase();
  if(meta)meta.textContent='Explore your '+system.name+' collection and player setup.';
@@ -557,20 +558,34 @@ function inferGameSystem(file){
 }
 function titleFromFile(name){return name.replace(/\.[^.]+$/,'').replace(/[._-]+/g,' ').replace(/\s+/g,' ').trim().replace(/\b\w/g,ch=>ch.toUpperCase());}
 function scanSelectedFolder(fileList,folderUri='browser'){
- const files=[...fileList].filter(file=>file&&file.name);
+ const files=Array.from(fileList||[]).filter(file=>file&&file.name);
  const found=[];let matched=0;
+ // A Set avoids repeatedly walking the full library for every file in a large folder.
+ const knownIds=new Set(games.map(game=>game.id));
  for(const file of files){
   const system=inferGameSystem(file);if(!system)continue;
   matched++;
   const relative=file.webkitRelativePath||file.relativePath||file.name;
-  const id=(folderUri||'browser')+'|'+relative+'|'+file.size;
-  if(games.some(game=>game.id===id))continue;
-  found.push({id,title:titleFromFile(file.name),system,year:'',art:'generic',tag:file.name.split('.').pop().toUpperCase(),fileName:file.name,relativePath:relative,size:file.size,lastModified:file.lastModified,uri:file.uri||null});
+  const id=(folderUri||'browser')+'|'+relative+'|'+(Number(file.size)||0);
+  if(knownIds.has(id))continue;
+  knownIds.add(id);
+  found.push({id,title:titleFromFile(file.name),system,year:'',art:'generic',tag:file.name.split('.').pop().toUpperCase(),fileName:file.name,relativePath:relative,size:Number(file.size)||0,lastModified:Number(file.lastModified)||0,uri:file.uri||null});
  }
- if(found.length){games.push(...found);localStorage.setItem('eclipse-games',JSON.stringify(games));activeSystem='All Games';renderLibrary();renderWidgets();renderHomeHero();}
  const status=$('#scanStatus');
+ if(found.length){
+  try{
+   // Persist before mutating in-memory state so storage quota errors do not leave a half-added library.
+   localStorage.setItem('eclipse-games',JSON.stringify([...games,...found]));
+   games.push(...found);activeSystem='All Games';renderLibrary();renderWidgets();renderHomeHero();
+  }catch(error){
+   console.error('ECLIPSE could not save scanned games',error);
+   status.textContent='Found '+matched+' supported game file(s), but the library could not save them. Free device storage or remove unused entries, then scan again.';
+   notify('Games were found, but ECLIPSE could not save the library.');
+   return;
+  }
+ }
  status.textContent=matched?'Found '+matched+' supported game file(s); added '+found.length+' new game(s). '+files.length+' total file(s) checked.':'No supported game files were found in that folder. Nothing was added to Home or your library.';
- notify(found.length?'Added '+found.length+' games to your library.':'No games found — nothing added.');
+ notify(found.length?'Added '+found.length+' games to your library.':'No new games found — your library was left unchanged.');
 }
 async function chooseGameFolder(){
  const status=$('#scanStatus');
@@ -876,7 +891,15 @@ document.addEventListener('keydown',e=>{
    event.preventDefault();event.stopImmediatePropagation();const first=focusables()[0];if(first){first.focus();first.click();}
   }
  });
- window.addEventListener('gamepadconnected',()=>{if(!document.activeElement||document.activeElement===document.body)focusables()[0]?.focus();});
+ window.addEventListener('gamepadconnected',event=>{
+  const status=document.querySelector('#controllerStatus');
+  if(status)status.textContent='Connected: '+(event.gamepad?.id||'Gamepad')+'. Use the D-pad or left stick to navigate.';
+  if(!document.activeElement||document.activeElement===document.body)focusables()[0]?.focus();
+ });
+ window.addEventListener('gamepaddisconnected',()=>{
+  const status=document.querySelector('#controllerStatus');
+  if(status)status.textContent='Controller disconnected. Keyboard navigation remains available.';
+ });
  window.setInterval(poll,80);
 })();
 

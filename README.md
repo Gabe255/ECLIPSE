@@ -23,7 +23,7 @@
 - Emulator/player assignment and system pages are organizational UI. End-to-end game launching into third-party emulators is not yet implemented.
 - Automatic metadata and artwork scraping, online theme marketplace, achievement-service integrations, and cloud sync are not included yet.
 - Foldable auto-detection requires Android to report a separating fold feature. Browser preview may not expose the same hardware information; the layout can be selected manually in that case.
-- The latest branch web CI and Android APK build both pass. A successful build does not replace testing on a real phone or foldable.
+- The release/v4.0.2 branch is being prepared for CI verification. Folder scanning now has bounded traversal time and safer large-library deduplication; a successful build does not replace testing on a real phone or foldable.
 
 ECLIPSE does not include ROMs, BIOS files, emulator cores, or copyrighted game artwork. Only add game files and apps you have the right to use.
 
@@ -43,7 +43,7 @@ npm run build
 
 ## Android APK
 
-The `.github/workflows/android-apk.yml` workflow creates a Capacitor Android project, installs the native plugins, builds an APK, and uploads it as a GitHub Actions artifact. Feature branches also build test APKs.
+The `.github/workflows/android-apk.yml` workflow creates a Capacitor Android project, installs the native plugins, builds an APK, and uploads it as a GitHub Actions artifact. Release branches also build test APK artifacts; stable tagged releases require persistent signing secrets and device validation. Feature branches also build test APKs.
 
 Stable tagged releases require the persistent Android signing secrets configured in GitHub Actions. Do not publish a stable release using a temporary debug signing key. The Android application ID is `com.eclipse.launcher`.
 
