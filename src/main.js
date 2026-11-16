@@ -248,4 +248,4 @@ document.addEventListener('keydown',e=>{
   renderGames();$('#gameGrid').querySelector('[data-game="'+selectedGame+'"]')?.focus();
  }
 });
-renderWidgets();renderLibrary();document.querySelector('.feature-hero').classList.toggle('hidden',!preferences.showHero);
+renderWidgets();renderLibrary();document.querySelector('.feature-hero').classList.toggle('hidden',!preferences.showHero);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
