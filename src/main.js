@@ -678,8 +678,9 @@ $('#displayLayoutSelect')?.addEventListener('change',event=>{localStorage.setIte
 $('#makeDefaultHome')?.addEventListener('click',requestDefaultHome);
 $('#defaultHomeSettings')?.addEventListener('click',requestDefaultHome);
 $('#settingsDisplayLayout')?.addEventListener('change',event=>{localStorage.setItem('eclipse-display-layout',event.target.value);applyDisplayLayout(event.target.value);if(event.target.value==='auto')refreshDisplayLayout();notify('Display layout saved.');});
-window.addEventListener('resize',()=>{if((localStorage.getItem('eclipse-display-layout')||'auto')==='auto')applyDisplayLayout('auto');});
-window.addEventListener('deviceposture',()=>{if((localStorage.getItem('eclipse-display-layout')||'auto')==='auto')applyDisplayLayout('auto');});
+let displayRefreshTimer;
+window.addEventListener('resize',()=>{if((localStorage.getItem('eclipse-display-layout')||'auto')==='auto'){clearTimeout(displayRefreshTimer);displayRefreshTimer=setTimeout(refreshDisplayLayout,180);}});
+window.addEventListener('deviceposture',()=>{if((localStorage.getItem('eclipse-display-layout')||'auto')==='auto')refreshDisplayLayout();});
 $('#onboardingLocal')?.addEventListener('click',()=>{finishOnboarding();notify('ECLIPSE will keep its data on this device.');});
 $('#onboardingFolder')?.addEventListener('click',async()=>{finishOnboarding();showView('settings');document.querySelector('[data-settings-tab="library"]')?.click();await chooseEclipseDataFolder();});
 $('#onboardingSkip')?.addEventListener('click',finishOnboarding);
