@@ -459,6 +459,7 @@ function renderKonsoruHome(){
  root.querySelectorAll('[data-konsoru-jump]').forEach(button=>button.onclick=()=>showView(button.dataset.konsoruJump));
 }
 function renderHomeHero(){
+ renderKonsoruHome();
  const hero=$('#homeLibraryHero');if(!hero)return;
  hero.classList.toggle('hidden',games.length===0||!preferences.showHero||interfaceMode==='cocoon');
  if(games.length){$('#homeHeroTitle').textContent=games[games.length-1].title;$('#homeHeroMeta').textContent=games[games.length-1].system+' · '+games.length+' GAMES IN YOUR LIBRARY';}
@@ -931,8 +932,15 @@ document.addEventListener('keydown',e=>{
    else focusables()[0]?.click();
   }
   if(cancel&&!wasBack)back();
-  // Keep extra face/shoulder buttons available to future context actions without hijacking games.
-  wasConfirm=confirm;wasBack=cancel;wasX=pressed(2);wasY=pressed(3);wasL1=pressed(4);wasR1=pressed(5);
+  const l1=pressed(4),r1=pressed(5);
+  if((l1&&!wasL1)||(r1&&!wasR1)){
+   const menu=[...document.querySelectorAll('#systemMenu [data-system-menu]')];
+   if(menu.length){const current=menu.findIndex(item=>item.classList.contains('active'));const step=r1?1:-1;const next=(current+step+menu.length)%menu.length;menu[next].click();menu[next].focus();}
+   else if(activePage==='home'&&document.documentElement.dataset.interfaceMode==='konsoru'){
+    const worlds=[...document.querySelectorAll('#konsoruWorldGrid [data-konsoru-family]')];const current=worlds.indexOf(document.activeElement);const step=r1?1:-1;worlds[(current+step+worlds.length)%worlds.length]?.focus();
+   }
+  }
+  wasConfirm=confirm;wasBack=cancel;wasX=pressed(2);wasY=pressed(3);wasL1=l1;wasR1=r1;
  }
  document.addEventListener('keydown',event=>{
   if(event.key==='Escape'||event.key==='Backspace'){event.preventDefault();event.stopImmediatePropagation();back();return;}
