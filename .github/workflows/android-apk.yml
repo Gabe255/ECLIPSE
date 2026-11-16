@@ -67,6 +67,20 @@ jobs:
           if dependency not in build:
               build = build.replace("dependencies {", "dependencies {\n" + dependency, 1)
           gradle.write_text(build)
+          import xml.etree.ElementTree as ET
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          ET.register_namespace("android", "http://schemas.android.com/apk/res/android")
+          tree = ET.parse(manifest)
+          root = tree.getroot()
+          if root.find("queries") is None:
+              queries = ET.Element("queries")
+              intent = ET.SubElement(queries, "intent")
+              action = ET.SubElement(intent, "action")
+              action.set("{http://schemas.android.com/apk/res/android}name", "android.intent.action.MAIN")
+              category = ET.SubElement(intent, "category")
+              category.set("{http://schemas.android.com/apk/res/android}name", "android.intent.category.LAUNCHER")
+              root.insert(0, queries)
+          tree.write(manifest, encoding="utf-8", xml_declaration=True)
           PY
       - name: Build debug APK
         working-directory: android
