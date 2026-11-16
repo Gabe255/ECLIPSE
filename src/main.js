@@ -453,6 +453,7 @@ function renderKonsoruHome(){
  worldGrid?.querySelectorAll('[data-konsoru-family]').forEach(button=>button.addEventListener('click',()=>{const first=systems.find(item=>item.family===button.dataset.konsoruFamily);if(first)openConsolePage(first.name);}));
  const recent=$('#konsoruRecentRow');
  if(recent)recent.innerHTML=games.length?games.slice().reverse().slice(0,10).map(game=>'<button class="konsoru-recent-card" data-konsoru-game="'+games.indexOf(game)+'"><span class="konsoru-cover"><i>✦</i><small>'+escapeHTML(game.system)+'</small></span><b>'+escapeHTML(game.title)+'</b><small>'+escapeHTML(game.system)+'</small></button>').join(''):'<div class="konsoru-empty"><span>✦</span><b>YOUR COLLECTION STARTS HERE</b><p>Add a game folder to build your library.</p><button class="konsoru-secondary" id="konsoruEmptyScan">ADD GAMES ↗</button></div>';
+ recent?.querySelectorAll('[data-konsoru-game]').forEach(card=>{const game=games[Number(card.dataset.konsoruGame)],url=game?.artwork?.grid;if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='lazy';img.className='sgdb-cover-image';card.querySelector('.konsoru-cover')?.prepend(img);}});
  recent?.querySelectorAll('[data-konsoru-game]').forEach(button=>button.addEventListener('click',()=>showGameDetails(games[Number(button.dataset.konsoruGame)])));
  $('#konsoruEmptyScan')?.addEventListener('click',()=>{showView('library');chooseGameFolder();});
  $('#konsoruOpenLibrary')?.addEventListener('click',()=>showView('library'));$('#konsoruAllGames')?.addEventListener('click',()=>showView('library'));
@@ -468,10 +469,11 @@ function renderHomeHero(){
  shelf.classList.toggle('hidden',games.length===0);
  if(!games.length){shelf.innerHTML='';return;}
  const groups=[...new Set(games.map(game=>game.system))];
- const makeTile=game=>'<button class="cocoon-game-tile" data-home-game="'+games.indexOf(game)+'" type="button"><span class="cocoon-game-cover"><i>✦</i><small>'+escapeHTML(game.system)+'</small></span><b>'+escapeHTML(game.title)+'</b><small class="cocoon-game-platform">'+escapeHTML(game.system)+'</small></button>';
+ const makeTile=game=>'<button class="cocoon-game-tile" data-home-game="'+games.indexOf(game)+'" type="button"><span class="cocoon-game-cover" data-art-game="'+games.indexOf(game)+'"><i>✦</i><small>'+escapeHTML(game.system)+'</small></span><b>'+escapeHTML(game.title)+'</b><small class="cocoon-game-platform">'+escapeHTML(game.system)+'</small></button>';
  const recent=games.slice().reverse().slice(0,14);
  shelf.innerHTML='<section class="cocoon-shelf"><div class="home-shelf-heading"><div><p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p><h2>YOUR COLLECTION</h2></div><span>'+games.length+' GAMES</span></div><div class="cocoon-game-row">'+recent.map(makeTile).join('')+'</div></section>'+
  groups.map(system=>{const items=games.filter(game=>game.system===system);return '<section class="cocoon-shelf"><div class="home-shelf-heading"><div><p class="eyebrow">YOUR LIBRARY</p><h2>'+escapeHTML(system)+'</h2></div><span>'+items.length+' '+(items.length===1?'GAME':'GAMES')+'</span></div><div class="cocoon-game-row">'+items.map(makeTile).join('')+'</div></section>';}).join('');
+ shelf.querySelectorAll('[data-art-game]').forEach(cover=>{const url=games[Number(cover.dataset.artGame)]?.artwork?.grid;if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='lazy';img.className='sgdb-cover-image';cover.prepend(img);}});
  shelf.querySelectorAll('[data-home-game]').forEach(button=>button.addEventListener('click',()=>showGameDetails(games[Number(button.dataset.homeGame)])));
 }
 function renderHomeAppsShelf(){
@@ -514,7 +516,7 @@ populatePlayerSelect($('#systemPlayerSelect'),name);
 $('#scanSystemPlayers').addEventListener('click',()=>scanInstalledApps(name));
 $('#systemPlayerSelect').addEventListener('change',event=>savePlayerAssignment(name,event.target.value));
 $('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
- const artFor=g=>'<div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">✦</span><span class="art-caption">'+escapeHTML(g.tag)+'</span></div>';
+ const artFor=g=>'<div class="game-art art-'+g.art+'" data-system-art="'+games.indexOf(g)+'"><span class="art-glow"></span><span class="art-mark">✦</span><span class="art-caption">'+escapeHTML(g.tag)+'</span></div>';
  const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+escapeHTML(g.title)+'</b><small>'+escapeHTML(g.tag)+' · '+escapeHTML(g.fileName)+'</small></div></button>';
  const featured=titles[0];
  const folderNames=['ALL GAMES'];
@@ -523,6 +525,7 @@ $('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
   '<div class="system-folder-row"><div class="system-row-label"><p class="eyebrow">YOUR COLLECTION</p><span>'+titles.length+' VERIFIED FILES</span></div><div class="system-folders">'+folderNames.map(folder=>'<button class="system-folder" data-system-folder="'+folder+'"><span>▣</span><b>'+folder+'</b><small>'+titles.length+' GAMES FOUND</small></button>').join('')+'</div></div>'+
   (featured?'<section class="system-featured"><div class="system-featured-art">'+artFor(featured)+'</div><div class="system-featured-copy"><p class="eyebrow">FEATURED GAME</p><h2>'+featured.title+'</h2><p>'+name+' · '+featured.year+' · '+featured.tag+'</p><button class="primary-btn" data-system-game="'+games.indexOf(featured)+'">OPEN GAME ↗</button></div></section>':'<div class="system-empty-hero"><p class="eyebrow">NOTHING IMPORTED</p><h2>NO GAMES FOUND.</h2><p>Only games found in a folder scan appear here. Nothing is added automatically.</p><button class="primary-btn" data-go-scan>CHOOSE GAME FOLDER ↗</button></div>')+
   '<section class="system-shelf"><div class="system-row-label"><div><p class="eyebrow">YOUR COLLECTION</p><h3>ALL GAMES</h3></div><span>'+titles.length+' ITEMS · '+systemShelfRows+' ROW'+(systemShelfRows===1?'':'S')+'</span></div><div class="system-game-row" style="--system-shelf-rows:'+systemShelfRows+'">'+(titles.length?titles.map(cardFor).join(''):'<p class="settings-note">No supported game files were found for this system.</p>')+'</div></section>';
+ $('#systemHome').querySelectorAll('[data-system-art]').forEach(cover=>{const url=games[Number(cover.dataset.systemArt)]?.artwork?.grid;if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='lazy';img.className='sgdb-cover-image';cover.prepend(img);}});
  $('#systemHome').querySelectorAll('[data-system-game]').forEach(button=>button.addEventListener('click',()=>{const game=games[Number(button.dataset.systemGame)];if(game)showGameDetails(game);}));
  $('#systemHome').querySelectorAll('[data-system-folder]').forEach(button=>button.addEventListener('click',()=>$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth'})));
  $('#systemHome').querySelector('[data-go-scan]')?.addEventListener('click',()=>{showView('library');chooseGameFolder();});
