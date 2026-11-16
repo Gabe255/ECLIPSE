@@ -37,7 +37,7 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             ECLIPSE_VERSION="${GITHUB_REF_NAME#v}"
           else
-            ECLIPSE_VERSION="4.0.0"
+            ECLIPSE_VERSION="4.0.1"
           fi
           echo "ECLIPSE_VERSION=$ECLIPSE_VERSION" >> "$GITHUB_ENV"
       - name: Validate stable version
@@ -182,14 +182,14 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
-          name: ECLIPSE — The Eclipse Experience (${{ github.event.inputs.release_tag || github.ref_name }})
+          tag_name: ${{ github.event.inputs.release_tag || (github.ref == 'refs/heads/main' && format('v{0}', env.ECLIPSE_VERSION)) || github.ref_name }}
+          name: ECLIPSE — The Eclipse Experience (v${{ env.ECLIPSE_VERSION }})
           prerelease: false
           overwrite_files: true
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/ECLIPSE-v${{ env.ECLIPSE_VERSION }}.apk
           body: |
-            # ECLIPSE 4.0.0 — The Eclipse Experience
+            # ECLIPSE 4.0.1 — The Eclipse Experience
 
             A major ECLIPSE update focused on making the launcher feel like a complete gaming home.
 
@@ -210,4 +210,4 @@ jobs:
 
             **Biggest Update Roadmap:** https://github.com/Gabe255/ECLIPSE/blob/main/docs/BIGGEST-UPDATE-ROADMAP.md
 
-            **Download APK:** [ECLIPSE-v${{ env.ECLIPSE_VERSION }}.apk](https://github.com/Gabe255/ECLIPSE/releases/download/${{ github.event.inputs.release_tag || github.ref_name }}/ECLIPSE-v${{ env.ECLIPSE_VERSION }}.apk)
+            **Download APK:** [ECLIPSE-v${{ env.ECLIPSE_VERSION }}.apk](https://github.com/Gabe255/ECLIPSE/releases/download/${{ github.event.inputs.release_tag || (github.ref == 'refs/heads/main' && format('v{0}', env.ECLIPSE_VERSION)) || github.ref_name }}/ECLIPSE-v${{ env.ECLIPSE_VERSION }}.apk)
