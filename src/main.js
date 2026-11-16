@@ -130,6 +130,15 @@ document.querySelector('#app').innerHTML = `
         <div><p class="eyebrow">YOUR PERSONAL GAME SPACE</p><h1>WELCOME <em>BACK.</em></h1><p class="welcome-sub">Your games. Your setup. Your rules.</p></div>
         <div class="welcome-orb" aria-hidden="true"></div>
       </section>
+      <section class="system-stage" aria-label="Choose a gaming system">
+        <div class="stage-heading"><div><p class="eyebrow">THE MULTIVERSE</p><h2>CHOOSE YOUR <em>WORLD.</em></h2><p>One tap takes you into that system's own space.</p></div><span class="stage-index">01 <i>/</i> SYSTEMS</span></div>
+        <div class="system-carousel-shell">
+          <button class="carousel-arrow" id="systemPrev" aria-label="Previous systems">‹</button>
+          <div class="system-picker" id="systemPicker" tabindex="0" aria-label="Available systems"></div>
+          <button class="carousel-arrow" id="systemNext" aria-label="Next systems">›</button>
+        </div>
+        <div class="stage-footer"><span id="systemPickerCount">37 WORLDS AVAILABLE</span><button class="text-link" data-view="library">EXPLORE FULL LIBRARY <b>↗</b></button></div>
+      </section>
       <div class="page-toolbar"><div class="page-tabs" id="pageTabs"></div><div class="page-actions"><button class="subtle-btn" id="addPage">+ PAGE</button><button class="subtle-btn" id="editWidgets">EDIT HOME</button></div></div>
       <section class="dashboard-grid" id="widgetGrid"></section>
       <section class="home-games-shelf hidden" id="homeGamesShelf"></section>
@@ -198,6 +207,15 @@ document.querySelector('#app').innerHTML = `
     <footer><span>ECLIPSE · PERSONAL BUILD · ${VERSION}</span><span>BUILT FOR YOUR NEXT ADVENTURE <b>✦</b></span></footer>
   </main>
 </div>
+<div class="onboarding-backdrop hidden" id="onboardingModal" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+  <div class="onboarding-card">
+    <div class="mascot-stage"><div class="mascot-aura"></div><div class="mascot-person"><div class="mascot-hat"></div><div class="mascot-head"><i></i><i></i></div><div class="mascot-neck"></div><div class="mascot-suit"><span></span></div></div><div class="mascot-label">E / GUIDE</div></div>
+    <div class="onboarding-copy"><p class="eyebrow">A NEW WORLD AWAITS</p><h2 id="onboardingTitle">WELCOME TO <em>ECLIPSE.</em></h2><p>I'm your guide. Let's decide where your library settings and backups live before you jump in.</p>
+      <div class="storage-options"><button class="storage-option" id="onboardingLocal"><b>ON THIS DEVICE</b><small>Keep settings and library data in app storage.</small><span>RECOMMENDED</span></button><button class="storage-option" id="onboardingFolder"><b>CHOOSE A BACKUP FOLDER</b><small>Pick a folder for portable backups on supported Android builds.</small><span>ANDROID FEATURE</span></button></div>
+      <button class="onboarding-skip" id="onboardingSkip">I'LL DO THIS LATER</button>
+    </div>
+  </div>
+</div>
 <div class="modal-backdrop hidden" id="widgetModal"><div class="widget-modal"><div class="modal-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>HOME WIDGETS</h2></div><button class="close-modal" id="closeWidgetModal">×</button></div><p class="settings-note">Add widgets, change their order, or remove the ones you don't use.</p><div id="widgetChoices" class="widget-choices"></div><button class="primary-btn" id="doneWidgets">DONE</button></div></div>
 <div class="system-boot hidden" id="systemBoot" aria-live="polite"><div class="boot-orbit"><span></span></div><p class="eyebrow">ECLIPSE SYSTEM STARTUP</p><h2 id="bootSystemName">STARTING SYSTEM</h2><div class="boot-progress"><span></span></div><small>PREPARING YOUR GAME SPACE</small></div>
 <div class="mascot-welcome hidden" id="mascotWelcome" role="dialog" aria-modal="true" aria-labelledby="mascotTitle"><div class="mascot-card"><div class="mascot-art" aria-hidden="true"><div class="mascot-hat"></div><div class="mascot-face"><span class="mascot-eye left"></span><span class="mascot-eye right"></span><span class="mascot-shadow"></span></div><div class="mascot-body"><span class="mascot-lapel left"></span><span class="mascot-lapel right"></span><span class="mascot-tie"></span></div></div><p class="eyebrow">YOUR NEW GAME SPACE</p><h2 id="mascotTitle">WELCOME TO <em>ECLIPSE.</em></h2><p class="mascot-message">I’ll show you around. Your systems, game shelves and collections all live here. Set things up your way and make this space yours.</p><div class="mascot-tips"><span><b>01</b> Pick a system</span><span><b>02</b> Build your library</span><span><b>03</b> Make it yours</span></div><div class="mascot-actions"><button class="primary-btn" id="mascotStart">SHOW ME AROUND ↗</button><button class="subtle-btn" id="mascotSkip">SKIP FOR NOW</button></div></div></div>
@@ -259,6 +277,18 @@ function renderSettings(){
 function savePreferences(){localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));document.querySelector('.feature-hero')?.classList.toggle('hidden',!preferences.showHero);document.documentElement.classList.toggle('eclipse-compact-rows',!!preferences.compactRows);renderLibrary();renderWidgets();}
 function renderFolderPaths(){const list=$('#folderList');if(!list)return;list.innerHTML=folderPaths.length?folderPaths.map((p,i)=>'<div class="folder-item"><span>▰ '+p.replace(/</g,'&lt;')+'</span><button data-folder-remove="'+i+'" aria-label="Remove folder">×</button></div>').join(''):'<p class="settings-note">No folders added yet.</p>';list.querySelectorAll('[data-folder-remove]').forEach(b=>b.addEventListener('click',()=>{folderPaths.splice(Number(b.dataset.folderRemove),1);localStorage.setItem('eclipse-folders',JSON.stringify(folderPaths));renderFolderPaths();}));}
 function renderSettingsPages(){const list=$('#settingsPageList');if(!list)return;list.innerHTML=pageNames.map((p,i)=>'<div class="settings-page-item"><span>'+p+'</span><button data-page-rename="'+i+'">RENAME</button><button data-page-delete="'+i+'">×</button></div>').join('');list.querySelectorAll('[data-page-rename]').forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.pageRename),name=prompt('Name this home page',pageNames[i]);if(name?.trim()){pageNames[i]=name.trim().slice(0,24);saveLayout();renderPages();renderSettingsPages();}}));list.querySelectorAll('[data-page-delete]').forEach(b=>b.addEventListener('click',()=>{if(pageNames.length===1){notify('Keep at least one home page.');return;}pageNames.splice(Number(b.dataset.pageDelete),1);currentPage=Math.min(currentPage,pageNames.length-1);saveLayout();renderWidgets();renderSettingsPages();}));}
+function renderSystemPicker(){
+ const picker=$('#systemPicker');if(!picker)return;
+ const marks={Nintendo:'✦',PlayStation:'△',Xbox:'◉',Sega:'◈',Atari:'▥',Arcade:'✧',PC:'⌘', 'PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
+ picker.innerHTML=systems.map((system,index)=>'<button class="system-pick-card" data-pick-system="'+escapeHTML(system.name)+'" style="--card-index:'+index+'" aria-label="Open '+escapeHTML(system.name)+'"><span class="system-card-top"><small>'+String(index+1).padStart(2,'0')+'</small><i>'+escapeHTML(system.family.toUpperCase())+'</i></span><span class="system-cube"><span class="cube-face cube-front">'+(marks[system.family]||system.icon)+'</span><span class="cube-face cube-side"></span><span class="cube-face cube-top"></span></span><span class="system-card-bottom"><b>'+escapeHTML(system.name)+'</b><small>'+gamesForSystem(system.name)+' TITLES <i>↗</i></small></span></button>').join('');
+ $('#systemPickerCount').textContent=systems.length+' WORLDS AVAILABLE';
+ picker.querySelectorAll('[data-pick-system]').forEach(card=>card.addEventListener('click',()=>openConsolePage(card.dataset.pickSystem)));
+}
+function openOnboarding(){
+ const modal=$('#onboardingModal');if(!modal||localStorage.getItem('eclipse-onboarding-complete')==='true')return;
+ modal.classList.remove('hidden');
+}
+function finishOnboarding(){localStorage.setItem('eclipse-onboarding-complete','true');$('#onboardingModal')?.classList.add('hidden');}
 function renderHomeHero(){
  const hero=$('#homeLibraryHero');if(!hero)return;
  hero.classList.toggle('hidden',games.length===0||!preferences.showHero);
@@ -523,6 +553,14 @@ function checkCompatibility(){
  const update=document.createElement('p');update.textContent='For an in-place APK update, Android requires the same application ID, a higher versionCode, and the same signing certificate. The current CI debug APK may not have a persistent signing key, so an update may require uninstalling the old build first; uninstalling can erase local app data.';result.append(update);
 }
 
+$('#systemPrev')?.addEventListener('click',()=>$('#systemPicker')?.scrollBy({left:-250,behavior:'smooth'}));
+$('#systemNext')?.addEventListener('click',()=>$('#systemPicker')?.scrollBy({left:250,behavior:'smooth'}));
+$('#systemPicker')?.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){$('#systemPicker').scrollBy({left:event.key==='ArrowRight'?220:-220,behavior:'smooth'});}});
+$('#onboardingLocal')?.addEventListener('click',()=>{finishOnboarding();notify('ECLIPSE will keep its data on this device.');});
+$('#onboardingFolder')?.addEventListener('click',async()=>{finishOnboarding();showView('settings');document.querySelector('[data-settings-tab="library"]')?.click();await chooseEclipseDataFolder();});
+$('#onboardingSkip')?.addEventListener('click',finishOnboarding);
+document.querySelectorAll('.text-link[data-view]').forEach(button=>button.addEventListener('click',()=>showView(button.dataset.view)));
+
 $('#themeSelect').addEventListener('change',e=>setTheme(e.target.value));
 $('#settingsTheme').addEventListener('change',e=>setTheme(e.target.value));
 document.querySelectorAll('.rail-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
@@ -583,4 +621,4 @@ document.addEventListener('keydown',e=>{
   renderGames();$('#gameGrid').querySelector('[data-game="'+selectedGame+'"]')?.focus();
  }
 });
-renderWidgets();renderLibrary();renderHomeHero();if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
+renderSystemPicker();renderWidgets();renderLibrary();renderHomeHero();window.setTimeout(openOnboarding,450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
