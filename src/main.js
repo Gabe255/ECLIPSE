@@ -442,9 +442,9 @@ function finishOnboarding(){localStorage.setItem('eclipse-onboarding-complete','
 function renderKonsoruHome(){
  const root=$('#konsoruHome');if(!root)return;
  const count=$('#konsoruGameCount'),systemsCount=$('#konsoruSystemCount');if(count)count.textContent=games.length;
- const activeSystems=[...new Set(games.map(game=>game.system))];if(systemsCount)systemsCount.textContent=activeSystems.length||systems.length;
+ const activeSystems=[...new Set(games.map(game=>game.system))];if(systemsCount)systemsCount.textContent=activeSystems.length;
  const latest=games.length?games[games.length-1]:null;const resume=$('#konsoruResume');
- if(resume){resume.textContent=latest?'▶  CONTINUE · '+latest.title:'＋  ADD YOUR FIRST GAME';resume.onclick=()=>latest?showGameDetails(latest):(showView('library'),chooseGameFolder());}
+ if(resume){resume.textContent=latest?'▶  OPEN · '+latest.title:'＋  ADD YOUR FIRST GAME';resume.onclick=()=>latest?showGameDetails(latest):(showView('library'),chooseGameFolder());}
  const status=$('#konsoruLibraryStatus');if(status)status.textContent=games.length?'COLLECTION READY':'AWAITING GAMES';
  const families=[...new Set(systems.map(item=>item.family))];const marks={Nintendo:'◈',PlayStation:'△',Xbox:'✕',Sega:'◉',Atari:'▥',Arcade:'✦',PC:'⌘','PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
  const worldGrid=$('#konsoruWorldGrid');
