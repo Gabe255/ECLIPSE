@@ -179,7 +179,7 @@ jobs:
           path: android/app/build/outputs/apk/debug/ECLIPSE-v${{ env.ECLIPSE_VERSION }}.apk
           if-no-files-found: error
       - name: Publish stable GitHub Release
-        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.release_tag || (github.ref == 'refs/heads/main' && format('v{0}', env.ECLIPSE_VERSION)) || github.ref_name }}
