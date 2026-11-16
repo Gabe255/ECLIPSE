@@ -40,8 +40,7 @@ public class SystemControlsPlugin extends Plugin {
 
     @PluginMethod
     public void openBluetoothSettings(PluginCall call) {
-        openSettings(call, Build.VERSION.SDK_INT >= 29
-            ? Settings.Panel.ACTION_BLUETOOTH : Settings.ACTION_BLUETOOTH_SETTINGS);
+        openSettings(call, Settings.ACTION_BLUETOOTH_SETTINGS);
     }
 
     @PluginMethod
