@@ -169,10 +169,16 @@ document.querySelector('#app').innerHTML = `
 </div>
 <div class="modal-backdrop hidden" id="widgetModal"><div class="widget-modal"><div class="modal-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>HOME WIDGETS</h2></div><button class="close-modal" id="closeWidgetModal">×</button></div><p class="settings-note">Add widgets, change their order, or remove the ones you don't use.</p><div id="widgetChoices" class="widget-choices"></div><button class="primary-btn" id="doneWidgets">DONE</button></div></div>
 <div class="system-boot hidden" id="systemBoot" aria-live="polite"><div class="boot-orbit"><span></span></div><p class="eyebrow">ECLIPSE SYSTEM STARTUP</p><h2 id="bootSystemName">STARTING SYSTEM</h2><div class="boot-progress"><span></span></div><small>PREPARING YOUR GAME SPACE</small></div>
+<div class="mascot-welcome hidden" id="mascotWelcome" role="dialog" aria-modal="true" aria-labelledby="mascotTitle"><div class="mascot-card"><div class="mascot-art" aria-hidden="true"><div class="mascot-hat"></div><div class="mascot-face"><span class="mascot-eye left"></span><span class="mascot-eye right"></span><span class="mascot-shadow"></span></div><div class="mascot-body"><span class="mascot-lapel left"></span><span class="mascot-lapel right"></span><span class="mascot-tie"></span></div></div><p class="eyebrow">YOUR NEW GAME SPACE</p><h2 id="mascotTitle">WELCOME TO <em>ECLIPSE.</em></h2><p class="mascot-message">I’ll show you around. Your systems, game shelves and collections all live here. Set things up your way and make this space yours.</p><div class="mascot-tips"><span><b>01</b> Pick a system</span><span><b>02</b> Build your library</span><span><b>03</b> Make it yours</span></div><div class="mascot-actions"><button class="primary-btn" id="mascotStart">SHOW ME AROUND ↗</button><button class="subtle-btn" id="mascotSkip">SKIP FOR NOW</button></div></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>`;
 
 const $ = s => document.querySelector(s);
 const toast = $('#toast');
+const mascotWelcome=$('#mascotWelcome');
+function closeMascot(){mascotWelcome.classList.add('hidden');localStorage.setItem('eclipse-onboarding-complete','true');}
+$('#mascotStart').addEventListener('click',()=>{closeMascot();showView('library');notify('Choose a system to open its ECLIPSE home.');});
+$('#mascotSkip').addEventListener('click',closeMascot);
+if(!localStorage.getItem('eclipse-onboarding-complete'))mascotWelcome.classList.remove('hidden');
 let toastTimer;
 function notify(message){toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2400);}
 function saveLayout(){localStorage.setItem('eclipse-widgets',JSON.stringify(widgets));localStorage.setItem('eclipse-pages',JSON.stringify(pageNames));}
