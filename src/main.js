@@ -1,4 +1,5 @@
 import './style.css';
+import { mountExperience } from './experience.js';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 const FolderAccess = registerPlugin('FolderAccess');
 
@@ -356,7 +357,7 @@ function openConsolePage(name){
  },1050);
 }
 function renderConsoleHome(system){
- const name=system.name;activeConsoleName=name;
+ const name=system.name;activeConsoleName=name;window.EclipseExperienceApplySystemTheme?.(name);
  const titles=gamesForSystem(name);
  $('#consoleTitle')?.remove();
  $('#consoleGeneration').textContent=system.family.toUpperCase()+' PLATFORM';
@@ -662,4 +663,5 @@ document.addEventListener('keydown',e=>{
   renderGames();$('#gameGrid').querySelector('[data-game="'+selectedGame+'"]')?.focus();
  }
 });
+mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
 renderSystemPicker();renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();window.setTimeout(openOnboarding,450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
