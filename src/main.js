@@ -364,7 +364,7 @@ function selectFeaturedSystem(index,scroll=true){
  if(name)name.textContent=system.name.toUpperCase();
  if(family)family.textContent=system.family.toUpperCase();
  if(meta)meta.textContent='Explore your '+system.name+' collection and player setup.';
- if(count)count.textContent=String(gamesForSystem(system.name));
+ if(count)count.textContent=String(gamesForSystem(system.name).length);
  if(symbol)symbol.textContent=mark;
  const picker=$('#systemPicker');
  picker?.querySelectorAll('[data-system-index]').forEach(card=>{const active=Number(card.dataset.systemIndex)===featuredSystemIndex;card.classList.toggle('selected',active);card.setAttribute('aria-pressed',String(active));});
