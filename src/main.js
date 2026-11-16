@@ -288,7 +288,7 @@ function renderWidgetChoices(){
  $('#widgetChoices').innerHTML=widgetCatalog.map(([id,name,desc])=>`<label class="widget-choice"><input type="checkbox" value="${id}" ${widgets.includes(id)?'checked':''}><span><b>${name}</b><small>${desc}</small></span></label>`).join('');
  $('#widgetChoices').querySelectorAll('input').forEach(input=>input.addEventListener('change',()=>{widgets=input.checked?[...widgets,input.value]:widgets.filter(x=>x!==input.value);saveLayout();}));
 }
-const ECLIPSE_BACKUP_KEYS=['eclipse-games','eclipse-widgets','eclipse-pages','eclipse-theme','eclipse-preferences','eclipse-installed-apps','eclipse-emulator-assignments','eclipse-favorites','eclipse-folders','eclipse-system-folders','eclipse-play-count','eclipse-onboarding-complete','eclipse-folder-uri'];
+const ECLIPSE_BACKUP_KEYS=['eclipse-games','eclipse-widgets','eclipse-pages','eclipse-theme','eclipse-preferences','eclipse-installed-apps','eclipse-emulator-assignments','eclipse-favorites','eclipse-folders','eclipse-system-folders','eclipse-system-shelf-rows','eclipse-play-count','eclipse-onboarding-complete','eclipse-folder-uri','eclipse-mascot-muted'];
 function eclipseBackupSnapshot(){const values={};ECLIPSE_BACKUP_KEYS.forEach(key=>{const value=localStorage.getItem(key);if(value!==null)values[key]=value;});return JSON.stringify({format:'eclipse-backup',version:1,savedAt:new Date().toISOString(),values});}
 async function chooseEclipseDataFolder(){const status=$('#dataFolderStatus');if(!Capacitor.isNativePlatform()){status.textContent='External folder selection is available in the Android APK. Browser data remains stored locally.';return;}status.textContent='Choose where ECLIPSE should keep its backup…';try{const result=await FolderAccess.pickDataFolder();status.textContent='Backup folder: '+(result.name||'Selected folder')+'. Saving your current ECLIPSE data…';const saved=await FolderAccess.saveData({data:eclipseBackupSnapshot()});status.textContent='Backup folder: '+(result.name||saved.name||'Selected folder')+'. Your current library and settings are backed up.';notify('ECLIPSE data folder connected.');}catch(error){const message=String(error?.message||error||'');if(!message.toLowerCase().includes('cancel'))status.textContent='Could not select the data folder: '+message;}}
 async function saveEclipseDataBackup(){const status=$('#dataFolderStatus');if(!Capacitor.isNativePlatform()){status.textContent='Open the Android APK to save a backup to a chosen folder.';return;}status.textContent='Saving ECLIPSE backup…';try{const result=await FolderAccess.saveData({data:eclipseBackupSnapshot()});status.textContent='Backup saved as '+result.name+'.';notify('ECLIPSE backup saved.');}catch(error){status.textContent='Backup not saved: '+(error?.message||'Choose a data folder first.');}}
@@ -569,7 +569,7 @@ async function chooseGameFolder(){
  }
 }
 async function rescanGameFolder(){
- const savedUris=folderPaths.map(item=>typeof item==='string'?item:item?.uri).filter(Boolean);
+ const savedUris=folderPaths.map(item=>typeof item==='string'?(item.startsWith('content://')?item:null):item?.uri).filter(Boolean);
  const legacyUri=localStorage.getItem('eclipse-folder-uri');if(legacyUri&&!savedUris.includes(legacyUri))savedUris.push(legacyUri);
  if(Capacitor.isNativePlatform()&&savedUris.length){
   const status=$('#scanStatus');status.textContent='Rescanning '+savedUris.length+' saved game folder(s)…';let scanned=0,failed=0;
@@ -612,7 +612,27 @@ async function scanInstalledApps(systemName){
  try{
   const result=await FolderAccess.getInstalledApps();
   installedApps=result.apps||[];
+  const playerAliases={
+   'NES':['retroarch','fceux','nes.emu'],'SNES':['retroarch','snes9x','snes.emu'],
+   'Nintendo 64':['retroarch','m64plus','mupen'],'Game Boy':['retroarch','my oldboy','gbc.emu'],
+   'Game Boy Advance':['retroarch','my boy','pizza boy','gba.emu'],
+   'Nintendo DS':['drastic','melonds','retroarch'],'Nintendo 3DS':['azahar','lime3ds','citra'],
+   'GameCube':['dolphin'],'Wii':['dolphin'],'PlayStation':['duckstation','retroarch','epsxe'],
+   'PlayStation 2':['nethersx2','aethersx2','retroarch'],'PSP':['ppsspp'],'PS Vita':['vita3k'],
+   'Master System':['retroarch','md.emu'],'Genesis / Mega Drive':['retroarch','md.emu'],
+   'Saturn':['retroarch','yaba sanshiro'],'Dreamcast':['redream','flycast','retroarch'],
+   'Atari 2600':['retroarch','atari 2600'],'Arcade':['retroarch','mame'],
+   'Nintendo Switch':['eden','sudachi','suyu','yuzu'],
+   'PC Games (x86)':['gamehub','gamenative']
+  };
+  systems.forEach(system=>{
+   if(emulatorAssignments[system.name])return;
+   const terms=playerAliases[system.name]||[];
+   const match=installedApps.find(app=>terms.some(term=>(app.name+' '+app.packageName).toLowerCase().includes(term)));
+   if(match)emulatorAssignments[system.name]=match.packageName;
+  });
   localStorage.setItem('eclipse-installed-apps',JSON.stringify(installedApps));
+  localStorage.setItem('eclipse-emulator-assignments',JSON.stringify(emulatorAssignments));
   renderPlayerSettings();
   if(systemName)populatePlayerSelect($('#systemPlayerSelect'),systemName);
   const message='Found '+installedApps.length+' launchable apps. Choose a player for each system below.';
