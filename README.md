@@ -1,6 +1,6 @@
-# ECLIPSE
+# ECLIPSE 4.0.0 — The Eclipse Experience
 
-**ECLIPSE** is an Android-first gaming home and library experience built with Vite and Capacitor. It organizes the games and apps you already have; it is not an emulator and does not distribute game files.
+**ECLIPSE 4.0.0 — The Eclipse Experience** is an Android-first gaming home and library experience built with Vite and Capacitor. It organizes the games and apps you already have; it is not an emulator and does not distribute game files.
 
 ## Current experience
 
