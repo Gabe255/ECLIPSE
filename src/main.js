@@ -158,7 +158,8 @@ document.querySelector('#app').innerHTML = `
         <div class="settings-panel hidden" id="settingsSystem">
           <div class="settings-panel-head"><div><p class="eyebrow">ECLIPSE</p><h3>SYSTEM</h3></div></div>
           <div class="settings-grid">
-            <article class="settings-card"><p class="eyebrow">SOFTWARE</p><h3>UPDATES</h3><p class="settings-note">Installed version: ${VERSION}</p><button class="primary-btn" id="checkUpdates">CHECK FOR UPDATES</button><div id="updateResult" class="update-result">Check GitHub for the latest ECLIPSE release.</div></article>
+            <article class="settings-card"><p class="eyebrow">SOFTWARE</p><h3>UPDATES</h3><p class="settings-note">Installed version: ${VERSION}</p><button class="primary-btn" id="checkUpdates">CHECK FOR UPDATES</button><div id="updateResult" class="update-result">Check GitHub for the latest ECLIPSE release.</div><div id="releaseHistory" class="release-history"></div></article>
+            <article class="settings-card"><p class="eyebrow">DEVICE CHECK</p><h3>COMPATIBILITY</h3><p class="settings-note">Check whether this device can run the current ECLIPSE web frontend and review update requirements.</p><button class="subtle-btn" id="checkCompatibility">CHECK THIS DEVICE</button><div id="compatibilityResult" class="update-result">Compatibility has not been checked yet.</div></article>
             <article class="settings-card"><p class="eyebrow">ABOUT</p><h3>ECLIPSE ALPHA</h3><p class="settings-note">A personal gaming frontend prototype. Emulator launching, native app scanning and real game imports are still in development.</p></article>
           </div>
         </div>
@@ -266,23 +267,68 @@ function renderGames(){
  $('#gameGrid').innerHTML=visible.length?visible.map(g=>{const i=games.indexOf(g);return `<button class="game-card ${i===selectedGame?'focused':''}" data-game="${i}"><div class="game-art art-${g.art}"><span class="art-glow"></span><span class="art-mark">${['M','Z','Ⅲ','S'][i]}</span><span class="art-caption">${g.tag}</span></div><div class="game-meta"><div><h3>${g.title}</h3><p>${g.system} · ${g.year}</p></div><span class="game-arrow">↗</span></div></button>`;}).join(''):'<div class="empty-state system-empty"><div class="empty-icon">✦</div><h3>YOUR COLLECTION STARTS HERE</h3><p>No games imported for this system yet. This platform is ready for your library.</p></div>';
  $('#gameGrid').querySelectorAll('[data-game]').forEach(card=>card.addEventListener('click',()=>{selectedGame=Number(card.dataset.game);playCount++;localStorage.setItem('eclipse-play-count',JSON.stringify(playCount));notify(games[selectedGame].title+' selected · Emulator launch integration is still in development.');}));
 }
-async function checkUpdates(){
- const result=$('#updateResult');result.textContent='Checking the ECLIPSE releases…';$('#checkUpdates').disabled=true;
- try{
-  const response=await fetch('https://api.github.com/repos/'+REPO+'/releases?per_page=10',{headers:{Accept:'application/vnd.github+json'}});
-  if(!response.ok)throw new Error('GitHub returned '+response.status);
-  const releases=await response.json();const release=releases.find(r=>!r.draft&&r.assets?.some(a=>a.name.toLowerCase().endsWith('.apk')));
-  if(!release){result.textContent='No APK release is published yet. Check again after the next beta release.';return;}
-  const asset=release.assets.find(a=>a.name.toLowerCase().endsWith('.apk'));
-  result.innerHTML='';
-  const title=document.createElement('b');title.textContent=release.tag_name+' is available';
-  const note=document.createElement('p');note.textContent=release.body?.slice(0,220)||'A newer ECLIPSE build is ready.';
-  const link=document.createElement('a');link.href=asset.browser_download_url;link.target='_blank';link.rel='noopener';link.textContent='DOWNLOAD APK ↗';
-  result.append(title,note,link);
-  if(release.tag_name===VERSION)result.prepend(document.createTextNode('You are on the latest published version. '));
- }catch(error){result.textContent='Could not check right now. Open the ECLIPSE GitHub Releases page when online.';console.error(error);}
- finally{$('#checkUpdates').disabled=false;}
+function compareVersions(a,b){
+ const parse=value=>{const clean=String(value||'').replace(/^v/i,'');const [core,pre='']=clean.split('-',2);return {parts:core.split('.').map(n=>Number(n)||0),pre};};
+ const x=parse(a),y=parse(b);
+ for(let i=0;i<3;i++){if((x.parts[i]||0)!==(y.parts[i]||0))return (x.parts[i]||0)>(y.parts[i]||0)?1:-1;}
+ if(!x.pre&&!y.pre)return 0;
+ if(!x.pre)return 1;
+ if(!y.pre)return -1;
+ return x.pre.localeCompare(y.pre,undefined,{numeric:true});
 }
+function addSafeLink(parent,url,label){
+ const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=label;parent.append(link);
+}
+async function checkUpdates(){
+ const result=$('#updateResult'),history=$('#releaseHistory'),button=$('#checkUpdates');
+ result.textContent='Checking published ECLIPSE versions…';history.textContent='';button.disabled=true;
+ try{
+  const response=await fetch('https://api.github.com/repos/'+REPO+'/releases?per_page=20',{headers:{Accept:'application/vnd.github+json'}});
+  if(!response.ok)throw new Error('GitHub returned '+response.status);
+  const releases=(await response.json()).filter(r=>!r.draft&&r.assets?.some(a=>a.name.toLowerCase().endsWith('.apk')));
+  releases.sort((a,b)=>compareVersions(b.tag_name,a.tag_name));
+  if(!releases.length){result.textContent='No APK releases are published yet.';return;}
+  const latest=releases[0],asset=latest.assets.find(a=>a.name.toLowerCase().endsWith('.apk'));
+  result.textContent='';
+  const status=document.createElement('b');
+  const comparison=compareVersions(latest.tag_name,VERSION);
+  status.textContent=comparison>0?'Update available: '+latest.tag_name:comparison===0?'You are on the latest published version.':'Installed version is newer than the latest published APK.';
+  result.append(status);
+  if(comparison>0){
+   const note=document.createElement('p');note.textContent=latest.body?.replace(/\s+/g,' ').slice(0,260)||'A newer ECLIPSE build is ready.';
+   result.append(note);addSafeLink(result,asset.browser_download_url,'DOWNLOAD '+latest.tag_name+' APK ↗');
+   const caution=document.createElement('p');caution.textContent='Install compatibility depends on the same app ID, a newer Android version code, and the same signing certificate. Back up important app data before updating.';result.append(caution);
+  }else{
+   const note=document.createElement('p');note.textContent='Latest release: '+latest.tag_name+'. Check the release history below for older builds.';result.append(note);
+  }
+  const heading=document.createElement('p');heading.className='release-history-title';heading.textContent='AVAILABLE RELEASES';history.append(heading);
+  releases.forEach(release=>{
+   const row=document.createElement('div');row.className='release-history-row';
+   const label=document.createElement('span');label.textContent=release.tag_name+(release.tag_name===VERSION?' · INSTALLED':'');
+   row.append(label);
+   const item=release.assets.find(a=>a.name.toLowerCase().endsWith('.apk'));
+   if(item)addSafeLink(row,item.browser_download_url,'APK ↗');
+   history.append(row);
+  });
+ }catch(error){result.textContent='Could not check releases right now. Connect to the internet and try again, or open the ECLIPSE Releases page.';console.error(error);}
+ finally{button.disabled=false;}
+}
+function checkCompatibility(){
+ const result=$('#compatibilityResult');result.textContent='';
+ const ua=navigator.userAgent||'';
+ const android=ua.match(/Android\s([0-9.]+)/i);
+ const isAndroid=!!android;
+ const checks=[
+  ['Browser engine',typeof window.fetch==='function'&&typeof Promise!=='undefined'?'Supported':'Required web features missing'],
+  ['Local data storage',(()=>{try{const key='eclipse-compat-test';localStorage.setItem(key,'1');localStorage.removeItem(key);return 'Available on this device';}catch{return 'Storage unavailable or restricted';}})()],
+  ['Device platform',isAndroid?'Android '+android[1]:'Non-Android browser / platform'],
+  ['Native app bridge',window.Capacitor?.isNativePlatform?.()?'Capacitor native bridge detected':'Not detected in this build']
+ ];
+ checks.forEach(([name,value])=>{const line=document.createElement('p');line.textContent=name+': '+value;result.append(line);});
+ const note=document.createElement('p');note.textContent='This is a frontend-level check only. It cannot verify every device requirement, emulator capability, or installed app.';result.append(note);
+ const update=document.createElement('p');update.textContent='For an in-place APK update, Android requires the same application ID, a higher versionCode, and the same signing certificate. The current CI debug APK may not have a persistent signing key, so an update may require uninstalling the old build first; uninstalling can erase local app data.';result.append(update);
+}
+
 $('#themeSelect').addEventListener('change',e=>setTheme(e.target.value));
 $('#settingsTheme').addEventListener('change',e=>setTheme(e.target.value));
 document.querySelectorAll('.rail-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
@@ -304,6 +350,7 @@ $('#rescanFolders').addEventListener('click',()=>{$('#scanResult').textContent=f
 $('#resetAllDefaults').addEventListener('click',()=>{if(!confirm('Restore ECLIPSE default settings?'))return;activeTheme='violet';localStorage.setItem('eclipse-theme',activeTheme);document.documentElement.dataset.theme=activeTheme;$('#themeSelect').value=activeTheme;widgets=['recent','systems','favorites'];pageNames=['Home','Discover','Collections'];currentPage=0;preferences={showHero:true,compactRows:false,systemCounts:true,startPage:'home'};localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));saveLayout();renderWidgets();renderSettings();document.querySelector('.feature-hero').classList.remove('hidden');notify('Default settings restored.');});
 document.querySelectorAll('[data-settings-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-settings-tab]').forEach(x=>x.classList.toggle('active',x===b));['personal','library','controls','system'].forEach(k=>$('#settings'+k[0].toUpperCase()+k.slice(1)).classList.toggle('hidden',k!==b.dataset.settingsTab));}));
 $('#checkUpdates').addEventListener('click',checkUpdates);
+$('#checkCompatibility').addEventListener('click',checkCompatibility);
 $('#androidInfo').addEventListener('click',()=>notify('Android app detection needs a native Android bridge and package visibility permission.'));
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape'){$('#widgetModal').classList.add('hidden');if(activePage!=='home')showView('home');return;}
