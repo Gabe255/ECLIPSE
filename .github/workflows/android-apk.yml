@@ -2,6 +2,12 @@ name: Build ECLIPSE Android APK
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Existing release tag to attach this APK to (for example v0.2.0-alpha)'
+        required: false
+        type: string
+        default: ''
   push:
     branches: [main]
     tags: ['v*-beta*', 'v*-alpha*']
@@ -42,11 +48,11 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
       - name: Publish beta GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: ECLIPSE ${{ github.ref_name }}
+          tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
+          name: ECLIPSE ${{ github.event.inputs.release_tag || github.ref_name }}
           prerelease: true
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/app-debug.apk
