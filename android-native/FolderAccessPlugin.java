@@ -68,7 +68,8 @@ public class FolderAccessPlugin extends Plugin {
         DocumentFile root = DocumentFile.fromTreeUri(getContext(), treeUri);
         if (root == null || !root.canRead()) throw new SecurityException("ECLIPSE cannot read this folder.");
         JSArray entries = new JSArray();
-        walk(root, "", entries);
+        String rootName = root.getName() == null ? "" : root.getName();
+        walk(root, rootName, entries);
         JSObject response = new JSObject();
         response.put("uri", treeUri.toString());
         response.put("files", entries);
