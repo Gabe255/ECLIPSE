@@ -324,8 +324,41 @@ function renderSystemPicker(){
  $('#systemPickerCount').textContent=systems.length+' WORLDS AVAILABLE';
  picker.querySelectorAll('[data-pick-system]').forEach(card=>card.addEventListener('click',()=>openConsolePage(card.dataset.pickSystem)));
 }
+function detectDisplaySegments(){
+ const segments=typeof window.getWindowSegments==='function'?window.getWindowSegments():[];
+ const posture=window.navigator.devicePosture?.type||'unknown';
+ const cssSegments=window.matchMedia?.('(horizontal-viewport-segments: 2)').matches||window.matchMedia?.('(vertical-viewport-segments: 2)').matches||false;
+ return {dual:segments.length>1||cssSegments,segments,posture};
+}
+function applyDisplayLayout(mode=localStorage.getItem('eclipse-display-layout')||'auto'){
+ const detected=detectDisplaySegments();
+ const effective=mode==='auto'?(detected.dual?'dual':'single'):mode;
+ document.documentElement.dataset.displayLayout=effective;
+ document.documentElement.dataset.displayPreference=mode;
+ if(detected.segments.length>1){
+  const ordered=[...detected.segments].sort((a,b)=>a.left-b.left);
+  const gap=Math.max(0,ordered[1].left-(ordered[0].left+ordered[0].width));
+  document.documentElement.style.setProperty('--eclipse-hinge-gap',Math.min(gap,80)+'px');
+ }else document.documentElement.style.removeProperty('--eclipse-hinge-gap');
+ const status=$('#displayDetectionStatus');
+ if(status)status.textContent=detected.dual?'Dual display detected · split layout ready':(detected.posture!=='unknown'?'Foldable posture detected · adaptive layout ready':'Single display detected · responsive layout ready');
+ const select=$('#displayLayoutSelect');if(select&&select.value!==mode)select.value=mode;
+ const settingsSelect=$('#settingsDisplayLayout');if(settingsSelect)settingsSelect.value=mode;
+ return {mode,effective,detected};
+}
+async function requestDefaultHome(){
+ const status=$('#defaultHomeStatus');
+ if(!Capacitor.isNativePlatform()){if(status)status.textContent='Available in the Android APK. Android controls the final Home app selection.';notify('Default Home setup is available in the Android APK.');return;}
+ if(status)status.textContent='Opening Android launcher confirmation…';
+ try{
+  const result=await LauncherSetup.requestDefaultHome();
+  if(result?.isDefaultHome){if(status)status.textContent='ECLIPSE is your default Home app.';notify('ECLIPSE is now your default Home.');}
+  else if(status)status.textContent='If Android showed its Home app chooser, select ECLIPSE there to finish.';
+ }catch(error){if(status)status.textContent='Could not open the Home app chooser: '+(error?.message||'Try Android Settings → Apps → Default apps → Home app.');}
+}
 function openOnboarding(){
  const modal=$('#onboardingModal');if(!modal||localStorage.getItem('eclipse-onboarding-complete')==='true')return;
+ applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
  modal.classList.remove('hidden');
 }
 function finishOnboarding(){localStorage.setItem('eclipse-onboarding-complete','true');$('#onboardingModal')?.classList.add('hidden');}
