@@ -105,6 +105,7 @@ let pageNames = load('eclipse-pages', ['Home','Discover','Collections']);
 let currentPage = 0;
 let playCount = load('eclipse-play-count', 0);
 let folderPaths = load('eclipse-folders', []);
+let systemShelfRows = Math.max(1, Math.min(4, Number(load('eclipse-system-shelf-rows', 2)) || 2));
 let systemFolders = load('eclipse-system-folders', {});
 let preferences = load('eclipse-preferences', {showHero:true,compactRows:false,systemCounts:true,startPage:'home'});
 let installedApps = load('eclipse-installed-apps', []);
@@ -185,7 +186,7 @@ document.querySelector('#app').innerHTML = `
           <div class="settings-panel-head"><div><p class="eyebrow">MAKE ECLIPSE YOURS</p><h3>PERSONALIZE</h3></div><button class="subtle-btn" id="resetAllDefaults">RESTORE DEFAULTS</button></div>
           <div class="settings-grid">
             <article class="settings-card"><p class="eyebrow">APPEARANCE</p><h3>THEME</h3><label>Built-in theme<select id="settingsTheme">${themes.map(([id,name])=>`<option value="${id}" ${id===activeTheme?'selected':''}>${name}</option>`).join('')}</select></label><p class="settings-note">Choose a visual preset. Your selection is saved on this device.</p></article>
-            <article class="settings-card"><p class="eyebrow">HOME SCREEN</p><h3>LAYOUT OPTIONS</h3><label class="setting-toggle"><input type="checkbox" id="showHeroSetting" checked><span>Show featured hero</span></label><label class="setting-toggle"><input type="checkbox" id="compactRowsSetting"><span>Compact home rows</span></label><label class="setting-toggle"><input type="checkbox" id="systemCountsSetting" checked><span>Show game counts on systems</span></label><label>Start page<select id="startPageSetting"><option value="home">Home</option><option value="library">Library</option><option value="android">Android games</option></select></label><label>Display layout<select id="settingsDisplayLayout"><option value="auto">Auto detect</option><option value="single">Single screen</option><option value="dual">Dual screen / foldable</option></select></label></article>
+            <article class="settings-card"><p class="eyebrow">HOME SCREEN</p><h3>LAYOUT OPTIONS</h3><label class="setting-toggle"><input type="checkbox" id="showHeroSetting" checked><span>Show featured hero</span></label><label class="setting-toggle"><input type="checkbox" id="compactRowsSetting"><span>Compact home rows</span></label><label class="setting-toggle"><input type="checkbox" id="systemCountsSetting" checked><span>Show game counts on systems</span></label><label>Start page<select id="startPageSetting"><option value="home">Home</option><option value="library">Library</option><option value="android">Android games</option></select></label><label>Games per shelf row<select id="systemShelfRowsSetting"><option value="1">1 row</option><option value="2">2 rows</option><option value="3">3 rows</option><option value="4">4 rows</option></select></label><label>Display layout<select id="settingsDisplayLayout"><option value="auto">Auto detect</option><option value="single">Single screen</option><option value="dual">Dual screen / foldable</option></select></label></article>
             <article class="settings-card"><p class="eyebrow">HOME PAGES</p><h3>YOUR PAGES</h3><p class="settings-note">Add up to five pages and arrange the widgets on each page.</p><button class="subtle-btn" id="settingsAddPage">+ ADD PAGE</button><div id="settingsPageList" class="settings-page-list"></div></article>
             <article class="settings-card"><p class="eyebrow">WIDGETS</p><h3>HOME CONTENT</h3><p class="settings-note">Choose which shelves appear and change their order.</p><button class="primary-btn" id="settingsEditWidgets">EDIT HOME WIDGETS</button><button class="subtle-btn" id="resetWidgets">RESET WIDGETS</button></article>
           </div>
@@ -237,16 +238,22 @@ document.querySelector('#app').innerHTML = `
 <div class="modal-backdrop hidden" id="widgetModal"><div class="widget-modal"><div class="modal-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>HOME WIDGETS</h2></div><button class="close-modal" id="closeWidgetModal">×</button></div><p class="settings-note">Add widgets, change their order, or remove the ones you don't use.</p><div id="widgetChoices" class="widget-choices"></div><button class="primary-btn" id="doneWidgets">DONE</button></div></div>
 <div class="system-boot hidden" id="systemBoot" aria-live="polite"><div class="boot-orbit"><span></span></div><p class="eyebrow">ECLIPSE SYSTEM STARTUP</p><h2 id="bootSystemName">STARTING SYSTEM</h2><div class="boot-progress"><span></span></div><small>PREPARING YOUR GAME SPACE</small></div>
 <div class="mascot-welcome hidden" id="mascotWelcome" role="dialog" aria-modal="true" aria-labelledby="mascotTitle"><div class="mascot-card"><div class="mascot-art" aria-hidden="true"><div class="eclipse-mascot"><div class="eclipse-mascot-hat"></div><div class="eclipse-mascot-orb"><i></i><i></i><span></span></div><div class="eclipse-mascot-ring"></div></div></div><p class="eyebrow">YOUR NEW GAME SPACE</p><h2 id="mascotTitle">WELCOME TO <em>ECLIPSE.</em></h2><p class="mascot-message">I’ll show you around. Your systems, game shelves and collections all live here. Set things up your way and make this space yours.</p><div class="mascot-tips"><span><b>01</b> Pick a system</span><span><b>02</b> Build your library</span><span><b>03</b> Make it yours</span></div><div class="mascot-actions"><button class="primary-btn" id="mascotStart">SHOW ME AROUND ↗</button><button class="subtle-btn" id="mascotSkip">SKIP FOR NOW</button></div></div></div>
-<div class="modal-backdrop hidden" id="gameDetailModal"><div class="widget-modal game-detail-modal"><div class="modal-head"><div><p class="eyebrow">GAME DETAILS</p><h2 id="gameDetailTitle">GAME</h2></div><button class="close-modal" id="closeGameDetail" aria-label="Close game details">×</button></div><p class="game-detail-meta" id="gameDetailMeta"></p><div class="game-detail-file"><small>FILE LOCATION</small><p id="gameDetailPath"></p><small>PLAYER</small><p id="gameDetailPlayer"></p></div><div class="game-detail-actions"><button class="primary-btn" id="gameDetailFavorite">☆ ADD TO FAVORITES</button><button class="subtle-btn" id="gameDetailRemove">REMOVE FROM LIBRARY</button></div><p class="settings-note">ECLIPSE has indexed this file. Direct game launching is still being connected to each player's supported file handoff.</p></div></div>
+<div class="modal-backdrop hidden" id="gameDetailModal"><div class="widget-modal game-detail-modal"><div class="modal-head"><div><p class="eyebrow">GAME DETAILS</p><h2 id="gameDetailTitle">GAME</h2></div><button class="close-modal" id="closeGameDetail" aria-label="Close game details">×</button></div><p class="game-detail-meta" id="gameDetailMeta"></p><div class="game-detail-file"><small>FILE LOCATION</small><p id="gameDetailPath"></p><small>PLAYER</small><p id="gameDetailPlayer"></p></div><div class="game-detail-actions"><button class="primary-btn" id="gameDetailLaunch">▶ PLAY GAME</button><button class="subtle-btn" id="gameDetailFavorite">☆ ADD TO FAVORITES</button><button class="subtle-btn" id="gameDetailRemove">REMOVE FROM LIBRARY</button></div><p class="settings-note">Choose a player for this system, then launch the original game file directly through that app.</p></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>`;
 
 const $ = s => document.querySelector(s);
 const toast = $('#toast');
 const mascotWelcome=$('#mascotWelcome');
+const mascotCompanion=document.createElement('button');mascotCompanion.className='mascot-companion';mascotCompanion.type='button';mascotCompanion.setAttribute('aria-label','Talk to the ECLIPSE guide');mascotCompanion.innerHTML='<span class="mascot-companion-orb"><i></i><i></i></span><span class="mascot-companion-label">GUIDE</span>';document.body.append(mascotCompanion);
+let mascotAudio=null,mascotMuted=localStorage.getItem('eclipse-mascot-muted')==='true';
+function mascotBlip(){if(mascotMuted)return;try{mascotAudio=mascotAudio||new (window.AudioContext||window.webkitAudioContext)();if(mascotAudio.state==='suspended')mascotAudio.resume();const osc=mascotAudio.createOscillator(),gain=mascotAudio.createGain();osc.type='square';osc.frequency.setValueAtTime(620+Math.random()*240,mascotAudio.currentTime);osc.frequency.exponentialRampToValueAtTime(280,mascotAudio.currentTime+.045);gain.gain.setValueAtTime(.035,mascotAudio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,mascotAudio.currentTime+.05);osc.connect(gain);gain.connect(mascotAudio.destination);osc.start();osc.stop(mascotAudio.currentTime+.052);}catch{}}
+function typeMascotLine(line){const target=$('.mascot-message');if(!target)return;target.textContent='';let index=0;const step=()=>{if(index>=line.length)return;target.textContent+=line[index++];if(index%2===0)mascotBlip();window.setTimeout(step,22);};step();}
 function closeMascot(){mascotWelcome.classList.add('hidden');localStorage.setItem('eclipse-onboarding-complete','true');}
 $('#mascotStart').addEventListener('click',()=>{closeMascot();showView('library');notify('Choose a system to open its ECLIPSE home.');});
 $('#mascotSkip').addEventListener('click',closeMascot);
-if(!localStorage.getItem('eclipse-onboarding-complete'))mascotWelcome.classList.remove('hidden');
+mascotCompanion.addEventListener('click',()=>{mascotWelcome.classList.remove('hidden');typeMascotLine('Need a hand? Pick a system, add your game folders, then arrange your shelves.');});
+const mascotSoundButton=document.createElement('button');mascotSoundButton.className='mascot-sound-toggle';mascotSoundButton.type='button';mascotSoundButton.textContent=mascotMuted?'SOUND OFF':'SOUND ON';mascotSoundButton.setAttribute('aria-label','Toggle mascot sound effects');$('.mascot-actions')?.append(mascotSoundButton);mascotSoundButton.addEventListener('click',()=>{mascotMuted=!mascotMuted;localStorage.setItem('eclipse-mascot-muted',String(mascotMuted));mascotSoundButton.textContent=mascotMuted?'SOUND OFF':'SOUND ON';if(!mascotMuted)mascotBlip();});
+if(!localStorage.getItem('eclipse-onboarding-complete')){mascotWelcome.classList.remove('hidden');window.setTimeout(()=>typeMascotLine('Hey. I can help you set up your game space. Start by choosing a system. I will keep the menus simple.'),280);}
 let toastTimer;
 function notify(message){toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2400);}
 function saveLayout(){localStorage.setItem('eclipse-widgets',JSON.stringify(widgets));localStorage.setItem('eclipse-pages',JSON.stringify(pageNames));}
@@ -330,12 +337,12 @@ window.setInterval(()=>{if(activeAppSession&&activePage==='android')renderAndroi
 
 function renderSettings(){
  renderPlayerSettings();
- ['showHeroSetting','compactRowsSetting','systemCountsSetting','startPageSetting'].forEach((id)=>{const el=$('#'+id);if(el){const key={showHeroSetting:'showHero',compactRowsSetting:'compactRows',systemCountsSetting:'systemCounts',startPageSetting:'startPage'}[id];el.value=preferences[key];if(el.type==='checkbox')el.checked=!!preferences[key];}});
+ ['showHeroSetting','compactRowsSetting','systemCountsSetting','startPageSetting'].forEach((id)=>{const el=$('#'+id);if(el){const key={showHeroSetting:'showHero',compactRowsSetting:'compactRows',systemCountsSetting:'systemCounts',startPageSetting:'startPage'}[id];el.value=preferences[key];if(el.type==='checkbox')el.checked=!!preferences[key];}});const rowsSelect=$('#systemShelfRowsSetting');if(rowsSelect)rowsSelect.value=String(systemShelfRows);
  renderFolderPaths();renderSettingsPages();
  const dataStatus=$('#dataFolderStatus');if(dataStatus&&!Capacitor.isNativePlatform())dataStatus.textContent='External backup folders require the Android APK. Local app data is still saved automatically on this device.';
 }
 function savePreferences(){localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));document.querySelector('.feature-hero')?.classList.toggle('hidden',!preferences.showHero);document.documentElement.classList.toggle('eclipse-compact-rows',!!preferences.compactRows);renderLibrary();renderWidgets();}
-function renderFolderPaths(){const list=$('#folderList');if(!list)return;list.innerHTML=folderPaths.length?folderPaths.map((p,i)=>'<div class="folder-item"><span>▰ '+p.replace(/</g,'&lt;')+'</span><button data-folder-remove="'+i+'" aria-label="Remove folder">×</button></div>').join(''):'<p class="settings-note">No folders added yet.</p>';list.querySelectorAll('[data-folder-remove]').forEach(b=>b.addEventListener('click',()=>{folderPaths.splice(Number(b.dataset.folderRemove),1);localStorage.setItem('eclipse-folders',JSON.stringify(folderPaths));renderFolderPaths();}));}
+function renderFolderPaths(){const list=$('#folderList');if(!list)return;list.innerHTML=folderPaths.length?folderPaths.map((p,i)=>{const name=typeof p==='string'?p:(p.name||'Game folder');return '<div class="folder-item"><span>▰ '+escapeHTML(name)+'</span><button data-folder-remove="'+i+'" aria-label="Remove '+escapeHTML(name)+'">×</button></div>';}).join(''):'<p class="settings-note">No folders added yet. Add a parent folder or a platform folder below.</p>';list.querySelectorAll('[data-folder-remove]').forEach(b=>b.addEventListener('click',()=>{const removed=folderPaths.splice(Number(b.dataset.folderRemove),1)[0];const uri=typeof removed==='string'?removed:removed?.uri;if(uri&&localStorage.getItem('eclipse-folder-uri')===uri)localStorage.removeItem('eclipse-folder-uri');localStorage.setItem('eclipse-folders',JSON.stringify(folderPaths));renderFolderPaths();}));}
 function renderSettingsPages(){const list=$('#settingsPageList');if(!list)return;list.innerHTML=pageNames.map((p,i)=>'<div class="settings-page-item"><span>'+p+'</span><button data-page-rename="'+i+'">RENAME</button><button data-page-delete="'+i+'">×</button></div>').join('');list.querySelectorAll('[data-page-rename]').forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.pageRename),name=prompt('Name this home page',pageNames[i]);if(name?.trim()){pageNames[i]=name.trim().slice(0,24);saveLayout();renderPages();renderSettingsPages();}}));list.querySelectorAll('[data-page-delete]').forEach(b=>b.addEventListener('click',()=>{if(pageNames.length===1){notify('Keep at least one home page.');return;}pageNames.splice(Number(b.dataset.pageDelete),1);currentPage=Math.min(currentPage,pageNames.length-1);saveLayout();renderWidgets();renderSettingsPages();}));}
 function renderSystemPicker(){
  const picker=$('#systemPicker');if(!picker)return;
@@ -423,16 +430,13 @@ function renderLibrary(){
  $('#consoleStrip').querySelectorAll('[data-console]').forEach(b=>b.addEventListener('click',()=>openConsolePage(b.dataset.console)));
  renderFilters();renderGames();
 }
+let systemBootTimer=null;
 function openConsolePage(name){
  const system=systems.find(s=>s.name===name)||{name,icon:'✦',family:'Platform'};
- const boot=$('#systemBoot');
- $('#bootSystemName').textContent='STARTING '+system.name.toUpperCase();
- boot.classList.remove('hidden');
- window.setTimeout(()=>{
-  boot.classList.add('hidden');
-  renderConsoleHome(system);
-  showView('console');
- },1050);
+ const boot=$('#systemBoot');if(systemBootTimer)window.clearTimeout(systemBootTimer);
+ $('#bootSystemName').textContent='OPENING '+system.name.toUpperCase();
+ renderConsoleHome(system);showView('console');boot.classList.remove('hidden');
+ systemBootTimer=window.setTimeout(()=>{boot.classList.add('hidden');systemBootTimer=null;},420);
 }
 function renderConsoleHome(system){
  const name=system.name;activeConsoleName=name;window.EclipseExperienceApplySystemTheme?.(name);
@@ -454,7 +458,7 @@ $('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
   '<div class="system-home-head"><div><p class="eyebrow">WELCOME TO YOUR SYSTEM</p><h2>'+name.toUpperCase()+' HOME</h2></div><span class="collection-count">'+titles.length+' TITLES</span></div>'+
   '<div class="system-folder-row"><div class="system-row-label"><p class="eyebrow">YOUR COLLECTION</p><span>'+titles.length+' VERIFIED FILES</span></div><div class="system-folders">'+folderNames.map(folder=>'<button class="system-folder" data-system-folder="'+folder+'"><span>▣</span><b>'+folder+'</b><small>'+titles.length+' GAMES FOUND</small></button>').join('')+'</div></div>'+
   (featured?'<section class="system-featured"><div class="system-featured-art">'+artFor(featured)+'</div><div class="system-featured-copy"><p class="eyebrow">FEATURED GAME</p><h2>'+featured.title+'</h2><p>'+name+' · '+featured.year+' · '+featured.tag+'</p><button class="primary-btn" data-system-game="'+games.indexOf(featured)+'">OPEN GAME ↗</button></div></section>':'<div class="system-empty-hero"><p class="eyebrow">NOTHING IMPORTED</p><h2>NO GAMES FOUND.</h2><p>Only games found in a folder scan appear here. Nothing is added automatically.</p><button class="primary-btn" data-go-scan>CHOOSE GAME FOLDER ↗</button></div>')+
-  '<section class="system-shelf"><div class="system-row-label"><div><p class="eyebrow">YOUR COLLECTION</p><h3>ALL GAMES</h3></div><span>'+titles.length+' ITEMS</span></div><div class="system-game-row">'+(titles.length?titles.map(cardFor).join(''):'<p class="settings-note">No supported game files were found for this system.</p>')+'</div></section>';
+  '<section class="system-shelf"><div class="system-row-label"><div><p class="eyebrow">YOUR COLLECTION</p><h3>ALL GAMES</h3></div><span>'+titles.length+' ITEMS · '+systemShelfRows+' ROW'+(systemShelfRows===1?'':'S')+'</span></div><div class="system-game-row" style="--system-shelf-rows:'+systemShelfRows+'">'+(titles.length?titles.map(cardFor).join(''):'<p class="settings-note">No supported game files were found for this system.</p>')+'</div></section>';
  $('#systemHome').querySelectorAll('[data-system-game]').forEach(button=>button.addEventListener('click',()=>{const game=games[Number(button.dataset.systemGame)];if(game)showGameDetails(game);}));
  $('#systemHome').querySelectorAll('[data-system-folder]').forEach(button=>button.addEventListener('click',()=>$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth'})));
  $('#systemHome').querySelector('[data-go-scan]')?.addEventListener('click',()=>{showView('library');chooseGameFolder();});
@@ -501,7 +505,19 @@ function showGameDetails(game){
  const player=installedApps.find(app=>app.packageName===emulatorAssignments[playerSystem]);
  $('#gameDetailPlayer').textContent=player?player.name:'No player selected for '+playerSystem;
  $('#gameDetailFavorite').textContent=favorites.includes(game.id)?'★ REMOVE FROM FAVORITES':'☆ ADD TO FAVORITES';
+ $('#gameDetailLaunch').disabled=!game.uri;
+ $('#gameDetailLaunch').textContent=game.uri?'▶ PLAY GAME':'PLAY IN ANDROID APK';
  $('#gameDetailModal').classList.remove('hidden');
+}
+async function launchSelectedGame(){
+ const game=games.find(item=>item.id===selectedGameDetailId);if(!game)return;
+ if(!Capacitor.isNativePlatform()){notify('Direct game launching is available in the Android APK.');return;}
+ if(!game.uri){notify('This entry has no Android file permission. Re-scan its game folder.');return;}
+ const system=playerSystemForGame(game),packageName=emulatorAssignments[system];if(!packageName){notify('Choose an installed player for '+system+' first.');return;}
+ const button=$('#gameDetailLaunch');button.disabled=true;button.textContent='OPENING…';
+ try{await FolderAccess.launchGame({uri:game.uri,packageName});notify('Opening '+game.title+'…');}
+ catch(error){notify(error?.message||'That player could not open this game file.');}
+ finally{button.disabled=false;button.textContent='▶ PLAY GAME';}
 }
 function inferGameSystem(file){
  const path=(file.webkitRelativePath||file.relativePath||file.name).toLowerCase().replace(/\\/g,'/');
@@ -513,7 +529,7 @@ function inferGameSystem(file){
 }
 function titleFromFile(name){return name.replace(/\.[^.]+$/,'').replace(/[._-]+/g,' ').replace(/\s+/g,' ').trim().replace(/\b\w/g,ch=>ch.toUpperCase());}
 function scanSelectedFolder(fileList,folderUri='browser'){
- const files=[...fileList].filter(file=>file&&file.size>0);
+ const files=[...fileList].filter(file=>file&&file.name);
  const found=[];let matched=0;
  for(const file of files){
   const system=inferGameSystem(file);if(!system)continue;
@@ -534,7 +550,14 @@ async function chooseGameFolder(){
   status.textContent='Choose your game folder. ECLIPSE is scanning its files…';
   try{
    const result=await FolderAccess.pickAndScan();
-   if(result.uri)localStorage.setItem('eclipse-folder-uri',result.uri);
+   if(result.uri){
+    localStorage.setItem('eclipse-folder-uri',result.uri);
+    const entry={uri:result.uri,name:result.rootName||'Game folder'};
+    const exists=folderPaths.some(item=>(typeof item==='string'?item:item?.uri)===entry.uri);
+    if(!exists)folderPaths.push(entry);
+    localStorage.setItem('eclipse-folders',JSON.stringify(folderPaths));
+    renderFolderPaths();
+   }
    scanSelectedFolder(result.files||[],result.uri||'android');
    if(result.truncated)status.textContent+=' Scan limit reached at 5,000 files; choose a smaller platform folder for the rest.';
   }catch(error){
@@ -546,11 +569,12 @@ async function chooseGameFolder(){
  }
 }
 async function rescanGameFolder(){
- const uri=localStorage.getItem('eclipse-folder-uri');
- if(Capacitor.isNativePlatform()&&uri){
-  const status=$('#scanStatus');status.textContent='Rescanning your saved game folder…';
-  try{const result=await FolderAccess.scanFolder({uri});scanSelectedFolder(result.files||[],uri);if(result.truncated)status.textContent+=' Scan limit reached at 5,000 files.';}
-  catch(error){status.textContent='Could not access that folder. Its permission may have been revoked. Choose it again.';notify('Folder permission needs to be renewed.');}
+ const savedUris=folderPaths.map(item=>typeof item==='string'?item:item?.uri).filter(Boolean);
+ const legacyUri=localStorage.getItem('eclipse-folder-uri');if(legacyUri&&!savedUris.includes(legacyUri))savedUris.push(legacyUri);
+ if(Capacitor.isNativePlatform()&&savedUris.length){
+  const status=$('#scanStatus');status.textContent='Rescanning '+savedUris.length+' saved game folder(s)…';let scanned=0,failed=0;
+  for(const uri of savedUris){try{const result=await FolderAccess.scanFolder({uri});scanSelectedFolder(result.files||[],uri);scanned++;if(result.truncated)status.textContent+=' A folder reached the 5,000-file safety limit.';}catch(error){failed++;console.warn('ECLIPSE folder rescan failed',error);}}
+  status.textContent='Finished scanning '+scanned+' folder(s).'+(failed?' '+failed+' folder permission(s) need to be renewed.':'');if(failed)notify(failed+' folder(s) could not be opened. Re-select them in Settings.');
  }else chooseGameFolder();
 }
 function savePlayerAssignment(system,packageName){
@@ -706,7 +730,8 @@ $('#showHeroSetting').addEventListener('change',e=>{preferences.showHero=e.targe
 $('#compactRowsSetting').addEventListener('change',e=>{preferences.compactRows=e.target.checked;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));document.documentElement.classList.toggle('eclipse-compact-rows',preferences.compactRows);});
 $('#systemCountsSetting').addEventListener('change',e=>{preferences.systemCounts=e.target.checked;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));renderLibrary();});
 $('#startPageSetting').addEventListener('change',e=>{preferences.startPage=e.target.value;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));notify('Startup page saved.');});
-$('#addFolderPath').addEventListener('click',()=>{$('#gameFolderPicker').click();});
+$('#systemShelfRowsSetting')?.addEventListener('change',e=>{systemShelfRows=Math.max(1,Math.min(4,Number(e.target.value)||2));localStorage.setItem('eclipse-system-shelf-rows',JSON.stringify(systemShelfRows));if(activePage==='console'&&activeConsoleName)renderConsoleHome(systems.find(item=>item.name===activeConsoleName)||{name:activeConsoleName,icon:'✦',family:'Platform'});notify('Game shelf layout saved.');});
+$('#addFolderPath').addEventListener('click',chooseGameFolder);
 
 $('#rescanFolders').addEventListener('click',rescanGameFolder);
 $('#chooseDataFolder').addEventListener('click',chooseEclipseDataFolder);
@@ -718,6 +743,7 @@ $('#scanInstalledPlayers').addEventListener('click',()=>scanInstalledApps());
 $('#scanAppsPage')?.addEventListener('click',()=>scanInstalledApps());
 $('#appLibrarySearch')?.addEventListener('input',renderAndroidApps);
 $('#closeGameDetail').addEventListener('click',()=>$('#gameDetailModal').classList.add('hidden'));
+$('#gameDetailLaunch').addEventListener('click',launchSelectedGame);
 $('#gameDetailModal').addEventListener('click',event=>{if(event.target.id==='gameDetailModal')$('#gameDetailModal').classList.add('hidden');});
 $('#gameDetailFavorite').addEventListener('click',()=>{
  const game=games.find(item=>item.id===selectedGameDetailId);if(!game)return;
@@ -752,4 +778,6 @@ applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
 refreshDisplayLayout();
 mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
 mountControlCenter({ notify });
-renderSystemPicker();renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();window.setTimeout(openOnboarding,450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
+renderSystemPicker();renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();
+if(Capacitor.isNativePlatform())window.setTimeout(()=>scanInstalledApps(),900);
+window.setTimeout(openOnboarding,450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
