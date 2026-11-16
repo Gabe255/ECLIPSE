@@ -825,14 +825,22 @@ document.addEventListener('keydown',e=>{
   else if(pressed(12)||axis[1]<-.55)direction='up';
   else if(pressed(13)||axis[1]>.55)direction='down';
   if(direction&&now-lastMove>190){moveFocus(direction);lastMove=now;}
-  const a=pressed(0),altA=pressed( ButtonIndex?.A ?? 999);
-  const confirm=a||altA;
+  const confirm=pressed(0);
   if(confirm&&!wasA){const active=document.activeElement;if(active&&active!==document.body&&typeof active.click==='function')active.click();else focusables()[0]?.click();}
   const cancel=pressed(1)||pressed(2);
   if(cancel&&!wasB)back();
   wasA=confirm;wasB=cancel;
  }
- let ButtonIndex=null;
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'||event.key==='Backspace'){event.preventDefault();event.stopImmediatePropagation();back();return;}
+  const directions={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};
+  if(directions[event.key]&&!event.target.matches('input,textarea,select')){
+   event.preventDefault();event.stopImmediatePropagation();moveFocus(directions[event.key]);return;
+  }
+  if((event.key==='Enter'||event.key===' ')&&(document.activeElement===document.body||!document.activeElement)){
+   event.preventDefault();event.stopImmediatePropagation();const first=focusables()[0];if(first){first.focus();first.click();}
+  }
+ });
  window.addEventListener('gamepadconnected',()=>{if(!document.activeElement||document.activeElement===document.body)focusables()[0]?.focus();});
  window.setInterval(poll,80);
 })();
