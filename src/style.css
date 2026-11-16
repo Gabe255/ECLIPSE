@@ -644,5 +644,5 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 #systemFeature[data-family="sega"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(73,190,255,.4),transparent 43%),linear-gradient(135deg,#10243c,#080910 72%);}
 #systemFeature[data-family="atari"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(255,177,77,.4),transparent 43%),linear-gradient(135deg,#34200f,#080910 72%);}
 #systemFeature[data-family="arcade"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(255,87,204,.4),transparent 43%),linear-gradient(135deg,#30102d,#080910 72%);}
-#systemFeature[data-family="pc"],#systemFeature[data-family="pc-gaming"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(125,145,255,.42),transparent 43%),linear-gradient(135deg,#171b37,#080910 72%);}
+#systemFeature[data-family="pc"] .system-feature-art,#systemFeature[data-family="pc-gaming"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(125,145,255,.42),transparent 43%),linear-gradient(135deg,#171b37,#080910 72%);}
 #systemFeature[data-family="mobile"] .system-feature-art,#systemFeature[data-family="android"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(65,218,191,.38),transparent 43%),linear-gradient(135deg,#102c2b,#080910 72%);}
