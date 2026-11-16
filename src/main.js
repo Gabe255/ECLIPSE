@@ -298,7 +298,7 @@ function renderAndroidApps(){
  const seconds=Object.values(appPlaytime).reduce((sum,value)=>sum+Number(value||0),0)+(activeAppSession?Math.floor((Date.now()-activeAppSession.startedAt)/1000):0);
  $('#trackedTime').textContent=formatPlaytime(seconds);
  $('#appLibraryStatus').textContent=Capacitor.isNativePlatform()?total+' apps discovered on this device.':'Device scanning is available in the Android APK.';
- if(!filtered.length){list.innerHTML='<div class="app-library-empty"><span>▣</span><b>'+(total?'NO MATCHING APPS':'NO APPS DISCOVERED YET')+'</b><p>'+(total?'Try another search.':'Tap SCAN DEVICE in the Android APK to discover installed apps.')+'</p></div>';return;}
+ if(!filtered.length){list.innerHTML='<div class="app-library-empty"><span>▣</span><b>'+(total?'NO MATCHING APPS':'NO APPS DISCOVERED YET')+'</b><p>'+(total?'Try another search.':'Tap SCAN DEVICE in the Android APK to discover installed apps.')+'</p></div>';renderHomeAppsShelf();return;}
  list.innerHTML=filtered.map(app=>{
   const isGame=!!appGameFlags[app.packageName],secondsForApp=trackedSeconds(app.packageName),isActive=activeAppSession?.packageName===app.packageName;
   const isPinned=appHomePins.includes(app.packageName);
@@ -314,6 +314,7 @@ function renderAndroidApps(){
  }));
  list.querySelectorAll('[data-treat-game]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.treatGame;if(appGameFlags[id])delete appGameFlags[id];else appGameFlags[id]=true;saveAppTracking();renderAndroidApps();notify(appGameFlags[id]?'Added to games.':'Removed game label.');}));
  list.querySelectorAll('[data-session-app]').forEach(button=>button.addEventListener('click',()=>toggleAppSession(button.dataset.sessionApp)));
+ renderHomeAppsShelf();
 }
 function toggleAppSession(packageName){
  if(activeAppSession?.packageName===packageName){
