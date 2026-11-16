@@ -292,7 +292,7 @@ $('#scanSystemPlayers').addEventListener('click',()=>scanInstalledApps(name));
 $('#systemPlayerSelect').addEventListener('change',event=>savePlayerAssignment(name,event.target.value));
 $('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
  const artFor=g=>'<div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">✦</span><span class="art-caption">'+escapeHTML(g.tag)+'</span></div>';
- const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+g.title+'</b><small>'+g.tag+' · '+g.fileName+'</small></div></button>';
+ const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+escapeHTML(g.title)+'</b><small>'+escapeHTML(g.tag)+' · '+escapeHTML(g.fileName)+'</small></div></button>';
  const featured=titles[0];
  const folderNames=['ALL GAMES'];
  $('#systemHome').innerHTML=
@@ -537,6 +537,7 @@ $('#gameDetailFavorite').addEventListener('click',()=>{
 });
 $('#gameDetailRemove').addEventListener('click',()=>{
  const index=games.findIndex(item=>item.id===selectedGameDetailId);if(index<0)return;
+ if(!confirm('Remove this game from your ECLIPSE library? The original file will not be deleted.'))return;
  const title=games[index].title;
  games.splice(index,1);favorites=favorites.filter(id=>id!==selectedGameDetailId);
  localStorage.setItem('eclipse-games',JSON.stringify(games));localStorage.setItem('eclipse-favorites',JSON.stringify(favorites));
