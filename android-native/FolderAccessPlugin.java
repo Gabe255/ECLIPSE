@@ -40,7 +40,7 @@ public class FolderAccessPlugin extends Plugin {
         int flags = result.getData().getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         try {
             getContext().getContentResolver().takePersistableUriPermission(treeUri, flags);
-        } catch (SecurityException ignored) {
+        } catch (Exception ignored) {
             // The current scan can still work even if the provider does not offer a persistent grant.
         }
         try {
