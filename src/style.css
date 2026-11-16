@@ -154,3 +154,57 @@ body{background:radial-gradient(ellipse at 80% 8%,color-mix(in srgb,var(--accent
 .emulator-option{display:inline-flex;align-items:center;padding:9px 12px;border:1px solid color-mix(in srgb,var(--accent) 40%,#ffffff20);border-radius:6px;background:color-mix(in srgb,var(--accent) 10%,#080912);color:#eee;font:10px 'DM Mono';letter-spacing:.4px}
 .emulator-panel .settings-note{margin:8px 0 0}
 @media(max-width:520px){.emulator-panel{padding:14px}.emulator-panel-head{align-items:flex-start;flex-direction:column}.emulator-option{font-size:9px;padding:8px 10px}}
+
+
+/* Console-style boot sequence and system home shelves */
+.system-boot{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;background:radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--accent) 24%,#111322),#070811 58%);text-align:center;animation:bootFade .25s ease-out}
+.system-boot h2{margin:0;font-size:clamp(24px,6vw,42px);letter-spacing:2px}
+.system-boot small{color:#85869c;font:9px 'DM Mono';letter-spacing:2px}
+.boot-orbit{width:86px;height:86px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:50%;box-shadow:0 0 45px color-mix(in srgb,var(--accent) 22%,transparent);animation:bootPulse 1s ease-in-out infinite}
+.boot-orbit span{width:36px;height:36px;border:5px solid #ffffff20;border-top-color:var(--accent);border-radius:50%;animation:bootSpin .8s linear infinite}
+.boot-progress{width:min(230px,65vw);height:3px;overflow:hidden;background:#ffffff1c;border-radius:10px;margin-top:7px}
+.boot-progress span{display:block;width:40%;height:100%;background:var(--accent);box-shadow:0 0 14px var(--accent);animation:bootLoad 1s ease-out forwards}
+@keyframes bootSpin{to{transform:rotate(360deg)}}
+@keyframes bootPulse{50%{transform:scale(1.06);box-shadow:0 0 65px color-mix(in srgb,var(--accent) 35%,transparent)}}
+@keyframes bootLoad{to{width:100%}}
+@keyframes bootFade{from{opacity:0}to{opacity:1}}
+.system-home{display:flex;flex-direction:column;gap:25px;margin:20px 0 45px}
+.system-home-head,.system-row-label{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.system-home-head h2,.system-row-label h3{margin:3px 0 0;letter-spacing:1px}
+.system-folder-row{padding:18px;border:1px solid #ffffff17;border-radius:10px;background:#ffffff05}
+.system-row-label{margin-bottom:13px}
+.system-row-label>span{color:#85869c;font:9px 'DM Mono';letter-spacing:1px}
+.system-folders{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.system-folder{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-height:100px;padding:14px;border:1px solid #ffffff19;border-radius:8px;background:linear-gradient(145deg,#ffffff0c,#ffffff04);color:#e9e7f2;text-align:left}
+.system-folder>span{font-size:22px;color:var(--accent)}
+.system-folder b{font-size:10px;letter-spacing:.6px}
+.system-folder small{font:8px 'DM Mono';color:#88899e}
+.system-folder:hover{border-color:var(--accent);transform:translateY(-2px)}
+.system-featured{min-height:220px;display:grid;grid-template-columns:1.1fr 1fr;overflow:hidden;border:1px solid #ffffff20;border-radius:11px;background:linear-gradient(110deg,#191a2a,#0e101b)}
+.system-featured-art{min-height:220px;overflow:hidden;position:relative}
+.system-featured-art .game-art{height:100%;min-height:220px;border-radius:0}
+.system-featured-copy{align-self:center;padding:22px 28px 22px 12px}
+.system-featured-copy h2{font-size:clamp(22px,4vw,38px);line-height:1;margin:8px 0;letter-spacing:-1px}
+.system-featured-copy p:not(.eyebrow){font:10px 'DM Mono';color:#9b9bad;margin:0 0 16px}
+.system-empty-hero{padding:42px 24px;border:1px dashed #ffffff27;border-radius:11px;background:radial-gradient(ellipse at 80% 20%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 50%),#ffffff04}
+.system-empty-hero h2{margin:8px 0;font-size:clamp(24px,5vw,40px)}
+.system-empty-hero p:last-child{color:#9b9bad;font-size:12px}
+.system-game-row{display:flex;gap:13px;overflow-x:auto;padding:2px 2px 13px;scroll-snap-type:x mandatory}
+.system-game-card{flex:0 0 190px;min-width:0;overflow:hidden;padding:0;border:1px solid #ffffff1b;border-radius:8px;background:#ffffff08;color:#fff;text-align:left;scroll-snap-align:start;transition:transform .2s,border-color .2s}
+.system-game-card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.system-game-card .game-art{height:132px;min-height:132px;border-radius:0}
+.system-game-meta{display:flex;flex-direction:column;gap:6px;padding:11px}
+.system-game-meta b{font-size:10px;letter-spacing:.3px}
+.system-game-meta small{font:8px 'DM Mono';color:#9292a6}
+.system-shelf{min-width:0}
+.system-shelf .system-row-label{margin-bottom:12px}
+@media(max-width:650px){
+ .system-folders{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .system-featured{grid-template-columns:1fr}
+ .system-featured-art{min-height:165px}
+ .system-featured-art .game-art{min-height:165px}
+ .system-featured-copy{padding:18px 20px 22px}
+ .system-game-card{flex-basis:155px}
+ .system-game-card .game-art{height:112px;min-height:112px}
+ .system-home{gap:18px}
+}
