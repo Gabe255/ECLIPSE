@@ -350,6 +350,8 @@ function applyDisplayLayout(mode=localStorage.getItem('eclipse-display-layout')|
  const effective=mode==='auto'?(detected.dual?'dual':'single'):mode;
  document.documentElement.dataset.displayLayout=effective;
  document.documentElement.dataset.displayPreference=mode;
+ const orientation=nativeDisplayInfo?.orientation||(detected.segments.length>1?(detected.segments[0].width>=detected.segments[0].height?'vertical':'horizontal'):'vertical');
+ document.documentElement.dataset.displayOrientation=orientation;
  if(detected.segments.length>1){
   const ordered=[...detected.segments].sort((a,b)=>a.left-b.left);
   const gap=Math.max(0,ordered[1].left-(ordered[0].left+ordered[0].width));
