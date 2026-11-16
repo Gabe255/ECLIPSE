@@ -55,6 +55,7 @@ jobs:
         run: |
           mkdir -p android/app/src/main/java/com/eclipse/launcher
           cp android-native/FolderAccessPlugin.java android/app/src/main/java/com/eclipse/launcher/FolderAccessPlugin.java
+          cp android-native/LauncherSetupPlugin.java android/app/src/main/java/com/eclipse/launcher/LauncherSetupPlugin.java
           python3 - <<'PY'
           from pathlib import Path
           activity = Path("android/app/src/main/java/com/eclipse/launcher/MainActivity.java")
@@ -69,6 +70,7 @@ jobs:
               "    @Override\n"
               "    public void onCreate(Bundle savedInstanceState) {\n"
               "        registerPlugin(FolderAccessPlugin.class);\n"
+              "        registerPlugin(LauncherSetupPlugin.class);\n"
               "        super.onCreate(savedInstanceState);\n"
               "    }\n"
               "}"
@@ -96,6 +98,16 @@ jobs:
               category = ET.SubElement(intent, "category")
               category.set("{http://schemas.android.com/apk/res/android}name", "android.intent.category.LAUNCHER")
               root.insert(0, queries)
+          ns = "{http://schemas.android.com/apk/res/android}"
+          for activity_node in root.iter("activity"):
+              if activity_node.get(ns + "name", "").endswith("MainActivity"):
+                  home_filter = ET.SubElement(activity_node, "intent-filter")
+                  home_action = ET.SubElement(home_filter, "action")
+                  home_action.set(ns + "name", "android.intent.action.MAIN")
+                  for category_name in ("android.intent.category.HOME", "android.intent.category.DEFAULT"):
+                      home_category = ET.SubElement(home_filter, "category")
+                      home_category.set(ns + "name", category_name)
+                  break
           tree.write(manifest, encoding="utf-8", xml_declaration=True)
           PY
       - name: Configure persistent release signing
