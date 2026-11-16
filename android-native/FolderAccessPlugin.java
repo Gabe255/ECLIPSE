@@ -19,6 +19,8 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @CapacitorPlugin(name = "FolderAccess")
 public class FolderAccessPlugin extends Plugin {
@@ -67,10 +69,11 @@ public class FolderAccessPlugin extends Plugin {
         );
 
         JSArray apps = new JSArray();
+        Set<String> seenPackages = new HashSet<>();
         for (ResolveInfo match : matches) {
             if (match.activityInfo == null) continue;
             String packageName = match.activityInfo.packageName;
-            if (getContext().getPackageName().equals(packageName)) continue;
+            if (getContext().getPackageName().equals(packageName) || !seenPackages.add(packageName)) continue;
             JSObject app = new JSObject();
             app.put("name", match.loadLabel(manager).toString());
             app.put("packageName", packageName);
