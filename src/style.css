@@ -87,3 +87,33 @@ body{background:radial-gradient(ellipse at 80% 8%,color-mix(in srgb,var(--accent
 .console-detail-toolbar h2{margin:4px 0 0}
 .console-empty-note{padding:28px;border:1px dashed #ffffff25;border-radius:10px;color:#9b9bad;text-align:center;font-size:13px}
 @media(max-width:520px){.console-banner{min-height:170px;padding:18px;gap:15px}.console-banner-mark{width:76px;height:76px;flex-basis:76px;border-radius:18px;font-size:43px}.console-banner-copy h1{font-size:28px}.console-banner-copy>p:last-child{font-size:11px}.console-banner-index{font-size:8px;right:12px;bottom:10px}}
+
+
+/* Prism Flow theme — visual-first, luminous built-in preset */
+:root[data-theme="iisu"]{--accent:#9de7ff;--accent2:#766bff}
+:root[data-theme="iisu"] body{background:radial-gradient(ellipse at 12% 8%,#6558ff30,transparent 34%),radial-gradient(ellipse at 88% 28%,#21c7d92b,transparent 32%),#070914}
+:root[data-theme="iisu"] .topbar{border-color:#9de7ff28}
+:root[data-theme="iisu"] .dashboard-widget{background:linear-gradient(112deg,#202a478c,#11182dcc 65%,#1d17448c);border-color:#9de7ff25;box-shadow:inset 0 1px #ffffff12,0 12px 35px #0003}
+:root[data-theme="iisu"] .feature-hero{background:linear-gradient(110deg,#171d37,#111629 65%,#241a48);border-color:#9de7ff35}
+:root[data-theme="iisu"] .console-card{background:linear-gradient(145deg,#202a478c,#11182dcc);border-color:#9de7ff25}
+
+/* Cocoon-inspired horizontal home rows */
+.dashboard-grid{display:flex;flex-direction:column;gap:11px;margin:0 0 24px}
+.dashboard-widget{display:grid;grid-template-columns:minmax(150px,.72fr) minmax(0,1.8fr);grid-template-rows:auto 1fr;align-items:center;column-gap:18px;min-height:112px;padding:17px 20px}
+.dashboard-widget .widget-heading{grid-column:1;grid-row:1;align-self:end}
+.dashboard-widget .widget-large,.dashboard-widget .system-mini-list,.dashboard-widget .quick-links{grid-column:2;grid-row:1 / span 2;align-self:center;margin-top:0}
+.dashboard-widget .widget-caption{grid-column:1;grid-row:2;align-self:start;margin-top:7px}
+.dashboard-widget .widget-controls{opacity:.5}
+.dashboard-widget:hover .widget-controls{opacity:1}
+.dashboard-widget .system-mini-list{gap:9px}
+.dashboard-widget .system-mini-list span{padding:9px 12px}
+.dashboard-widget .quick-links{margin-top:0}
+.dashboard-widget .widget-large{font-size:clamp(16px,2vw,23px)}
+@media(max-width:520px){
+ .dashboard-widget{grid-template-columns:minmax(92px,.72fr) minmax(0,1.5fr);gap:8px;padding:13px;min-height:104px}
+ .dashboard-widget .widget-large{font-size:14px;white-space:normal;line-height:1.25}
+ .dashboard-widget .system-mini-list{gap:5px}
+ .dashboard-widget .system-mini-list span{font-size:8px;padding:7px}
+ .dashboard-widget .widget-caption{font-size:8px}
+ .dashboard-widget .widget-controls{opacity:.8;right:7px;bottom:5px}
+}
