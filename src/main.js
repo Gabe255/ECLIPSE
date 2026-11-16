@@ -55,7 +55,7 @@ let selectedGame = 0;
 let widgets = load('eclipse-widgets', ['recent','systems','favorites']);
 let pageNames = load('eclipse-pages', ['Home','Discover','Collections']);
 let currentPage = 0;
-let playCount = load('eclipse-play-count', 0);
+let playCount = load('eclipse-play-count', 0);\nlet folderPaths = load('eclipse-folders', []);\nlet preferences = load('eclipse-preferences', {showHero:true,compactRows:false,systemCounts:true,startPage:'home'});
 document.documentElement.dataset.theme = activeTheme;
 
 document.querySelector('#app').innerHTML = `
@@ -107,11 +107,33 @@ document.querySelector('#app').innerHTML = `
     </section>
     <section id="settingsView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>SETTINGS</h2></div></div>
-      <div class="settings-grid">
-        <article class="settings-card"><p class="eyebrow">APPEARANCE</p><h3>THEME & HOME</h3><label>Color theme<select id="settingsTheme">${themes.map(([id,name])=>`<option value="${id}" ${id===activeTheme?'selected':''}>${name}</option>`).join('')}</select></label><button class="subtle-btn" id="resetWidgets">RESET HOME LAYOUT</button></article>
-        <article class="settings-card"><p class="eyebrow">SOFTWARE</p><h3>UPDATES</h3><p class="settings-note">Installed version: ${VERSION}</p><button class="primary-btn" id="checkUpdates">CHECK FOR UPDATES</button><div id="updateResult" class="update-result">Check GitHub for the latest ECLIPSE release.</div></article>
-        <article class="settings-card"><p class="eyebrow">INPUT</p><h3>CONTROLLER</h3><p class="settings-note">D-pad / arrow keys move focus. A / Enter selects. B / Escape backs out.</p><span class="feature-tag">KEYBOARD NAVIGATION ACTIVE</span></article>
-        <article class="settings-card"><p class="eyebrow">ABOUT</p><h3>ECLIPSE ALPHA</h3><p class="settings-note">A personal gaming frontend prototype. Emulator launching, native app scanning and real game imports are still in development.</p></article>
+      <div class="settings-layout">
+        <nav class="settings-nav"><button class="settings-tab active" data-settings-tab="personal">PERSONALIZE</button><button class="settings-tab" data-settings-tab="library">LIBRARY FOLDERS</button><button class="settings-tab" data-settings-tab="controls">CONTROLS</button><button class="settings-tab" data-settings-tab="system">SYSTEM</button></nav>
+        <div class="settings-panel" id="settingsPersonal">
+          <div class="settings-panel-head"><div><p class="eyebrow">MAKE ECLIPSE YOURS</p><h3>PERSONALIZE</h3></div><button class="subtle-btn" id="resetAllDefaults">RESTORE DEFAULTS</button></div>
+          <div class="settings-grid">
+            <article class="settings-card"><p class="eyebrow">APPEARANCE</p><h3>THEME</h3><label>Built-in theme<select id="settingsTheme">${themes.map(([id,name])=>`<option value="${id}" ${id===activeTheme?'selected':''}>${name}</option>`).join('')}</select></label><p class="settings-note">Choose a visual preset. Your selection is saved on this device.</p></article>
+            <article class="settings-card"><p class="eyebrow">HOME SCREEN</p><h3>LAYOUT OPTIONS</h3><label class="setting-toggle"><input type="checkbox" id="showHeroSetting" checked><span>Show featured hero</span></label><label class="setting-toggle"><input type="checkbox" id="compactRowsSetting"><span>Compact home rows</span></label><label class="setting-toggle"><input type="checkbox" id="systemCountsSetting" checked><span>Show game counts on systems</span></label><label>Start page<select id="startPageSetting"><option value="home">Home</option><option value="library">Library</option><option value="android">Android games</option></select></label></article>
+            <article class="settings-card"><p class="eyebrow">HOME PAGES</p><h3>YOUR PAGES</h3><p class="settings-note">Add up to five pages and arrange the widgets on each page.</p><button class="subtle-btn" id="settingsAddPage">+ ADD PAGE</button><div id="settingsPageList" class="settings-page-list"></div></article>
+            <article class="settings-card"><p class="eyebrow">WIDGETS</p><h3>HOME CONTENT</h3><p class="settings-note">Choose which shelves appear and change their order.</p><button class="primary-btn" id="settingsEditWidgets">EDIT HOME WIDGETS</button><button class="subtle-btn" id="resetWidgets">RESET WIDGETS</button></article>
+          </div>
+        </div>
+        <div class="settings-panel hidden" id="settingsLibrary">
+          <div class="settings-panel-head"><div><p class="eyebrow">YOUR GAME LOCATIONS</p><h3>LIBRARY FOLDERS</h3></div><span class="feature-tag">LOCAL SETUP</span></div>
+          <article class="settings-card folder-card"><h3>GAME FOLDERS</h3><p class="settings-note">Add the folder locations where you keep your game files. ECLIPSE can save these locations now; automatic folder scanning needs the native Android storage bridge, which is not connected yet.</p><div class="folder-add-row"><input id="folderPathInput" type="text" placeholder="Example: /storage/emulated/0/Games"><button class="primary-btn" id="addFolderPath">ADD FOLDER</button></div><div id="folderList" class="folder-list"></div><button class="primary-btn" id="rescanFolders">↻ RESCAN FOLDERS</button><div id="scanResult" class="update-result">No scan has been run. Saved folder locations will appear here.</div></article>
+          <article class="settings-card"><p class="eyebrow">IMPORT STATUS</p><h3>WHAT WORKS RIGHT NOW</h3><p class="settings-note">Folder locations are stored on this device. Detecting game files, reading metadata and importing box art will be enabled when the Android storage integration is added.</p></article>
+        </div>
+        <div class="settings-panel hidden" id="settingsControls">
+          <div class="settings-panel-head"><div><p class="eyebrow">NAVIGATION</p><h3>CONTROLS</h3></div></div>
+          <article class="settings-card"><h3>CONTROLLER & KEYBOARD</h3><p class="settings-note">D-pad / arrow keys move focus. A / Enter selects. B / Escape backs out. Native controller remapping is planned for a later Android integration.</p><span class="feature-tag">BASIC KEYBOARD NAVIGATION ACTIVE</span></article>
+        </div>
+        <div class="settings-panel hidden" id="settingsSystem">
+          <div class="settings-panel-head"><div><p class="eyebrow">ECLIPSE</p><h3>SYSTEM</h3></div></div>
+          <div class="settings-grid">
+            <article class="settings-card"><p class="eyebrow">SOFTWARE</p><h3>UPDATES</h3><p class="settings-note">Installed version: ${VERSION}</p><button class="primary-btn" id="checkUpdates">CHECK FOR UPDATES</button><div id="updateResult" class="update-result">Check GitHub for the latest ECLIPSE release.</div></article>
+            <article class="settings-card"><p class="eyebrow">ABOUT</p><h3>ECLIPSE ALPHA</h3><p class="settings-note">A personal gaming frontend prototype. Emulator launching, native app scanning and real game imports are still in development.</p></article>
+          </div>
+        </div>
       </div>
     </section>
     <footer><span>ECLIPSE · PERSONAL BUILD · ${VERSION}</span><span>BUILT FOR YOUR NEXT ADVENTURE <b>✦</b></span></footer>
@@ -126,7 +148,7 @@ let toastTimer;
 function notify(message){toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2400);}
 function saveLayout(){localStorage.setItem('eclipse-widgets',JSON.stringify(widgets));localStorage.setItem('eclipse-pages',JSON.stringify(pageNames));}
 function setTheme(id){activeTheme=id;document.documentElement.dataset.theme=id;localStorage.setItem('eclipse-theme',id);$('#themeSelect').value=id;$('#settingsTheme').value=id;notify('Theme changed: '+themes.find(t=>t[0]===id)[1]);}
-function showView(name){activePage=name;document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));$('#'+name+'View').classList.remove('hidden');document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));window.scrollTo({top:0,behavior:'smooth'});if(name==='library')renderLibrary();}
+function showView(name){activePage=name;document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));$('#'+name+'View').classList.remove('hidden');document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));window.scrollTo({top:0,behavior:'smooth'});if(name==='library')renderLibrary();if(name==='settings')renderSettings();}
 function renderPages(){$('#pageTabs').innerHTML=pageNames.map((p,i)=>`<button class="page-tab ${i===currentPage?'selected':''}" data-page="${i}">${p}</button>`).join('');$('#pageTabs').querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{currentPage=Number(b.dataset.page);renderPages();renderWidgets();}));}
 function widgetContent(id){
  const recent=games[playCount%games.length];
@@ -149,8 +171,15 @@ function renderWidgetChoices(){
  $('#widgetChoices').innerHTML=widgetCatalog.map(([id,name,desc])=>`<label class="widget-choice"><input type="checkbox" value="${id}" ${widgets.includes(id)?'checked':''}><span><b>${name}</b><small>${desc}</small></span></label>`).join('');
  $('#widgetChoices').querySelectorAll('input').forEach(input=>input.addEventListener('change',()=>{widgets=input.checked?[...widgets,input.value]:widgets.filter(x=>x!==input.value);saveLayout();}));
 }
+function renderSettings(){
+ ['showHeroSetting','compactRowsSetting','systemCountsSetting','startPageSetting'].forEach((id)=>{const el=$('#'+id);if(el){const key={showHeroSetting:'showHero',compactRowsSetting:'compactRows',systemCountsSetting:'systemCounts',startPageSetting:'startPage'}[id];el.value=preferences[key];if(el.type==='checkbox')el.checked=!!preferences[key];}});
+ renderFolderPaths();renderSettingsPages();
+}
+function savePreferences(){localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));document.querySelector('.feature-hero')?.classList.toggle('hidden',!preferences.showHero);document.documentElement.classList.toggle('eclipse-compact-rows',!!preferences.compactRows);renderLibrary();renderWidgets();}
+function renderFolderPaths(){const list=$('#folderList');if(!list)return;list.innerHTML=folderPaths.length?folderPaths.map((p,i)=>'<div class="folder-item"><span>▰ '+p.replace(/</g,'&lt;')+'</span><button data-folder-remove="'+i+'" aria-label="Remove folder">×</button></div>').join(''):'<p class="settings-note">No folders added yet.</p>';list.querySelectorAll('[data-folder-remove]').forEach(b=>b.addEventListener('click',()=>{folderPaths.splice(Number(b.dataset.folderRemove),1);localStorage.setItem('eclipse-folders',JSON.stringify(folderPaths));renderFolderPaths();}));}
+function renderSettingsPages(){const list=$('#settingsPageList');if(!list)return;list.innerHTML=pageNames.map((p,i)=>'<div class="settings-page-item"><span>'+p+'</span><button data-page-rename="'+i+'">RENAME</button><button data-page-delete="'+i+'">×</button></div>').join('');list.querySelectorAll('[data-page-rename]').forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.pageRename),name=prompt('Name this home page',pageNames[i]);if(name?.trim()){pageNames[i]=name.trim().slice(0,24);saveLayout();renderPages();renderSettingsPages();}}));list.querySelectorAll('[data-page-delete]').forEach(b=>b.addEventListener('click',()=>{if(pageNames.length===1){notify('Keep at least one home page.');return;}pageNames.splice(Number(b.dataset.pageDelete),1);currentPage=Math.min(currentPage,pageNames.length-1);saveLayout();renderWidgets();renderSettingsPages();}));}
 function renderLibrary(){
- $('#consoleStrip').innerHTML=systems.map(s=>`<button class="console-card" data-console="${s.name}"><span>${s.icon}</span><b>${s.name}</b><small>${gamesForSystem(s.name).length ? gamesForSystem(s.name)+' IN LIBRARY' : 'READY FOR IMPORT'}</small></button>`).join('');
+ $('#consoleStrip').innerHTML=systems.map(s=>`<button class="console-card" data-console="${s.name}"><span>${s.icon}</span><b>${s.name}</b><small>${preferences.systemCounts?(gamesForSystem(s.name).length ? gamesForSystem(s.name)+' IN LIBRARY' : 'READY FOR IMPORT'):'OPEN SYSTEM'}</small></button>`).join('');
  $('#consoleStrip').querySelectorAll('[data-console]').forEach(b=>b.addEventListener('click',()=>openConsolePage(b.dataset.console)));
  renderFilters();renderGames();
 }
@@ -207,7 +236,7 @@ $('#editWidgets').addEventListener('click',()=>{$('#widgetModal').classList.remo
 $('#closeWidgetModal').addEventListener('click',()=>{$('#widgetModal').classList.add('hidden');renderWidgets();});
 $('#doneWidgets').addEventListener('click',()=>{$('#widgetModal').classList.add('hidden');renderWidgets();notify('Home layout saved.');});
 $('#addPage').addEventListener('click',()=>{if(pageNames.length>=5){notify('You can have up to five home pages.');return;}pageNames.push('Page '+(pageNames.length+1));currentPage=pageNames.length-1;saveLayout();renderWidgets();});
-$('#resetWidgets').addEventListener('click',()=>{widgets=['recent','systems','favorites'];pageNames=['Home','Discover','Collections'];currentPage=0;saveLayout();renderWidgets();notify('Home layout reset.');});
+$('#resetWidgets').addEventListener('click',()=>{widgets=['recent','systems','favorites'];currentPage=0;saveLayout();renderWidgets();notify('Widgets reset.');});\n$('#settingsAddPage').addEventListener('click',()=>$('#addPage').click());\n$('#settingsEditWidgets').addEventListener('click',()=>$('#editWidgets').click());\n$('#showHeroSetting').addEventListener('change',e=>{preferences.showHero=e.target.checked;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));document.querySelector('.feature-hero').classList.toggle('hidden',!preferences.showHero);});\n$('#compactRowsSetting').addEventListener('change',e=>{preferences.compactRows=e.target.checked;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));document.documentElement.classList.toggle('eclipse-compact-rows',preferences.compactRows);});\n$('#systemCountsSetting').addEventListener('change',e=>{preferences.systemCounts=e.target.checked;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));renderLibrary();});\n$('#startPageSetting').addEventListener('change',e=>{preferences.startPage=e.target.value;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));notify('Startup page saved.');});\n$('#addFolderPath').addEventListener('click',()=>{const value=$('#folderPathInput').value.trim();if(!value){notify('Enter a folder location first.');return;}if(!folderPaths.includes(value)){folderPaths.push(value);localStorage.setItem('eclipse-folders',JSON.stringify(folderPaths));}$('#folderPathInput').value='';renderFolderPaths();notify('Folder location saved.');});\n$('#rescanFolders').addEventListener('click',()=>{$('#scanResult').textContent=folderPaths.length?'Rescan requested for '+folderPaths.length+' saved location(s). Automatic file detection is not available until the native Android storage bridge is connected.':'Add a game folder first. No locations to rescan.';});\n$('#resetAllDefaults').addEventListener('click',()=>{if(!confirm('Restore ECLIPSE default settings?'))return;activeTheme='violet';localStorage.setItem('eclipse-theme',activeTheme);document.documentElement.dataset.theme=activeTheme;$('#themeSelect').value=activeTheme;widgets=['recent','systems','favorites'];pageNames=['Home','Discover','Collections'];currentPage=0;preferences={showHero:true,compactRows:false,systemCounts:true,startPage:'home'};localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));saveLayout();renderWidgets();renderSettings();document.querySelector('.feature-hero').classList.remove('hidden');notify('Default settings restored.');});\ndocument.querySelectorAll('[data-settings-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-settings-tab]').forEach(x=>x.classList.toggle('active',x===b));['personal','library','controls','system'].forEach(k=>$('#settings'+k[0].toUpperCase()+k.slice(1)).classList.toggle('hidden',k!==b.dataset.settingsTab));}));
 $('#checkUpdates').addEventListener('click',checkUpdates);
 $('#androidInfo').addEventListener('click',()=>notify('Android app detection needs a native Android bridge and package visibility permission.'));
 document.addEventListener('keydown',e=>{
@@ -219,4 +248,4 @@ document.addEventListener('keydown',e=>{
   renderGames();$('#gameGrid').querySelector('[data-game="'+selectedGame+'"]')?.focus();
  }
 });
-renderWidgets();renderLibrary();
+renderWidgets();renderLibrary();document.querySelector('.feature-hero').classList.toggle('hidden',!preferences.showHero);
