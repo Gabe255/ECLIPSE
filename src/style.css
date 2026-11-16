@@ -73,3 +73,17 @@ body{background:radial-gradient(ellipse at 80% 8%,color-mix(in srgb,var(--accent
 .widget-choice small{font-size:9px;color:#9292a6}
 @media(max-width:750px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.console-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.settings-grid{grid-template-columns:1fr}}
 @media(max-width:520px){.page-toolbar{align-items:flex-start;flex-direction:column}.page-tabs{max-width:100%;overflow:auto}.page-actions{width:100%;justify-content:flex-end}.dashboard-grid{grid-template-columns:1fr 1fr;gap:8px}.dashboard-widget{min-height:128px;padding:12px}.widget-large{font-size:15px}.widget-controls{opacity:.8}.feature-hero{grid-template-columns:1fr}.feature-art{min-height:145px}.feature-art:after{background:linear-gradient(0deg,#111321 0%,transparent 60%)}.feature-symbol{font-size:105px}.feature-copy{padding:8px 20px 28px}.feature-copy h2{font-size:34px}.feature-count{right:15px;bottom:14px}.widget-choices{grid-template-columns:1fr}}
+
+/* Dedicated console pages */
+.console-detail-top,.console-detail-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:8px 0 18px}
+.console-banner{min-height:220px;position:relative;overflow:hidden;display:flex;align-items:center;gap:30px;padding:30px;border:1px solid #ffffff20;border-radius:12px;background:radial-gradient(ellipse at 75% 50%,color-mix(in srgb,var(--accent) 28%,transparent),transparent 45%),linear-gradient(115deg,#171827,#0d0f1b 75%);margin-bottom:28px}
+.console-banner:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 65%,#08091266);pointer-events:none}
+.console-banner-mark{width:130px;height:130px;flex:0 0 130px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:28px;background:color-mix(in srgb,var(--accent) 12%,#080912);color:var(--accent);font-size:76px;text-shadow:0 0 40px color-mix(in srgb,var(--accent) 60%,transparent);box-shadow:0 15px 60px #0005}
+.console-banner-copy{position:relative;z-index:1}
+.console-banner-copy h1{font-size:clamp(30px,6vw,58px);letter-spacing:-2px;line-height:.95;margin:8px 0}
+.console-banner-copy>p:last-child{color:#a5a4b7;font-size:13px}
+.console-banner-index{position:absolute;right:22px;bottom:18px;color:#85869c;font:10px 'DM Mono';letter-spacing:1px}
+.console-detail-toolbar{margin-top:26px}
+.console-detail-toolbar h2{margin:4px 0 0}
+.console-empty-note{padding:28px;border:1px dashed #ffffff25;border-radius:10px;color:#9b9bad;text-align:center;font-size:13px}
+@media(max-width:520px){.console-banner{min-height:170px;padding:18px;gap:15px}.console-banner-mark{width:76px;height:76px;flex-basis:76px;border-radius:18px;font-size:43px}.console-banner-copy h1{font-size:28px}.console-banner-copy>p:last-child{font-size:11px}.console-banner-index{font-size:8px;right:12px;bottom:10px}}
