@@ -87,7 +87,7 @@ const themes = [
   ['ember','Ember'],['ice','Arctic'],['sakura','Sakura'],['matrix','Matrix'],['gold','Solar Gold']
 ];
 const widgetCatalog = [
-  ['recent','Recently played','Your latest game picks'],['systems','My systems','Jump into a platform'],
+  ['recent','Last added','Your most recently scanned game'],['systems','My systems','Jump into a platform'],
   ['favorites','Favorites','Your pinned games'],['playtime','Play activity','Your playtime overview'],
   ['achievements','Achievements','Achievement progress'],['quicklaunch','Quick launch','Your favorite shortcuts']
 ];
@@ -135,7 +135,7 @@ document.querySelector('#app').innerHTML = `
       <section class="home-games-shelf hidden" id="homeGamesShelf"></section>
       <section class="feature-hero hidden" id="homeLibraryHero" aria-label="Your game library">
         <div class="feature-art"><span class="feature-glow"></span><span class="feature-symbol">E</span><span class="feature-kicker">YOUR COLLECTION</span></div>
-        <div class="feature-copy"><p class="eyebrow">YOUR VAULT</p><h2 id="homeHeroTitle">YOUR GAMES</h2><p id="homeHeroMeta">Games you scan will appear here.</p><button class="primary-btn" id="homeScanBtn">ADD GAME FOLDER ↗</button></div>
+        <div class="feature-copy"><p class="eyebrow">YOUR VAULT</p><h2 id="homeHeroTitle">YOUR GAMES</h2><p id="homeHeroMeta">Games you scan will appear here.</p><button class="primary-btn" id="homeScanBtn">ADD MORE GAMES ↗</button></div>
       </section>
     </section>
     <section id="libraryView" class="view hidden">
@@ -228,7 +228,7 @@ function widgetContent(id){
  if(id==='systems')return `<div class="widget-heading"><small>MY SYSTEMS</small><span>↗</span></div><div class="system-mini-list">${systems.slice(0,3).map(s=>`<span>${s.icon} ${s.name}</span>`).join('')}</div>`;
  if(id==='favorites'){const favoriteGames=games.filter(game=>favorites.includes(game.id));return `<div class="widget-heading"><small>FAVORITES</small><span>✦</span></div><div class="widget-large">${favoriteGames.length?favoriteGames.length+' SAVED':'NO FAVORITES YET'}</div><p class="widget-caption">${escapeHTML(favoriteGames[0]?.title||'Save games from their details panel')}</p>`;}
  if(id==='playtime')return `<div class="widget-heading"><small>PLAYTIME</small><span>◷</span></div><div class="widget-large">NOT TRACKING YET</div><p class="widget-caption">Accurate sessions need native game-launch tracking</p>`;
- if(id==='achievements')return `<div class="widget-heading"><small>ACHIEVEMENTS</small><span>✧</span></div><div class="widget-large">READY</div><p class="widget-caption">Connect a supported achievement service later</p>`;
+ if(id==='achievements')return `<div class="widget-heading"><small>ACHIEVEMENTS</small><span>✧</span></div><div class="widget-large">NOT CONNECTED</div><p class="widget-caption">Achievement services are not integrated yet</p>`;
  return `<div class="widget-heading"><small>QUICK LAUNCH</small><span>↗</span></div><div class="quick-links"><button data-jump="library">LIBRARY</button><button data-jump="android">ANDROID</button></div>`;
 }
 function renderWidgets(){
