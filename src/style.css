@@ -587,3 +587,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
   .mascot-actions{gap:5px}
   .mascot-actions .primary-btn{padding:9px 13px}
 }
+
+
+/* Clear focus feedback for D-pad and controller navigation. */
+:where(button,a[href],input,select,textarea,[tabindex]):focus-visible{
+ outline:2px solid var(--accent,#b8a2ff)!important;
+ outline-offset:4px;
+ box-shadow:0 0 0 5px color-mix(in srgb,var(--accent,#b8a2ff) 22%,transparent);
+}
