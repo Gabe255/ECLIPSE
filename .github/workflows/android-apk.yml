@@ -51,9 +51,12 @@ jobs:
         run: npx cap add android
       - name: Sync Capacitor
         run: npx cap sync android
-      - name: Install native folder scanner
+      - name: Install native folder scanner and ECLIPSE icon
         run: |
-          mkdir -p android/app/src/main/java/com/eclipse/launcher
+          mkdir -p android/app/src/main/java/com/eclipse/launcher android/app/src/main/res/drawable android/app/src/main/res/mipmap-anydpi android/app/src/main/res/mipmap-anydpi-v26
+          cp android-native/eclipse_icon_foreground.xml android/app/src/main/res/drawable/eclipse_icon_foreground.xml
+          cp android-native/ic_launcher_legacy.xml android/app/src/main/res/mipmap-anydpi/ic_launcher.xml
+          cp android-native/ic_launcher_adaptive.xml android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
           cp android-native/FolderAccessPlugin.java android/app/src/main/java/com/eclipse/launcher/FolderAccessPlugin.java
           cp android-native/LauncherSetupPlugin.java android/app/src/main/java/com/eclipse/launcher/LauncherSetupPlugin.java
           cp android-native/DisplayInfoPlugin.java android/app/src/main/java/com/eclipse/launcher/DisplayInfoPlugin.java
@@ -98,6 +101,10 @@ jobs:
           ET.register_namespace("android", "http://schemas.android.com/apk/res/android")
           tree = ET.parse(manifest)
           root = tree.getroot()
+          app = root.find("application")
+          if app is not None:
+              app.set("{http://schemas.android.com/apk/res/android}icon", "@mipmap/ic_launcher")
+              app.set("{http://schemas.android.com/apk/res/android}roundIcon", "@mipmap/ic_launcher")
           if root.find("queries") is None:
               queries = ET.Element("queries")
               intent = ET.SubElement(queries, "intent")
