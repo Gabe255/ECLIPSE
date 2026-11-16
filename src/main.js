@@ -39,7 +39,7 @@ const games = [
   { title: 'SONIC ADVENTURE', system: 'DREAMCAST', year: '1998', art: 'sonic', tag: 'PLATFORMER' }
 ];
 const themes = [
-  ['violet','Eclipse Violet'],['cocoonix','Cocoonix'],['midnight','Midnight'],
+  ['violet','Eclipse Violet'],['iisu','Prism Flow'],['cocoonix','Cocoonix'],['midnight','Midnight'],
   ['ember','Ember'],['ice','Arctic'],['sakura','Sakura'],['matrix','Matrix'],['gold','Solar Gold']
 ];
 const widgetCatalog = [
