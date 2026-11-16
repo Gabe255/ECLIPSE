@@ -891,7 +891,15 @@ document.addEventListener('keydown',e=>{
    event.preventDefault();event.stopImmediatePropagation();const first=focusables()[0];if(first){first.focus();first.click();}
   }
  });
- window.addEventListener('gamepadconnected',()=>{if(!document.activeElement||document.activeElement===document.body)focusables()[0]?.focus();});
+ window.addEventListener('gamepadconnected',event=>{
+  const status=document.querySelector('#controllerStatus');
+  if(status)status.textContent='Connected: '+(event.gamepad?.id||'Gamepad')+'. Use the D-pad or left stick to navigate.';
+  if(!document.activeElement||document.activeElement===document.body)focusables()[0]?.focus();
+ });
+ window.addEventListener('gamepaddisconnected',()=>{
+  const status=document.querySelector('#controllerStatus');
+  if(status)status.textContent='Controller disconnected. Keyboard navigation remains available.';
+ });
  window.setInterval(poll,80);
 })();
 
