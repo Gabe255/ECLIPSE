@@ -6,7 +6,7 @@
 
 - Console-inspired home with 37 system categories and dedicated system landing pages.
 - Game library with folder scanning, system assignment, search, favorites, and user-managed entries.
-- Android Apps Library with installed-app discovery, Treat as Game labels, and manual session/playtime tracking.
+- Android Apps Library with installed-app discovery and launching, pin-to-Home shortcuts, Treat as Game labels, and manual session/playtime tracking.
 - ECLIPSE orb mascot and first-run setup for storage, display layout, and Android's default Home-app chooser.
 - Single-screen responsive layout and dual-screen/foldable layout support, using AndroidX WindowManager detection in the Android APK where a separating fold feature is available.
 - Experience Studio: theme presets, custom accent, local wallpaper, per-system themes, local profiles, motion preferences, and JSON backup/restore.
