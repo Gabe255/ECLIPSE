@@ -14,7 +14,7 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
+import androidx.core.util.Consumer;
 
 @CapacitorPlugin(name = "DisplayInfo")
 public class DisplayInfoPlugin extends Plugin {
