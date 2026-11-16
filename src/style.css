@@ -718,3 +718,21 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 @media(max-width:850px){.konsoru-welcome{grid-template-columns:1fr minmax(130px,.55fr);min-height:240px}.konsoru-hero-stats{grid-column:1/-1;display:flex;gap:28px}.konsoru-world-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){:root[data-interface-mode="konsoru"] .topbar{height:60px}.konsoru-welcome{grid-template-columns:1fr;gap:10px;padding:21px;min-height:0}.konsoru-welcome-copy h1{font-size:37px}.konsoru-core-art{position:absolute;right:-38px;top:10px;width:155px;opacity:.24}.konsoru-hero-stats{position:relative;display:flex;grid-column:auto;gap:25px}.konsoru-nav{justify-content:space-around}.konsoru-nav button{flex-direction:column;gap:4px;padding:9px 10px;font-size:16px}.konsoru-nav button span{font-size:7px}.konsoru-world-grid{grid-template-columns:1fr}.konsoru-world-card{min-height:78px}.konsoru-bottom-grid{grid-template-columns:1fr}.konsoru-primary,.konsoru-secondary{font-size:8px;padding-inline:12px}}
 @media(prefers-reduced-motion:reduce){.konsoru-home,.konsoru-welcome:after,.konsoru-world-card{animation:none!important;transition:none!important}}
+/* Konsoru system worlds: a distinct console dashboard once a platform is opened */
+:root[data-interface-mode="konsoru"] #consoleView{display:flex;flex-direction:column;gap:18px;min-width:0}
+:root[data-interface-mode="konsoru"] .console-detail-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+:root[data-interface-mode="konsoru"] .console-banner{position:relative;min-height:205px;padding:clamp(22px,4vw,40px);border:1px solid #a78bfa42;border-radius:22px;background:radial-gradient(ellipse at 80% 20%,#9274ff30,transparent 42%),linear-gradient(120deg,#17152b,#0c1020 72%);box-shadow:0 20px 55px #0005}
+:root[data-interface-mode="konsoru"] .console-banner-mark{border-radius:22px;background:linear-gradient(145deg,#a78bfa2d,#ffffff05);border:1px solid #bba5ff55;color:#d6caff;box-shadow:0 0 35px #9674ff24}
+:root[data-interface-mode="konsoru"] .console-banner-copy h1{font-size:clamp(30px,5vw,52px);letter-spacing:-1.8px}
+:root[data-interface-mode="konsoru"] .system-menu{display:flex;gap:8px;overflow-x:auto;padding:7px;border:1px solid #ffffff16;border-radius:13px;background:#ffffff05;scrollbar-width:none}
+:root[data-interface-mode="konsoru"] .system-menu-item{flex:0 0 auto;padding:12px 17px;border:1px solid transparent;border-radius:9px;background:transparent;color:#a4a0ba;font:9px 'DM Mono';letter-spacing:1px}
+:root[data-interface-mode="konsoru"] .system-menu-item.active,:root[data-interface-mode="konsoru"] .system-menu-item:hover{border-color:#a78bfa55;background:#a78bfa19;color:#f1ebff}
+:root[data-interface-mode="konsoru"] .emulator-panel,:root[data-interface-mode="konsoru"] .system-folder-row,:root[data-interface-mode="konsoru"] .system-featured,:root[data-interface-mode="konsoru"] .system-empty-hero{border-color:#ffffff18;border-radius:16px;background:linear-gradient(140deg,#17172b,#0e111e)}
+:root[data-interface-mode="konsoru"] .system-folder{border-radius:12px;background:#ffffff07}
+:root[data-interface-mode="konsoru"] .system-game-card{flex-basis:clamp(145px,17vw,195px);border-radius:13px;background:#111321}
+:root[data-interface-mode="konsoru"] .system-game-card:hover,:root[data-interface-mode="konsoru"] .system-game-card:focus-visible{border-color:#b69dff;transform:translateY(-4px);box-shadow:0 16px 35px #0006}
+:root[data-interface-mode="konsoru"] .system-featured{border-radius:18px;background:radial-gradient(ellipse at 20% 40%,#9274ff20,transparent 50%),linear-gradient(115deg,#17152b,#0e1220)}
+:root[data-interface-mode="konsoru"] .system-featured-copy h2{font-size:clamp(24px,4vw,40px)}
+:root[data-interface-mode="konsoru"] .emulator-option{border-radius:9px;background:#a78bfa12;border-color:#a78bfa35}
+:root[data-interface-mode="konsoru"] .console-detail-top .subtle-btn{border-radius:10px}
+@media(max-width:650px){:root[data-interface-mode="konsoru"] .console-banner{min-height:155px;padding:18px;border-radius:17px}:root[data-interface-mode="konsoru"] .system-menu-item{padding:11px 13px;font-size:8px}:root[data-interface-mode="konsoru"] .system-game-card{flex-basis:145px}}
