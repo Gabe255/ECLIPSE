@@ -208,3 +208,30 @@ body{background:radial-gradient(ellipse at 80% 8%,color-mix(in srgb,var(--accent
  .system-game-card .game-art{height:112px;min-height:112px}
  .system-home{gap:18px}
 }
+
+
+/* First-launch ECLIPSE mascot welcome */
+.mascot-welcome{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;background:#050610ef;backdrop-filter:blur(12px);animation:bootFade .25s ease-out}
+.mascot-card{width:min(470px,100%);padding:28px 30px 25px;border:1px solid color-mix(in srgb,var(--accent) 42%,#ffffff20);border-radius:16px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--accent) 18%,#151528),#0c0d19 62%);box-shadow:0 24px 90px #0009;text-align:center}
+.mascot-art{height:160px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;margin:0 auto 17px;filter:drop-shadow(0 0 22px color-mix(in srgb,var(--accent) 26%,transparent))}
+.mascot-face{position:relative;z-index:2;width:116px;height:94px;border:5px solid #d7d8e5;border-radius:50%;background:radial-gradient(circle at 35% 30%,#35384d,#111320 70%);box-shadow:inset -10px -8px 0 #05060d,0 0 0 5px #080914}
+.mascot-hat{z-index:3;position:absolute;top:5px;width:88px;height:28px;border-radius:48% 48% 5px 5px;background:linear-gradient(110deg,#242638,#080a13);border:2px solid #73778e;transform:rotate(-5deg)}
+.mascot-hat:after{content:"";position:absolute;width:116px;height:8px;left:-16px;bottom:-5px;border-radius:50%;background:#080a13;border:1px solid #777b90}
+.mascot-eye{position:absolute;top:42px;width:12px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.mascot-eye.left{left:29px}.mascot-eye.right{right:29px}
+.mascot-shadow{position:absolute;left:12px;right:12px;top:32px;height:25px;border-radius:5px;background:#03040a;opacity:.88;border:1px solid #777b90}
+.mascot-body{position:relative;width:142px;height:54px;margin-top:-4px;border-radius:22px 22px 7px 7px;background:linear-gradient(110deg,#303448,#11131f 65%);border:2px solid #777b90;overflow:hidden}
+.mascot-lapel{position:absolute;top:0;width:34px;height:43px;background:#d5d7e4;clip-path:polygon(0 0,100% 0,55% 100%)}
+.mascot-lapel.left{left:30px;transform:rotate(12deg)}.mascot-lapel.right{right:30px;transform:scaleX(-1) rotate(12deg)}
+.mascot-tie{position:absolute;top:2px;left:calc(50% - 5px);width:10px;height:42px;background:var(--accent);clip-path:polygon(50% 0,100% 18%,65% 100%,35% 100%,0 18%)}
+.mascot-card>.eyebrow{margin:0 0 8px}
+.mascot-card h2{margin:0;font-size:clamp(23px,6vw,31px);letter-spacing:1px}
+.mascot-card h2 em{color:var(--accent);font-style:normal}
+.mascot-message{max-width:350px;margin:12px auto 17px;color:#b5b5c7;font-size:12px;line-height:1.7}
+.mascot-tips{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:18px 0 22px}
+.mascot-tips span{padding:10px 5px;border:1px solid #ffffff17;border-radius:7px;background:#ffffff06;color:#bdbdce;font:9px 'DM Mono';line-height:1.5}
+.mascot-tips b{display:block;color:var(--accent);font-size:11px;margin-bottom:4px}
+.mascot-actions{display:flex;flex-direction:column;align-items:center;gap:9px}
+.mascot-actions .primary-btn{width:100%;justify-content:center}
+.mascot-actions .subtle-btn{border:0}
+@media(max-width:420px){.mascot-card{padding:22px 17px}.mascot-art{height:145px}.mascot-tips{gap:5px}.mascot-tips span{font-size:8px}}
