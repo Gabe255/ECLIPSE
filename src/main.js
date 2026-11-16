@@ -103,6 +103,8 @@ let playCount = load('eclipse-play-count', 0);
 let folderPaths = load('eclipse-folders', []);
 let systemFolders = load('eclipse-system-folders', {});
 let preferences = load('eclipse-preferences', {showHero:true,compactRows:false,systemCounts:true,startPage:'home'});
+let installedApps = load('eclipse-installed-apps', []);
+let emulatorAssignments = load('eclipse-emulator-assignments', {});
 document.documentElement.dataset.theme = activeTheme;
 
 document.querySelector('#app').innerHTML = `
@@ -154,7 +156,7 @@ document.querySelector('#app').innerHTML = `
     <section id="settingsView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>SETTINGS</h2></div></div>
       <div class="settings-layout">
-        <nav class="settings-nav"><button class="settings-tab active" data-settings-tab="personal">PERSONALIZE</button><button class="settings-tab" data-settings-tab="library">LIBRARY FOLDERS</button><button class="settings-tab" data-settings-tab="controls">CONTROLS</button><button class="settings-tab" data-settings-tab="system">SYSTEM</button></nav>
+        <nav class="settings-nav"><button class="settings-tab active" data-settings-tab="personal">PERSONALIZE</button><button class="settings-tab" data-settings-tab="library">LIBRARY FOLDERS</button><button class="settings-tab" data-settings-tab="controls">CONTROLS</button><button class="settings-tab" data-settings-tab="players">PLAYERS</button><button class="settings-tab" data-settings-tab="system">SYSTEM</button></nav>
         <div class="settings-panel" id="settingsPersonal">
           <div class="settings-panel-head"><div><p class="eyebrow">MAKE ECLIPSE YOURS</p><h3>PERSONALIZE</h3></div><button class="subtle-btn" id="resetAllDefaults">RESTORE DEFAULTS</button></div>
           <div class="settings-grid">
@@ -172,6 +174,12 @@ document.querySelector('#app').innerHTML = `
         <div class="settings-panel hidden" id="settingsControls">
           <div class="settings-panel-head"><div><p class="eyebrow">NAVIGATION</p><h3>CONTROLS</h3></div></div>
           <article class="settings-card"><h3>CONTROLLER & KEYBOARD</h3><p class="settings-note">D-pad / arrow keys move focus. A / Enter selects. B / Escape backs out. Native controller remapping is planned for a later Android integration.</p><span class="feature-tag">BASIC KEYBOARD NAVIGATION ACTIVE</span></article>
+        </div>
+        <div class="settings-panel hidden" id="settingsPlayers">
+          <div class="settings-panel-head"><div><p class="eyebrow">EMULATOR & APP ROUTING</p><h3>YOUR PLAYERS</h3></div><button class="primary-btn" id="scanInstalledPlayers">SCAN INSTALLED APPS</button></div>
+          <p class="settings-note">ECLIPSE can list apps Android exposes as launchable. Pick the player you use for each system, or let ECLIPSE choose a clear name match. This does not guarantee the app supports every game format.</p>
+          <div id="playerScanStatus" class="scan-status">No app scan has been run yet.</div>
+          <div id="playerAssignmentsList" class="player-assignments"></div>
         </div>
         <div class="settings-panel hidden" id="settingsSystem">
           <div class="settings-panel-head"><div><p class="eyebrow">ECLIPSE</p><h3>SYSTEM</h3></div></div>
@@ -226,6 +234,7 @@ function renderWidgetChoices(){
  $('#widgetChoices').querySelectorAll('input').forEach(input=>input.addEventListener('change',()=>{widgets=input.checked?[...widgets,input.value]:widgets.filter(x=>x!==input.value);saveLayout();}));
 }
 function renderSettings(){
+ renderPlayerSettings();
  ['showHeroSetting','compactRowsSetting','systemCountsSetting','startPageSetting'].forEach((id)=>{const el=$('#'+id);if(el){const key={showHeroSetting:'showHero',compactRowsSetting:'compactRows',systemCountsSetting:'systemCounts',startPageSetting:'startPage'}[id];el.value=preferences[key];if(el.type==='checkbox')el.checked=!!preferences[key];}});
  renderFolderPaths();renderSettingsPages();
 }
@@ -261,7 +270,11 @@ function renderConsoleHome(system){
  $('#consoleGeneration').textContent=system.family.toUpperCase()+' PLATFORM';
  $('#consoleBanner').innerHTML='<div class="console-banner-mark">'+system.icon+'</div><div class="console-banner-copy"><p class="eyebrow">SYSTEM HOME</p><h1>'+system.name.toUpperCase()+'</h1><p>Your '+system.name+' dashboard. Pick a folder or jump into a game.</p></div><div class="console-banner-index">SYSTEM / '+String(systems.indexOf(system)+1).padStart(2,'0')+'</div>';
  const profile=emulatorOptions[name];
- $('#emulatorPanel').innerHTML='<div class="emulator-panel-head"><div><p class="eyebrow">COMPATIBILITY PROFILE</p><h3>EMULATORS & LAUNCHERS</h3></div><span class="feature-tag">'+(profile?'OPTIONS LISTED':'PROFILE PENDING')+'</span></div>'+(profile?'<div class="emulator-option-list">'+profile.items.map(item=>'<span class="emulator-option">'+item+'</span>').join('')+'</div><p class="settings-note">'+profile.note+'</p>':'<p class="settings-note">No emulator or launcher profile has been added for this platform yet.</p>');
+ $('#emulatorPanel').innerHTML='<div class="emulator-panel-head"><div><p class="eyebrow">PLAYER SETUP</p><h3>CHOOSE YOUR EMULATOR / APP</h3></div><span class="feature-tag">'+(profile?'SYSTEM PROFILE':'PLAYER ROUTING')+'</span></div>'+(profile?'<div class="emulator-option-list">'+profile.items.map(item=>'<span class="emulator-option">'+item+'</span>').join('')+'</div><p class="settings-note">'+profile.note+'</p>':'<p class="settings-note">Choose an installed app for this system.</p>')+'<div class="player-picker-row"><label>PLAYER FOR '+name.toUpperCase()+'<select id="systemPlayerSelect"><option value="">Choose an installed app…</option></select></label><button class="subtle-btn" id="scanSystemPlayers">SCAN APPS</button><button class="subtle-btn" id="autoSystemPlayer">AUTO-SELECT</button></div><p class="settings-note" id="systemPlayerStatus">Scan installed apps, then choose the player you want to use.</p>';
+populatePlayerSelect($('#systemPlayerSelect'),name);
+$('#scanSystemPlayers').addEventListener('click',()=>scanInstalledApps(name));
+$('#systemPlayerSelect').addEventListener('change',event=>savePlayerAssignment(name,event.target.value));
+$('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
  const artFor=g=>'<div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">'+(['M','Z','Ⅲ','S'][games.indexOf(g)]||'✦')+'</span><span class="art-caption">'+g.tag+'</span></div>';
  const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+g.title+'</b><small>'+g.tag+' · '+g.fileName+'</small></div></button>';
  const featured=titles[0];
@@ -344,6 +357,61 @@ async function rescanGameFolder(){
   try{const result=await FolderAccess.scanFolder({uri});scanSelectedFolder(result.files||[],uri);if(result.truncated)status.textContent+=' Scan limit reached at 5,000 files.';}
   catch(error){status.textContent='Could not access that folder. Its permission may have been revoked. Choose it again.';notify('Folder permission needs to be renewed.');}
  }else chooseGameFolder();
+}
+function savePlayerAssignment(system,packageName){
+ emulatorAssignments[system]=packageName||'';
+ localStorage.setItem('eclipse-emulator-assignments',JSON.stringify(emulatorAssignments));
+ const app=installedApps.find(item=>item.packageName===packageName);
+ const status=$('#systemPlayerStatus');if(status)status.textContent=app?'Selected player: '+app.name+' ('+app.packageName+')':'No player selected for '+system+'.';
+ notify(app?'Player saved for '+system+'.':'Player selection cleared.');
+}
+function populatePlayerSelect(select,system){
+ if(!select)return;
+ const selected=emulatorAssignments[system]||'';
+ select.innerHTML='<option value="">Choose an installed app…</option>';
+ installedApps.forEach(app=>{const option=document.createElement('option');option.value=app.packageName;option.textContent=app.name+' · '+app.packageName;select.append(option);});
+ select.value=selected;
+}
+function renderPlayerSettings(){
+ const list=$('#playerAssignmentsList');if(!list)return;
+ list.innerHTML='';
+ systems.forEach(system=>{
+  const row=document.createElement('div');row.className='player-setting-row';
+  const info=document.createElement('div');const title=document.createElement('b');title.textContent=system.name;const note=document.createElement('small');note.textContent=emulatorAssignments[system.name]||'No player selected';info.append(title,note);
+  const select=document.createElement('select');select.dataset.playerSystem=system.name;populatePlayerSelect(select,system.name);
+  select.addEventListener('change',event=>{savePlayerAssignment(system.name,event.target.value);note.textContent=event.target.value||'No player selected';});
+  row.append(info,select);list.append(row);
+ });
+}
+async function scanInstalledApps(systemName){
+ const status=$('#playerScanStatus');if(status)status.textContent='Scanning apps Android makes available to ECLIPSE…';
+ const localStatus=$('#systemPlayerStatus');if(localStatus)localStatus.textContent='Scanning installed apps…';
+ if(!Capacitor.isNativePlatform()){
+  const message='Installed-app discovery is available in the Android APK, not this browser preview.';
+  if(status)status.textContent=message;if(localStatus)localStatus.textContent=message;return;
+ }
+ try{
+  const result=await FolderAccess.getInstalledApps();
+  installedApps=result.apps||[];
+  localStorage.setItem('eclipse-installed-apps',JSON.stringify(installedApps));
+  renderPlayerSettings();
+  if(systemName)populatePlayerSelect($('#systemPlayerSelect'),systemName);
+  const message='Found '+installedApps.length+' launchable apps. Choose a player for each system below.';
+  if(status)status.textContent=message;if(localStatus)localStatus.textContent=message;
+  notify('Installed app scan complete.');
+ }catch(error){
+  const message='Could not scan installed apps: '+(error?.message||'unknown error');
+  if(status)status.textContent=message;if(localStatus)localStatus.textContent=message;
+ }
+}
+function autoSelectPlayer(system){
+ const profile=emulatorOptions[system];
+ const suggestions=(profile?.items||[]).filter(item=>!/(native|no established|proton|wine)/i.test(item)).map(item=>item.toLowerCase());
+ const match=installedApps.find(app=>suggestions.some(term=>app.name.toLowerCase().includes(term)||app.packageName.toLowerCase().includes(term)));
+ if(!match){const message='No clear installed app match found for '+system+'. Choose one manually.';const status=$('#systemPlayerStatus');if(status)status.textContent=message;notify('No automatic match found.');return;}
+ savePlayerAssignment(system,match.packageName);
+ const select=$('#systemPlayerSelect');if(select)select.value=match.packageName;
+ renderPlayerSettings();
 }
 function compareVersions(a,b){
  const parse=value=>{const clean=String(value||'').replace(/^v/i,'');const [core,pre='']=clean.split('-',2);return {parts:core.split('.').map(n=>Number(n)||0),pre};};
@@ -430,7 +498,8 @@ $('#addFolderPath').addEventListener('click',()=>{$('#gameFolderPicker').click()
 
 $('#rescanFolders').addEventListener('click',rescanGameFolder);
 $('#resetAllDefaults').addEventListener('click',()=>{if(!confirm('Restore ECLIPSE default settings?'))return;activeTheme='violet';localStorage.setItem('eclipse-theme',activeTheme);document.documentElement.dataset.theme=activeTheme;$('#themeSelect').value=activeTheme;widgets=['recent','systems','favorites'];pageNames=['Home','Discover','Collections'];currentPage=0;preferences={showHero:true,compactRows:false,systemCounts:true,startPage:'home'};localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));saveLayout();renderWidgets();renderSettings();document.querySelector('.feature-hero').classList.remove('hidden');notify('Default settings restored.');});
-document.querySelectorAll('[data-settings-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-settings-tab]').forEach(x=>x.classList.toggle('active',x===b));['personal','library','controls','system'].forEach(k=>$('#settings'+k[0].toUpperCase()+k.slice(1)).classList.toggle('hidden',k!==b.dataset.settingsTab));}));
+document.querySelectorAll('[data-settings-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-settings-tab]').forEach(x=>x.classList.toggle('active',x===b));['personal','library','controls','players','system'].forEach(k=>$('#settings'+k[0].toUpperCase()+k.slice(1)).classList.toggle('hidden',k!==b.dataset.settingsTab));}));
+$('#scanInstalledPlayers').addEventListener('click',()=>scanInstalledApps());
 $('#checkUpdates').addEventListener('click',checkUpdates);
 $('#checkCompatibility').addEventListener('click',checkCompatibility);
 $('#androidInfo').addEventListener('click',()=>notify('Android app detection needs a native Android bridge and package visibility permission.'));
