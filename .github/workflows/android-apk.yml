@@ -76,7 +76,7 @@ jobs:
               "    @Override\n"
               "    public void onCreate(Bundle savedInstanceState) {\n"
               "        registerPlugin(FolderAccessPlugin.class);\n"
-              "        registerPlugin(UpdateDownloadPlugin.class);\\n"
+              "        registerPlugin(UpdateDownloadPlugin.class);\n"
               "        registerPlugin(LauncherSetupPlugin.class);\n"
               "        registerPlugin(DisplayInfoPlugin.class);\n"
               "        registerPlugin(SystemControlsPlugin.class);\n"
