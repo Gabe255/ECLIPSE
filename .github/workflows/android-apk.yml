@@ -58,6 +58,7 @@ jobs:
           cp android-native/ic_launcher_legacy.xml android/app/src/main/res/mipmap-anydpi/ic_launcher.xml
           cp android-native/ic_launcher_adaptive.xml android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
           cp android-native/FolderAccessPlugin.java android/app/src/main/java/com/eclipse/launcher/FolderAccessPlugin.java
+          cp android-native/UpdateDownloadPlugin.java android/app/src/main/java/com/eclipse/launcher/UpdateDownloadPlugin.java
           cp android-native/LauncherSetupPlugin.java android/app/src/main/java/com/eclipse/launcher/LauncherSetupPlugin.java
           cp android-native/DisplayInfoPlugin.java android/app/src/main/java/com/eclipse/launcher/DisplayInfoPlugin.java
           cp android-native/SystemControlsPlugin.java android/app/src/main/java/com/eclipse/launcher/SystemControlsPlugin.java
