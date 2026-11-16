@@ -3,10 +3,34 @@ import './style.css';
 const VERSION = '0.2.0-alpha';
 const REPO = 'Gabe255/ECLIPSE';
 const systems = [
-  { name: 'Nintendo', icon: '◈', color: 'mint', games: 2 },
-  { name: 'PlayStation', icon: '△', color: 'blue', games: 1 },
-  { name: 'GameCube', icon: '◆', color: 'violet', games: 1 },
-  { name: 'Dreamcast', icon: '◉', color: 'orange', games: 1 }
+  { name: 'Nintendo', icon: '◈', family: 'Nintendo' },
+  { name: 'NES', icon: '▦', family: 'Nintendo' },
+  { name: 'SNES', icon: '▤', family: 'Nintendo' },
+  { name: 'Nintendo 64', icon: '◉', family: 'Nintendo' },
+  { name: 'Game Boy', icon: '▣', family: 'Nintendo' },
+  { name: 'Game Boy Advance', icon: '▣', family: 'Nintendo' },
+  { name: 'Nintendo DS', icon: '▤', family: 'Nintendo' },
+  { name: 'Nintendo 3DS', icon: '▤', family: 'Nintendo' },
+  { name: 'GameCube', icon: '◆', family: 'Nintendo' },
+  { name: 'Wii', icon: '◎', family: 'Nintendo' },
+  { name: 'Wii U', icon: '▣', family: 'Nintendo' },
+  { name: 'Nintendo Switch', icon: '▥', family: 'Nintendo' },
+  { name: 'PlayStation', icon: '△', family: 'PlayStation' },
+  { name: 'PlayStation 2', icon: '△', family: 'PlayStation' },
+  { name: 'PlayStation 3', icon: '△', family: 'PlayStation' },
+  { name: 'PSP', icon: '▰', family: 'PlayStation' },
+  { name: 'PS Vita', icon: '▰', family: 'PlayStation' },
+  { name: 'Xbox', icon: '✕', family: 'Xbox' },
+  { name: 'Xbox 360', icon: '✕', family: 'Xbox' },
+  { name: 'Xbox One', icon: '✕', family: 'Xbox' },
+  { name: 'Xbox Series X|S', icon: '✕', family: 'Xbox' },
+  { name: 'Master System', icon: '◫', family: 'Sega' },
+  { name: 'Genesis / Mega Drive', icon: '◫', family: 'Sega' },
+  { name: 'Saturn', icon: '◉', family: 'Sega' },
+  { name: 'Dreamcast', icon: '◉', family: 'Sega' },
+  { name: 'Atari 2600', icon: '▥', family: 'Atari' },
+  { name: 'Arcade', icon: '✦', family: 'Arcade' },
+  { name: 'Android', icon: '▣', family: 'Android' }
 ];
 const games = [
   { title: 'METROID PRIME', system: 'GAMECUBE', year: '2002', art: 'metroid', tag: 'ADVENTURE' },
@@ -119,18 +143,23 @@ function renderWidgetChoices(){
  $('#widgetChoices').querySelectorAll('input').forEach(input=>input.addEventListener('change',()=>{widgets=input.checked?[...widgets,input.value]:widgets.filter(x=>x!==input.value);saveLayout();}));
 }
 function renderLibrary(){
- $('#consoleStrip').innerHTML=systems.map(s=>`<button class="console-card" data-console="${s.name}"><span>${s.icon}</span><b>${s.name}</b><small>${s.games} SAMPLE GAMES</small></button>`).join('');
+ $('#consoleStrip').innerHTML=systems.map(s=>`<button class="console-card" data-console="${s.name}"><span>${s.icon}</span><b>${s.name}</b><small>${gamesForSystem(s.name).length ? gamesForSystem(s.name)+' IN LIBRARY' : 'READY FOR IMPORT'}</small></button>`).join('');
  $('#consoleStrip').querySelectorAll('[data-console]').forEach(b=>b.addEventListener('click',()=>{activeSystem=b.dataset.console;renderFilters();renderGames();}));
  renderFilters();renderGames();
 }
+function gamesForSystem(name){
+ if(name==='Nintendo')return games.filter(g=>g.system==='NINTENDO'||g.system==='GAMECUBE');
+ if(name==='PlayStation')return games.filter(g=>g.system.startsWith('PLAYSTATION'));
+ return games.filter(g=>g.system===name.toUpperCase());
+}
 function renderFilters(){
- const labels=['All Games','Nintendo','PlayStation','GameCube','Dreamcast'];
- $('#systemFilters').innerHTML=labels.map(n=>`<button class="system-chip ${activeSystem===n?'selected':''}" data-system="${n}">${n}<small>${n==='All Games'?'04':games.filter(g=>n==='Nintendo'?/NINTENDO|GAMECUBE/.test(g.system):g.system===n.toUpperCase()).length.toString().padStart(2,'0')}</small></button>`).join('');
+ const labels=['All Games',...systems.map(s=>s.name)];
+ $('#systemFilters').innerHTML=labels.map(n=>{const count=n==='All Games'?games.length:gamesForSystem(n).length;return `<button class="system-chip ${activeSystem===n?'selected':''}" data-system="${n}">${n}<small>${String(count).padStart(2,'0')}</small></button>`;}).join('');
  $('#systemFilters').querySelectorAll('[data-system]').forEach(b=>b.addEventListener('click',()=>{activeSystem=b.dataset.system;renderFilters();renderGames();}));
 }
 function renderGames(){
- const visible=activeSystem==='All Games'?games:games.filter(g=>activeSystem==='Nintendo'?/NINTENDO|GAMECUBE/.test(g.system):g.system===activeSystem.toUpperCase());
- $('#gameGrid').innerHTML=visible.map(g=>{const i=games.indexOf(g);return `<button class="game-card ${i===selectedGame?'focused':''}" data-game="${i}"><div class="game-art art-${g.art}"><span class="art-glow"></span><span class="art-mark">${['M','Z','Ⅲ','S'][i]}</span><span class="art-caption">${g.tag}</span></div><div class="game-meta"><div><h3>${g.title}</h3><p>${g.system} · ${g.year}</p></div><span class="game-arrow">↗</span></div></button>`;}).join('');
+ const visible=activeSystem==='All Games'?games:gamesForSystem(activeSystem);
+ $('#gameGrid').innerHTML=visible.length?visible.map(g=>{const i=games.indexOf(g);return `<button class="game-card ${i===selectedGame?'focused':''}" data-game="${i}"><div class="game-art art-${g.art}"><span class="art-glow"></span><span class="art-mark">${['M','Z','Ⅲ','S'][i]}</span><span class="art-caption">${g.tag}</span></div><div class="game-meta"><div><h3>${g.title}</h3><p>${g.system} · ${g.year}</p></div><span class="game-arrow">↗</span></div></button>`;}).join(''):'<div class="empty-state system-empty"><div class="empty-icon">✦</div><h3>YOUR COLLECTION STARTS HERE</h3><p>No games imported for this system yet. This platform is ready for your library.</p></div>';
  $('#gameGrid').querySelectorAll('[data-game]').forEach(card=>card.addEventListener('click',()=>{selectedGame=Number(card.dataset.game);playCount++;localStorage.setItem('eclipse-play-count',JSON.stringify(playCount));notify(games[selectedGame].title+' selected · Emulator launch integration is still in development.');}));
 }
 async function checkUpdates(){
