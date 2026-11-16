@@ -10,7 +10,7 @@
 - ECLIPSE orb mascot and first-run setup for storage, display layout, and Android's default Home-app chooser.
 - Single-screen responsive layout and dual-screen/foldable layout support, using AndroidX WindowManager detection in the Android APK where a separating fold feature is available.
 - Experience Studio: theme presets, custom accent, local wallpaper, per-system themes, local profiles, motion preferences, and JSON backup/restore.
-- Control Center: Wi-Fi and Bluetooth settings shortcuts, volume panel, app-window brightness, battery status, display settings, and Do Not Disturb settings.
+- Control Center: top-edge swipe-down or button access to Wi-Fi and Bluetooth settings, volume panel, app-window brightness, battery status, display settings, and Do Not Disturb settings.
 - ECLIPSE Game Mode reduces interface effects; it does not change the phone's CPU/GPU performance profile.
 - Android native folder access, installed-app discovery, default-launcher request, foldable display detection, and system-control bridges.
 
