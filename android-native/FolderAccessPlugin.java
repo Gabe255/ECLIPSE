@@ -32,10 +32,13 @@ import java.util.concurrent.Executors;
 
 @CapacitorPlugin(name = "FolderAccess")
 public class FolderAccessPlugin extends Plugin {
-    private static final int MAX_FILES = 1500;
+    private static final int MAX_FILES = 900;
+    private static final int MAX_DIRECTORIES = 1200;
+    private static final int MAX_DEPTH = 18;
     private static final String DATA_FILE = "eclipse-data.json";
     private static final String PREFS = "eclipse_native_storage";
     private final ExecutorService scanExecutor = Executors.newSingleThreadExecutor();
+    private final java.util.concurrent.atomic.AtomicBoolean scanRunning = new java.util.concurrent.atomic.AtomicBoolean(false);
 
     @PluginMethod
     public void pickAndScan(PluginCall call) {
@@ -59,9 +62,11 @@ public class FolderAccessPlugin extends Plugin {
         } catch (Exception ignored) {
             // The current scan can still work even if the provider does not offer a persistent grant.
         }
+        if (!scanRunning.compareAndSet(false, true)) { call.reject("A folder scan is already running. Please wait for it to finish."); return; }
         scanExecutor.execute(() -> {
             try { call.resolve(scanTree(treeUri)); }
-            catch (Exception error) { call.reject("Could not scan this folder: " + error.getMessage(), error); }
+            catch (Exception error) { call.reject("Could not scan this folder safely: " + error.getMessage(), error); }
+            finally { scanRunning.set(false); }
         });
     }
 
@@ -104,9 +109,11 @@ public class FolderAccessPlugin extends Plugin {
         Uri treeUri;
         try { treeUri = Uri.parse(value); }
         catch (Exception error) { call.reject("The saved folder reference is invalid.", error); return; }
+        if (!scanRunning.compareAndSet(false, true)) { call.reject("A folder scan is already running. Please wait for it to finish."); return; }
         scanExecutor.execute(() -> {
             try { call.resolve(scanTree(treeUri)); }
-            catch (Exception error) { call.reject("Could not rescan this folder: " + error.getMessage(), error); }
+            catch (Exception error) { call.reject("Could not rescan this folder safely: " + error.getMessage(), error); }
+            finally { scanRunning.set(false); }
         });
     }
 
@@ -226,51 +233,60 @@ public class FolderAccessPlugin extends Plugin {
         }
     }
 
+    private static final class ScanNode {
+        final DocumentFile directory; final String relativePath; final int depth;
+        ScanNode(DocumentFile directory, String relativePath, int depth) {
+            this.directory = directory; this.relativePath = relativePath; this.depth = depth;
+        }
+    }
+
     private JSObject scanTree(Uri treeUri) throws Exception {
         DocumentFile root = DocumentFile.fromTreeUri(getContext(), treeUri);
-        if (root == null || !root.canRead()) throw new SecurityException("ECLIPSE cannot read this folder.");
+        if (root == null || !root.canRead()) throw new SecurityException("Folder permission expired or folder is not readable. Re-select it in ECLIPSE Settings.");
         JSArray entries = new JSArray();
         String rootName = root.getName() == null ? "Game folder" : root.getName();
-        walk(root, rootName, entries, 0);
+        java.util.ArrayDeque<ScanNode> pending = new java.util.ArrayDeque<>();
+        pending.add(new ScanNode(root, rootName, 0));
+        int visitedDirectories = 0;
+        boolean truncated = false;
+        while (!pending.isEmpty() && entries.length() < MAX_FILES && visitedDirectories < MAX_DIRECTORIES) {
+            ScanNode node = pending.removeFirst();
+            if (node.depth > MAX_DEPTH) { truncated = true; continue; }
+            visitedDirectories++;
+            DocumentFile[] children;
+            try { children = node.directory.listFiles(); }
+            catch (RuntimeException providerError) { continue; }
+            if (children == null) continue;
+            for (DocumentFile child : children) {
+                if (entries.length() >= MAX_FILES || visitedDirectories + pending.size() >= MAX_DIRECTORIES) { truncated = true; break; }
+                if (child == null) continue;
+                try {
+                    String name = child.getName();
+                    if (name == null || name.isEmpty()) continue;
+                    String relative = node.relativePath.isEmpty() ? name : node.relativePath + "/" + name;
+                    if (child.isDirectory()) pending.addLast(new ScanNode(child, relative, node.depth + 1));
+                    else if (child.isFile()) {
+                        JSObject item = new JSObject();
+                        item.put("name", name);
+                        item.put("relativePath", relative);
+                        item.put("uri", child.getUri().toString());
+                        item.put("size", Math.max(0L, child.length()));
+                        item.put("lastModified", Math.max(0L, child.lastModified()));
+                        entries.put(item);
+                    }
+                } catch (RuntimeException inaccessibleChild) {
+                    // Providers can revoke access to individual descendants; skip only that item.
+                }
+            }
+        }
+        if (!pending.isEmpty() || entries.length() >= MAX_FILES || visitedDirectories >= MAX_DIRECTORIES) truncated = true;
         JSObject response = new JSObject();
         response.put("uri", treeUri.toString());
         response.put("rootName", rootName);
         response.put("files", entries);
         response.put("scannedCount", entries.length());
-        response.put("truncated", entries.length() >= MAX_FILES);
+        response.put("visitedDirectories", visitedDirectories);
+        response.put("truncated", truncated);
         return response;
-    }
-
-    private void walk(DocumentFile directory, String parent, JSArray entries, int depth) {
-        if (entries.length() >= MAX_FILES || depth > 24 || directory == null) return;
-        DocumentFile[] children;
-        try {
-            children = directory.listFiles();
-        } catch (SecurityException | IllegalStateException error) {
-            return;
-        }
-        if (children == null) return;
-        for (DocumentFile child : children) {
-            if (entries.length() >= MAX_FILES) return;
-            if (child == null) continue;
-            try {
-                String name = child.getName();
-                if (name == null) continue;
-                String relative = parent.isEmpty() ? name : parent + "/" + name;
-                if (child.isDirectory()) {
-                    walk(child, relative, entries, depth + 1);
-                } else if (child.isFile()) {
-                    JSObject item = new JSObject();
-                    item.put("name", name);
-                    item.put("relativePath", relative);
-                    item.put("uri", child.getUri().toString());
-                    item.put("size", child.length());
-                    item.put("lastModified", child.lastModified());
-                    entries.put(item);
-                }
-            } catch (RuntimeException ignored) {
-                // Some Android providers expose a folder but deny access to individual children.
-            }
-        }
     }
 }
