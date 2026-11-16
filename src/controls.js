@@ -115,15 +115,24 @@ export function mountControlCenter({ notify }) {
     applyGameMode();
     notify(gameMode ? 'ECLIPSE Game Mode enabled.' : 'ECLIPSE Game Mode disabled.');
   });
-  backdrop.querySelector('#controlBrightness').addEventListener('input', async event => {
-    brightness = Number(event.target.value) / 100;
-    backdrop.querySelector('#controlBrightnessValue').textContent = event.target.value + '%';
+  let brightnessTimer;
+  const applyBrightness = async () => {
     if (isNative) {
       try { await SystemControls.setWindowBrightness({ value: brightness }); }
       catch { notify('Could not adjust ECLIPSE brightness.'); }
     } else {
       document.documentElement.style.setProperty('--eclipse-preview-brightness', String(brightness));
     }
+  };
+  backdrop.querySelector('#controlBrightness').addEventListener('input', event => {
+    brightness = Number(event.target.value) / 100;
+    backdrop.querySelector('#controlBrightnessValue').textContent = event.target.value + '%';
+    clearTimeout(brightnessTimer);
+    brightnessTimer = setTimeout(applyBrightness, 70);
+  });
+  backdrop.querySelector('#controlBrightness').addEventListener('change', () => {
+    clearTimeout(brightnessTimer);
+    applyBrightness();
   });
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !backdrop.classList.contains('hidden')) close();
