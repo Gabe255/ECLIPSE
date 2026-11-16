@@ -563,7 +563,7 @@ async function chooseGameFolder(){
     renderFolderPaths();
    }
    scanSelectedFolder(result.files||[],result.uri||'android');
-   if(result.truncated)status.textContent+=' Scan limit reached at 5,000 files; choose a smaller platform folder for the rest.';
+   if(result.truncated)status.textContent+=' Scan limit reached at 1,500 files; choose a smaller platform folder for the rest.';
   }catch(error){
    const message=String(error?.message||error||'');
    if(!message.toLowerCase().includes('cancel'))status.textContent='Folder scan failed: '+message;
@@ -577,7 +577,7 @@ async function rescanGameFolder(){
  const legacyUri=localStorage.getItem('eclipse-folder-uri');if(legacyUri&&!savedUris.includes(legacyUri))savedUris.push(legacyUri);
  if(Capacitor.isNativePlatform()&&savedUris.length){
   const status=$('#scanStatus');status.textContent='Rescanning '+savedUris.length+' saved game folder(s)…';let scanned=0,failed=0;
-  for(const uri of savedUris){try{const result=await FolderAccess.scanFolder({uri});scanSelectedFolder(result.files||[],uri);scanned++;if(result.truncated)status.textContent+=' A folder reached the 5,000-file safety limit.';}catch(error){failed++;console.warn('ECLIPSE folder rescan failed',error);}}
+  for(const uri of savedUris){try{const result=await FolderAccess.scanFolder({uri});scanSelectedFolder(result.files||[],uri);scanned++;if(result.truncated)status.textContent+=' A folder reached the 1,500-file safety limit.';}catch(error){failed++;console.warn('ECLIPSE folder rescan failed',error);}}
   status.textContent='Finished scanning '+scanned+' folder(s).'+(failed?' '+failed+' folder permission(s) need to be renewed.':'');if(failed)notify(failed+' folder(s) could not be opened. Re-select them in Settings.');
  }else chooseGameFolder();
 }
