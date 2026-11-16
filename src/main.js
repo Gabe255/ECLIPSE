@@ -2,7 +2,7 @@ import './style.css';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 const FolderAccess = registerPlugin('FolderAccess');
 
-const VERSION = '0.2.0-alpha';
+const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '0.3.0-beta';
 const REPO = 'Gabe255/ECLIPSE';
 const systems = [
   { name: 'Nintendo', icon: '◈', family: 'Nintendo' },
