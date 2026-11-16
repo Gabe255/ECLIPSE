@@ -293,3 +293,16 @@ button{color:#f4f2ff}
 .system-game-card,.console-card,.system-folder,.game-card{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
 .system-game-card:hover,.console-card:hover,.system-folder:hover,.game-card:hover{box-shadow:0 12px 28px #0005}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+
+/* Player assignment workspace */
+.player-picker-row{display:flex;align-items:flex-end;gap:9px;flex-wrap:wrap;margin-top:16px}
+.player-picker-row label{display:flex;flex:1 1 220px;flex-direction:column;gap:8px;margin:0;color:#dedced;font:10px 'DM Mono';letter-spacing:.6px}
+.player-picker-row select,.player-setting-row select{min-width:0;width:100%;padding:11px 12px;border:1px solid #ffffff28;border-radius:7px;background:#171827;color:#f8f6ff}
+.player-picker-row button{min-height:39px}
+.player-assignments{display:flex;flex-direction:column;gap:8px;margin-top:15px}
+.player-setting-row{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(180px,1.2fr);align-items:center;gap:14px;padding:12px 14px;border:1px solid #ffffff18;border-radius:8px;background:#ffffff06}
+.player-setting-row>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.player-setting-row b{color:#f5f3ff;font-size:11px}
+.player-setting-row small{overflow-wrap:anywhere;color:#b9b7ca;font:9px 'DM Mono'}
+@media(max-width:520px){.player-setting-row{grid-template-columns:1fr;gap:9px}.library-actions{width:100%;justify-content:space-between}.library-actions .primary-btn{font-size:9px;padding:10px 11px}}
