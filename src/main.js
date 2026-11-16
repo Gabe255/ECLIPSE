@@ -1,5 +1,6 @@
 import './style.css';
 import { mountExperience } from './experience.js';
+import { mountControlCenter } from './controls.js';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 const FolderAccess = registerPlugin('FolderAccess');
 const LauncherSetup = registerPlugin('LauncherSetup');
@@ -721,4 +722,5 @@ document.addEventListener('keydown',e=>{
 applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
 refreshDisplayLayout();
 mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
+mountControlCenter({ notify });
 renderSystemPicker();renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();window.setTimeout(openOnboarding,450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
