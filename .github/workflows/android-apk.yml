@@ -38,6 +38,36 @@ jobs:
         run: npx cap add android
       - name: Sync Capacitor
         run: npx cap sync android
+      - name: Install native folder scanner
+        run: |
+          mkdir -p android/app/src/main/java/com/eclipse/launcher
+          cp android-native/FolderAccessPlugin.java android/app/src/main/java/com/eclipse/launcher/FolderAccessPlugin.java
+          python3 - <<'PY'
+          from pathlib import Path
+          activity = Path("android/app/src/main/java/com/eclipse/launcher/MainActivity.java")
+          source = activity.read_text()
+          source = source.replace(
+              "import com.getcapacitor.BridgeActivity;",
+              "import android.os.Bundle;\nimport com.getcapacitor.BridgeActivity;"
+          )
+          source = source.replace(
+              "public class MainActivity extends BridgeActivity {}",
+              "public class MainActivity extends BridgeActivity {\n"
+              "    @Override\n"
+              "    public void onCreate(Bundle savedInstanceState) {\n"
+              "        registerPlugin(FolderAccessPlugin.class);\n"
+              "        super.onCreate(savedInstanceState);\n"
+              "    }\n"
+              "}"
+          )
+          activity.write_text(source)
+          gradle = Path("android/app/build.gradle")
+          build = gradle.read_text()
+          dependency = '    implementation "androidx.documentfile:documentfile:1.0.1"'
+          if dependency not in build:
+              build = build.replace("dependencies {", "dependencies {\n" + dependency, 1)
+          gradle.write_text(build)
+          PY
       - name: Build debug APK
         working-directory: android
         run: chmod +x gradlew && ./gradlew assembleDebug
