@@ -737,3 +737,37 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 :root[data-interface-mode="konsoru"] .emulator-option{border-radius:9px;background:#a78bfa12;border-color:#a78bfa35}
 :root[data-interface-mode="konsoru"] .console-detail-top .subtle-btn{border-radius:10px}
 @media(max-width:650px){:root[data-interface-mode="konsoru"] .console-banner{min-height:155px;padding:18px;border-radius:17px}:root[data-interface-mode="konsoru"] .system-menu-item{padding:11px 13px;font-size:8px}:root[data-interface-mode="konsoru"] .system-game-card{flex-basis:145px}}
+
+/* SteamGridDB artwork browser and rendered game media */
+.sgdb-launch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px;padding:15px;border:1px solid #a78bfa35;border-radius:12px;background:linear-gradient(110deg,#a78bfa12,#ffffff04)}
+.sgdb-launch-row h3{margin:3px 0 0;font-size:13px;letter-spacing:.5px}
+.sgdb-browser{padding:14px 0 3px;border-top:1px solid #ffffff16}
+.sgdb-search-row{display:flex;gap:8px}
+.sgdb-search-row input,.settings-card input#sgdbApiKey{min-width:0;flex:1;padding:11px 12px;border:1px solid #ffffff25;border-radius:8px;background:#10111d;color:#fff;font:11px 'DM Mono'}
+.sgdb-search-row .primary-btn{flex:0 0 auto}
+.sgdb-browser .settings-note{margin:10px 0;font-size:10px}
+#sgdbStatus.error{color:#ff9aab}
+.sgdb-matches{display:flex;gap:8px;overflow-x:auto;padding:3px 0 12px}
+.sgdb-match{display:flex;flex:0 0 auto;flex-direction:column;gap:5px;max-width:210px;padding:10px 12px;border:1px solid #ffffff1c;border-radius:8px;background:#ffffff08;color:#fff;text-align:left}
+.sgdb-match:hover{border-color:#bba5ff}
+.sgdb-match b{font-size:10px;white-space:normal}
+.sgdb-match small{font:8px 'DM Mono';color:#a7a3ba}
+.sgdb-category-tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 0;border-top:1px solid #ffffff12;border-bottom:1px solid #ffffff12}
+.sgdb-category-tabs button{flex:0 0 auto;padding:9px 12px;border:1px solid transparent;border-radius:7px;background:#ffffff08;color:#a6a2ba;font:9px 'DM Mono';letter-spacing:.8px}
+.sgdb-category-tabs button.active,.sgdb-category-tabs button:hover{border-color:#a78bfa66;background:#a78bfa20;color:#eee8ff}
+.sgdb-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;max-height:390px;overflow:auto;padding:12px 2px}
+.sgdb-art-card{min-width:0;display:flex;flex-direction:column;gap:6px;padding:6px;border:1px solid #ffffff19;border-radius:9px;background:#ffffff06;color:#fff;text-align:left}
+.sgdb-art-card:hover,.sgdb-art-card:focus-visible{border-color:#bba5ff;box-shadow:0 0 20px #a78bfa22}
+.sgdb-art-card img{display:block;width:100%;height:135px;object-fit:contain;border-radius:5px;background:#080912}
+.sgdb-art-card small{overflow:hidden;color:#a9a5bd;font:8px 'DM Mono';text-overflow:ellipsis;white-space:nowrap}
+.sgdb-settings-actions{display:flex;gap:8px;flex-wrap:wrap;margin:5px 0 12px}
+.settings-card input#sgdbApiKey{width:100%;max-width:100%;box-sizing:border-box}
+.sgdb-cover-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;z-index:1}
+.konsoru-cover .sgdb-cover-image{z-index:1}
+.konsoru-cover i,.konsoru-cover small{z-index:2;text-shadow:0 2px 8px #000}
+.cocoon-game-cover .sgdb-cover-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;z-index:1}
+.cocoon-game-cover i,.cocoon-game-cover small{position:relative;z-index:2;text-shadow:0 2px 8px #000}
+.system-game-card .game-art{position:relative;overflow:hidden}
+.system-game-card .game-art .sgdb-cover-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.system-game-card .game-art .art-glow,.system-game-card .game-art .art-mark,.system-game-card .game-art .art-caption{position:relative;z-index:2;text-shadow:0 2px 8px #000}
+@media(max-width:520px){.sgdb-results{grid-template-columns:repeat(2,minmax(0,1fr))}.sgdb-art-card img{height:125px}.sgdb-launch-row{align-items:flex-start;flex-direction:column}.sgdb-search-row{flex-wrap:wrap}.sgdb-search-row input{flex-basis:100%}}
