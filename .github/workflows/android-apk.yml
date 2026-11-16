@@ -9,7 +9,7 @@ on:
         type: string
         default: ''
   push:
-    branches: [main]
+    branches: [main, 'redesign/**']
     tags: ['v*.*.*']
 
 permissions:
@@ -31,7 +31,7 @@ jobs:
           distribution: temurin
           java-version: '21'
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
       - name: Set build version
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
