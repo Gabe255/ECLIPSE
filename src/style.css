@@ -331,3 +331,7 @@ button{color:#f4f2ff}
 
 /* Let the mascot's pointing arm animate outside the suit silhouette */
 .mascot-body{overflow:visible}
+
+.library-actions input[type="search"]{width:min(220px,42vw);min-width:120px;padding:10px 12px;border:1px solid #ffffff24;border-radius:20px;background:#171827;color:#f7f5ff;font:10px 'DM Mono'}
+.library-actions input[type="search"]:focus{outline:1px solid var(--accent);border-color:var(--accent)}
+@media(max-width:520px){.library-actions input[type="search"]{flex:1 1 130px;width:auto}}
