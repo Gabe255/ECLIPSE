@@ -3,6 +3,7 @@ import { mountExperience } from './experience.js';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 const FolderAccess = registerPlugin('FolderAccess');
 const LauncherSetup = registerPlugin('LauncherSetup');
+const DisplayInfo = registerPlugin('DisplayInfo');
 
 const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '3.0.0';
 const REPO = 'Gabe255/ECLIPSE';
@@ -219,7 +220,12 @@ document.querySelector('#app').innerHTML = `
 <div class="onboarding-backdrop hidden" id="onboardingModal" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
   <div class="onboarding-card">
     <div class="mascot-stage"><div class="mascot-aura"></div><div class="eclipse-mascot"><div class="eclipse-mascot-hat"></div><div class="eclipse-mascot-orb"><i></i><i></i><span></span></div><div class="eclipse-mascot-ring"></div></div><div class="mascot-label">E / GUIDE</div></div>
-    <div class="onboarding-copy"><p class="eyebrow">A NEW WORLD AWAITS</p><h2 id="onboardingTitle">WELCOME TO <em>ECLIPSE.</em></h2><p>I'm your guide. Let's decide where your library settings and backups live before you jump in.</p>
+    <div class="onboarding-copy"><p class="eyebrow">A NEW WORLD AWAITS</p><h2 id="onboardingTitle">WELCOME TO <em>ECLIPSE.</em></h2><p>I'm your guide. Let's set up your screen layout, Home launcher and storage before you jump in.</p>
+      <section class="device-setup-block" aria-label="Device setup">
+        <div class="device-setup-heading"><span class="setup-spark">✦</span><div><b>DISPLAY SETUP</b><small id="displayDetectionStatus">Checking your device screens…</small></div></div>
+        <label class="setup-select-label">ECLIPSE LAYOUT<select id="displayLayoutSelect"><option value="auto">AUTO DETECT</option><option value="single">SINGLE SCREEN</option><option value="dual">DUAL SCREEN / FOLDABLE</option></select></label>
+        <button class="setup-home-button" id="makeDefaultHome" type="button"><span>⌂</span><b>MAKE ECLIPSE MY DEFAULT HOME</b><small id="defaultHomeStatus">Android will ask you to confirm this.</small></button>
+      </section>
       <div class="storage-options"><button class="storage-option" id="onboardingLocal"><b>ON THIS DEVICE</b><small>Keep settings and library data in app storage.</small><span>RECOMMENDED</span></button><button class="storage-option" id="onboardingFolder"><b>CHOOSE A BACKUP FOLDER</b><small>Pick a folder for portable backups on supported Android builds.</small><span>ANDROID FEATURE</span></button></div>
       <button class="onboarding-skip" id="onboardingSkip">I'LL DO THIS LATER</button>
     </div>
@@ -325,11 +331,18 @@ function renderSystemPicker(){
  $('#systemPickerCount').textContent=systems.length+' WORLDS AVAILABLE';
  picker.querySelectorAll('[data-pick-system]').forEach(card=>card.addEventListener('click',()=>openConsolePage(card.dataset.pickSystem)));
 }
+let nativeDisplayInfo = null;
 function detectDisplaySegments(){
  const segments=typeof window.getWindowSegments==='function'?window.getWindowSegments():[];
  const posture=window.navigator.devicePosture?.type||'unknown';
  const cssSegments=window.matchMedia?.('(horizontal-viewport-segments: 2)').matches||window.matchMedia?.('(vertical-viewport-segments: 2)').matches||false;
- return {dual:segments.length>1||cssSegments,segments,posture};
+ return {dual:segments.length>1||cssSegments||nativeDisplayInfo?.dual===true,segments,posture};
+}
+async function refreshDisplayLayout(){
+ if(Capacitor.isNativePlatform()){
+  try{nativeDisplayInfo=await DisplayInfo.getLayout();}catch(error){console.info('Native display detection unavailable; using browser detection.',error);}
+ }
+ return applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
 }
 function applyDisplayLayout(mode=localStorage.getItem('eclipse-display-layout')||'auto'){
  const detected=detectDisplaySegments();
@@ -361,6 +374,7 @@ function openOnboarding(){
  const modal=$('#onboardingModal');if(!modal||localStorage.getItem('eclipse-onboarding-complete')==='true')return;
  applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
  modal.classList.remove('hidden');
+ refreshDisplayLayout();
 }
 function finishOnboarding(){localStorage.setItem('eclipse-onboarding-complete','true');$('#onboardingModal')?.classList.add('hidden');}
 function renderHomeHero(){
@@ -631,10 +645,10 @@ function checkCompatibility(){
 $('#systemPrev')?.addEventListener('click',()=>$('#systemPicker')?.scrollBy({left:-250,behavior:'smooth'}));
 $('#systemNext')?.addEventListener('click',()=>$('#systemPicker')?.scrollBy({left:250,behavior:'smooth'}));
 $('#systemPicker')?.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){$('#systemPicker').scrollBy({left:event.key==='ArrowRight'?220:-220,behavior:'smooth'});}});
-$('#displayLayoutSelect')?.addEventListener('change',event=>{localStorage.setItem('eclipse-display-layout',event.target.value);const result=applyDisplayLayout(event.target.value);notify(result.effective==='dual'?'Dual-screen layout enabled.':'Single-screen layout enabled.');});
+$('#displayLayoutSelect')?.addEventListener('change',event=>{localStorage.setItem('eclipse-display-layout',event.target.value);const result=applyDisplayLayout(event.target.value);if(event.target.value==='auto')refreshDisplayLayout();notify(result.effective==='dual'?'Dual-screen layout enabled.':'Single-screen layout enabled.');});
 $('#makeDefaultHome')?.addEventListener('click',requestDefaultHome);
 $('#defaultHomeSettings')?.addEventListener('click',requestDefaultHome);
-$('#settingsDisplayLayout')?.addEventListener('change',event=>{localStorage.setItem('eclipse-display-layout',event.target.value);applyDisplayLayout(event.target.value);notify('Display layout saved.');});
+$('#settingsDisplayLayout')?.addEventListener('change',event=>{localStorage.setItem('eclipse-display-layout',event.target.value);applyDisplayLayout(event.target.value);if(event.target.value==='auto')refreshDisplayLayout();notify('Display layout saved.');});
 window.addEventListener('resize',()=>{if((localStorage.getItem('eclipse-display-layout')||'auto')==='auto')applyDisplayLayout('auto');});
 window.addEventListener('deviceposture',()=>{if((localStorage.getItem('eclipse-display-layout')||'auto')==='auto')applyDisplayLayout('auto');});
 $('#onboardingLocal')?.addEventListener('click',()=>{finishOnboarding();notify('ECLIPSE will keep its data on this device.');});
@@ -705,5 +719,6 @@ document.addEventListener('keydown',e=>{
  }
 });
 applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
+refreshDisplayLayout();
 mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
 renderSystemPicker();renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();window.setTimeout(openOnboarding,450);if(preferences.startPage&&preferences.startPage!=='home')showView(preferences.startPage);
