@@ -56,6 +56,7 @@ jobs:
           mkdir -p android/app/src/main/java/com/eclipse/launcher
           cp android-native/FolderAccessPlugin.java android/app/src/main/java/com/eclipse/launcher/FolderAccessPlugin.java
           cp android-native/LauncherSetupPlugin.java android/app/src/main/java/com/eclipse/launcher/LauncherSetupPlugin.java
+          cp android-native/DisplayInfoPlugin.java android/app/src/main/java/com/eclipse/launcher/DisplayInfoPlugin.java
           python3 - <<'PY'
           from pathlib import Path
           activity = Path("android/app/src/main/java/com/eclipse/launcher/MainActivity.java")
@@ -71,6 +72,7 @@ jobs:
               "    public void onCreate(Bundle savedInstanceState) {\n"
               "        registerPlugin(FolderAccessPlugin.class);\n"
               "        registerPlugin(LauncherSetupPlugin.class);\n"
+              "        registerPlugin(DisplayInfoPlugin.class);\n"
               "        super.onCreate(savedInstanceState);\n"
               "    }\n"
               "}"
@@ -81,7 +83,8 @@ jobs:
           build = gradle.read_text()
           build = re.sub(r'versionCode\s+\d+', 'versionCode ' + os.environ["GITHUB_RUN_NUMBER"], build, count=1)
           build = re.sub(r'versionName\s+"[^"]+"', 'versionName "' + os.environ["ECLIPSE_VERSION"] + '"', build, count=1)
-          dependency = '    implementation "androidx.documentfile:documentfile:1.0.1"'
+          dependency = '    implementation "androidx.documentfile:documentfile:1.0.1"
+    implementation "androidx.window:window-java:1.3.0"'
           if dependency not in build:
               build = build.replace("dependencies {", "dependencies {\n" + dependency, 1)
           gradle.write_text(build)
