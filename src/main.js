@@ -2,6 +2,7 @@ import './style.css';
 import { mountExperience } from './experience.js';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 const FolderAccess = registerPlugin('FolderAccess');
+const LauncherSetup = registerPlugin('LauncherSetup');
 
 const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '3.0.0';
 const REPO = 'Gabe255/ECLIPSE';
@@ -596,6 +597,10 @@ function checkCompatibility(){
 $('#systemPrev')?.addEventListener('click',()=>$('#systemPicker')?.scrollBy({left:-250,behavior:'smooth'}));
 $('#systemNext')?.addEventListener('click',()=>$('#systemPicker')?.scrollBy({left:250,behavior:'smooth'}));
 $('#systemPicker')?.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){$('#systemPicker').scrollBy({left:event.key==='ArrowRight'?220:-220,behavior:'smooth'});}});
+$('#displayLayoutSelect')?.addEventListener('change',event=>{localStorage.setItem('eclipse-display-layout',event.target.value);const result=applyDisplayLayout(event.target.value);notify(result.effective==='dual'?'Dual-screen layout enabled.':'Single-screen layout enabled.');});
+$('#makeDefaultHome')?.addEventListener('click',requestDefaultHome);
+window.addEventListener('resize',()=>{if((localStorage.getItem('eclipse-display-layout')||'auto')==='auto')applyDisplayLayout('auto');});
+window.addEventListener('deviceposture',()=>{if((localStorage.getItem('eclipse-display-layout')||'auto')==='auto')applyDisplayLayout('auto');});
 $('#onboardingLocal')?.addEventListener('click',()=>{finishOnboarding();notify('ECLIPSE will keep its data on this device.');});
 $('#onboardingFolder')?.addEventListener('click',async()=>{finishOnboarding();showView('settings');document.querySelector('[data-settings-tab="library"]')?.click();await chooseEclipseDataFolder();});
 $('#onboardingSkip')?.addEventListener('click',finishOnboarding);
