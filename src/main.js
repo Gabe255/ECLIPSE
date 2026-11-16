@@ -69,11 +69,11 @@ const supportedGameTypes = [
   {system:'GAME BOY ADVANCE',ext:['gba'],dirs:['gba','gameboy advance','game boy advance']},
   {system:'NINTENDO DS',ext:['nds'],dirs:['nds','nintendo ds','ds']},
   {system:'NINTENDO 3DS',ext:['3ds','cci','cxi'],dirs:['3ds','nintendo 3ds']},
-  {system:'GAMECUBE',ext:['gcm','rvz','gcz'],dirs:['gamecube','game cube','gc']},
-  {system:'WII',ext:['wbfs','wia'],dirs:['wii']},
-  {system:'PLAYSTATION',ext:['pbp','chd'],dirs:['psx','ps1','ps one','playstation','playstation 1']},
-  {system:'PLAYSTATION 2',ext:['iso','cso','chd'],dirs:['ps2','playstation 2']},
-  {system:'PSP',ext:['cso','pbp'],dirs:['psp','playstation portable']},
+  {system:'GAMECUBE',ext:['gcm','rvz','gcz','iso'],dirs:['gamecube','game cube','gc']},
+  {system:'WII',ext:['wbfs','wia','iso'],dirs:['wii']},
+  {system:'PLAYSTATION',ext:['pbp','chd','bin','cue','iso'],dirs:['psx','ps1','ps one','playstation','playstation 1']},
+  {system:'PLAYSTATION 2',ext:['iso','cso','chd','bin','cue'],dirs:['ps2','playstation 2']},
+  {system:'PSP',ext:['cso','pbp','iso'],dirs:['psp','playstation portable']},
   {system:'PS VITA',ext:['vpk'],dirs:['ps vita','psvita','vita']},
   {system:'MASTER SYSTEM',ext:['sms'],dirs:['mastersystem','master system']},
   {system:'GENESIS / MEGA DRIVE',ext:['md','gen','smd'],dirs:['genesis','megadrive','mega drive']},
@@ -263,7 +263,7 @@ function renderConsoleHome(system){
  const profile=emulatorOptions[name];
  $('#emulatorPanel').innerHTML='<div class="emulator-panel-head"><div><p class="eyebrow">COMPATIBILITY PROFILE</p><h3>EMULATORS & LAUNCHERS</h3></div><span class="feature-tag">'+(profile?'OPTIONS LISTED':'PROFILE PENDING')+'</span></div>'+(profile?'<div class="emulator-option-list">'+profile.items.map(item=>'<span class="emulator-option">'+item+'</span>').join('')+'</div><p class="settings-note">'+profile.note+'</p>':'<p class="settings-note">No emulator or launcher profile has been added for this platform yet.</p>');
  const artFor=g=>'<div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">'+(['M','Z','Ⅲ','S'][games.indexOf(g)]||'✦')+'</span><span class="art-caption">'+g.tag+'</span></div>';
- const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+g.title+'</b><small>'+g.year+' · '+g.tag+'</small></div></button>';
+ const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+g.title+'</b><small>'+g.tag+' · '+g.fileName+'</small></div></button>';
  const featured=titles[0];
  const folderNames=['ALL GAMES'];
  $('#systemHome').innerHTML=
@@ -306,9 +306,10 @@ function inferGameSystem(file){
 function titleFromFile(name){return name.replace(/\.[^.]+$/,'').replace(/[._-]+/g,' ').replace(/\s+/g,' ').trim().replace(/\b\w/g,ch=>ch.toUpperCase());}
 function scanSelectedFolder(fileList,folderUri='browser'){
  const files=[...fileList].filter(file=>file&&file.size>0);
- const found=[];
+ const found=[];let matched=0;
  for(const file of files){
   const system=inferGameSystem(file);if(!system)continue;
+  matched++;
   const relative=file.webkitRelativePath||file.relativePath||file.name;
   const id=(folderUri||'browser')+'|'+relative+'|'+file.size;
   if(games.some(game=>game.id===id))continue;
@@ -316,7 +317,7 @@ function scanSelectedFolder(fileList,folderUri='browser'){
  }
  if(found.length){games.push(...found);localStorage.setItem('eclipse-games',JSON.stringify(games));activeSystem='All Games';renderLibrary();renderWidgets();renderHomeHero();}
  const status=$('#scanStatus');
- status.textContent=found.length?'Found '+found.length+' supported game file(s). '+files.length+' total file(s) were checked.': 'No supported game files were found in that folder. Nothing was added to Home or your library.';
+ status.textContent=matched?'Found '+matched+' supported game file(s); added '+found.length+' new game(s). '+files.length+' total file(s) checked.':'No supported game files were found in that folder. Nothing was added to Home or your library.';
  notify(found.length?'Added '+found.length+' games to your library.':'No games found — nothing added.');
 }
 async function chooseGameFolder(){
