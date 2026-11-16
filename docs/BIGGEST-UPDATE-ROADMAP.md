@@ -11,13 +11,13 @@
 | Web dashboard and system picker | Implemented; latest web CI passing | 37 system categories and system landing-page UI |
 | Experience Studio | Implemented | Themes, wallpaper, profiles, motion settings, JSON backup/restore |
 | Apps Library | Implemented foundation | Android app discovery, Treat as Game labels, manual playtime |
-| Folder scanning and backup folder | Native implementation present | Requires Android device testing and edge-case checks |
+| Folder scanning and backup folder | Native implementation present; bounded scan duration added in v4.0.2 branch | Requires Odin testing with large folders, slow providers, revoked permissions, and duplicate rescans |
 | Mascot and first-run setup | Implemented | Eclipse orb mascot; display, default Home, and storage setup |
 | Single/dual display | Implemented; Android APK build verified | AndroidX WindowManager detection; real foldable/phone validation still required |
 | Default Android Home request | Implemented; Android APK build verified | User must confirm through Android's system role picker; device behavior still needs validation |
 | Control Center | Implemented in web and native code | Android panels, app-window brightness, battery status; APK/device validation required |
 | Game Mode | Implemented as an ECLIPSE UI mode | Reduces interface effects only; no CPU/GPU tuning |
-| Third-party emulator launching | Not implemented end-to-end | Player assignment is not proof of compatibility |
+| Third-party emulator launching | Native ACTION_VIEW handoff implemented | Verify each emulator, content-URI permissions, and file type on device; unsupported combinations must show a clear error |
 | Metadata/artwork scraping | Not implemented | Requires provider integration and reliable-match handling |
 | Achievements and online theme marketplace | Not implemented | Future work |
 | Cloud sync and automatic foreground playtime | Not implemented | Requires additional services/permissions and privacy design |
@@ -44,6 +44,7 @@
 - System assignment and library organization.
 
 **Remaining:**
+- Real-device stress tests for large folders and slow document providers.
 - Reliable add/edit/remove game flows and duplicate-safe rescans.
 - Automatic foreground-app tracking only if Android permissions and platform behavior allow it.
 - End-to-end launch handoff for individually tested emulators and file types.
@@ -56,8 +57,7 @@
 - The user must be able to choose a player installed on their device.
 
 **Remaining:**
-- Connect a selected game content URI to a selected player's documented Android launch intent.
-- Verify one supported emulator and file type at a time.
+- Verify the existing selected-game content URI handoff against one supported emulator and file type at a time.
 - Record tested versions and known limitations.
 - Keep unsupported or untested players clearly labelled.
 
@@ -142,3 +142,13 @@ A release is ready only when:
 7. A stable signing/update path is verified before publishing a stable release.
 
 **Current decision:** The v4.0.0 feature set is present on `main`. The version/release preparation is in progress. Web CI and Android APK compilation must pass on the exact v4.0.0 commit, and real-device checks remain outstanding before publishing a stable tag.
+
+
+## v4.0.2 branch changes
+
+- Large-library scan deduplication uses a `Set` rather than repeatedly searching the full library for every discovered file.
+- Library persistence is guarded so storage quota errors produce a visible message instead of leaving in-memory state half-updated.
+- Native folder traversal has a 20-second time budget in addition to file, directory, and depth limits. A time-limited scan reports itself as truncated; rescan a narrower folder to continue.
+- The selected-system hero art now uses original platform-family visual treatments rather than relying only on a symbol.
+- Settings copy now reflects active gamepad navigation alongside keyboard controls.
+- Emulator handoff remains device/emulator-dependent; manual playtime, Steam integration, and privileged Android Quick Settings remain separate unfinished integrations.
