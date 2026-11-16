@@ -126,9 +126,7 @@ document.querySelector('#app').innerHTML = `
       <div class="console-detail-top"><button class="subtle-btn" id="backToLibrary">← ALL SYSTEMS</button><span class="collection-count" id="consoleGeneration">PLATFORM</span></div>
       <section class="console-banner" id="consoleBanner"></section>
       <section class="emulator-panel" id="emulatorPanel"></section>
-      <div class="console-detail-toolbar"><div><p class="eyebrow">YOUR COLLECTION</p><h2 id="consoleTitle">SYSTEM</h2></div><span class="collection-count" id="consoleGameCount">0 GAMES</span></div>
-      <div class="game-grid" id="consoleGameGrid"></div>
-      <div class="console-empty-note" id="consoleEmptyNote">Your games for this system will appear here when imported.</div>
+      <section class="system-home" id="systemHome"></section>
     </section>
     <section id="androidView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">NATIVE ANDROID</p><h2>ANDROID GAMES</h2></div><span class="collection-count">DEVICE LIBRARY</span></div>
@@ -169,6 +167,7 @@ document.querySelector('#app').innerHTML = `
   </main>
 </div>
 <div class="modal-backdrop hidden" id="widgetModal"><div class="widget-modal"><div class="modal-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>HOME WIDGETS</h2></div><button class="close-modal" id="closeWidgetModal">×</button></div><p class="settings-note">Add widgets, change their order, or remove the ones you don't use.</p><div id="widgetChoices" class="widget-choices"></div><button class="primary-btn" id="doneWidgets">DONE</button></div></div>
+<div class="system-boot hidden" id="systemBoot" aria-live="polite"><div class="boot-orbit"><span></span></div><p class="eyebrow">ECLIPSE SYSTEM STARTUP</p><h2 id="bootSystemName">STARTING SYSTEM</h2><div class="boot-progress"><span></span></div><small>PREPARING YOUR GAME SPACE</small></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>`;
 
 const $ = s => document.querySelector(s);
@@ -214,17 +213,36 @@ function renderLibrary(){
 }
 function openConsolePage(name){
  const system=systems.find(s=>s.name===name)||{name,icon:'✦',family:'Platform'};
+ const boot=$('#systemBoot');
+ $('#bootSystemName').textContent='STARTING '+system.name.toUpperCase();
+ boot.classList.remove('hidden');
+ window.setTimeout(()=>{
+  boot.classList.add('hidden');
+  renderConsoleHome(system);
+  showView('console');
+ },1050);
+}
+function renderConsoleHome(system){
+ const name=system.name;
  const titles=gamesForSystem(name);
- $('#consoleTitle').textContent=system.name.toUpperCase();
+ $('#consoleTitle')?.remove();
  $('#consoleGeneration').textContent=system.family.toUpperCase()+' PLATFORM';
- $('#consoleGameCount').textContent=String(titles.length).padStart(2,'0')+' GAMES';
- $('#consoleBanner').innerHTML='<div class="console-banner-mark">'+system.icon+'</div><div class="console-banner-copy"><p class="eyebrow">ECLIPSE SYSTEM PROFILE</p><h1>'+system.name.toUpperCase()+'</h1><p>Your '+system.name+' collection, all in one place.</p></div><div class="console-banner-index">SYSTEM / '+String(systems.indexOf(system)+1).padStart(2,'0')+'</div>';
+ $('#consoleBanner').innerHTML='<div class="console-banner-mark">'+system.icon+'</div><div class="console-banner-copy"><p class="eyebrow">SYSTEM HOME</p><h1>'+system.name.toUpperCase()+'</h1><p>Your '+system.name+' dashboard. Pick a folder or jump into a game.</p></div><div class="console-banner-index">SYSTEM / '+String(systems.indexOf(system)+1).padStart(2,'0')+'</div>';
  const profile=emulatorOptions[name];
  $('#emulatorPanel').innerHTML='<div class="emulator-panel-head"><div><p class="eyebrow">COMPATIBILITY PROFILE</p><h3>EMULATORS & LAUNCHERS</h3></div><span class="feature-tag">'+(profile?'OPTIONS LISTED':'PROFILE PENDING')+'</span></div>'+(profile?'<div class="emulator-option-list">'+profile.items.map(item=>'<span class="emulator-option">'+item+'</span>').join('')+'</div><p class="settings-note">'+profile.note+'</p>':'<p class="settings-note">No emulator or launcher profile has been added for this platform yet.</p>');
- $('#consoleGameGrid').innerHTML=titles.map(g=>{const i=games.indexOf(g);return '<button class="game-card" data-console-game="'+i+'"><div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">'+['M','Z','Ⅲ','S'][i]+'</span><span class="art-caption">'+g.tag+'</span></div><div class="game-meta"><div><h3>'+g.title+'</h3><p>'+g.system+' · '+g.year+'</p></div><span class="game-arrow">↗</span></div></button>';}).join('');
- $('#consoleEmptyNote').classList.toggle('hidden',titles.length>0);
- $('#consoleGameGrid').querySelectorAll('[data-console-game]').forEach(card=>card.addEventListener('click',()=>{selectedGame=Number(card.dataset.consoleGame);notify(games[selectedGame].title+' selected · Game launching is coming later.');}));
- showView('console');
+ const artFor=g=>'<div class="game-art art-'+g.art+'"><span class="art-glow"></span><span class="art-mark">'+(['M','Z','Ⅲ','S'][games.indexOf(g)]||'✦')+'</span><span class="art-caption">'+g.tag+'</span></div>';
+ const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+g.title+'</b><small>'+g.year+' · '+g.tag+'</small></div></button>';
+ const featured=titles[0];
+ const folderNames=['ALL GAMES','FAVORITES','RECENTLY PLAYED','UNSORTED'];
+ $('#systemHome').innerHTML=
+  '<div class="system-home-head"><div><p class="eyebrow">WELCOME TO YOUR SYSTEM</p><h2>'+name.toUpperCase()+' HOME</h2></div><span class="collection-count">'+titles.length+' TITLES</span></div>'+
+  '<div class="system-folder-row"><div class="system-row-label"><p class="eyebrow">YOUR FOLDERS</p><button class="subtle-btn" id="addSystemFolder">+ NEW FOLDER</button></div><div class="system-folders">'+folderNames.map((folder,i)=>'<button class="system-folder" data-system-folder="'+folder+'"><span>'+['▣','✦','◷','▰'][i]+'</span><b>'+folder+'</b><small>'+(i===0?titles.length+' ITEMS':i===1?'PINNED GAMES':i===2?'PLAY HISTORY':'UNSORTED ITEMS')+'</small></button>').join('')+'</div></div>'+
+  (featured?'<section class="system-featured"><div class="system-featured-art">'+artFor(featured)+'</div><div class="system-featured-copy"><p class="eyebrow">FEATURED GAME</p><h2>'+featured.title+'</h2><p>'+name+' · '+featured.year+' · '+featured.tag+'</p><button class="primary-btn" data-system-game="'+games.indexOf(featured)+'">OPEN GAME ↗</button></div></section>':'<div class="system-empty-hero"><p class="eyebrow">YOUR SYSTEM IS READY</p><h2>MAKE THIS SPACE YOURS.</h2><p>Import games to see featured artwork, folders and game shelves here.</p></div>')+
+  '<section class="system-shelf"><div class="system-row-label"><div><p class="eyebrow">YOUR COLLECTION</p><h3>ALL GAMES</h3></div><span>'+titles.length+' ITEMS</span></div><div class="system-game-row">'+(titles.length?titles.map(cardFor).join(''):'<p class="settings-note">No games added to this system yet.</p>')+'</div></section>'+
+  '<section class="system-shelf"><div class="system-row-label"><div><p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p><h3>RECENTLY PLAYED</h3></div><span>PLAY HISTORY</span></div><div class="system-game-row">'+(titles.length?titles.slice(0,3).map(cardFor).join(''):'<p class="settings-note">Your recent games will show here.</p>')+'</div></section>';
+ $('#systemHome').querySelectorAll('[data-system-game]').forEach(button=>button.addEventListener('click',()=>{const game=games[Number(button.dataset.systemGame)];if(!game)return;selectedGame=games.indexOf(game);playCount++;localStorage.setItem('eclipse-play-count',JSON.stringify(playCount));notify(game.title+' selected · Emulator launching is not connected yet.');}));
+ $('#systemHome').querySelectorAll('[data-system-folder]').forEach(button=>button.addEventListener('click',()=>{const folder=button.dataset.systemFolder;if(folder==='ALL GAMES')$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth'});else notify(folder+' folder · Add folder management is coming next.');}));
+ $('#addSystemFolder').addEventListener('click',()=>{const folder=prompt('Name your new '+name+' folder:');if(folder?.trim())notify('"'+folder.trim().slice(0,28)+'" folder idea saved for the next library update.');});
 }
 function gamesForSystem(name){
  if(name==='Nintendo')return games.filter(g=>g.system==='NINTENDO'||g.system==='GAMECUBE');
