@@ -17,8 +17,6 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
-import org.json.JSONException;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -127,16 +125,12 @@ public class FolderAccessPlugin extends Plugin {
                 walk(child, relative, entries);
             } else if (child.isFile()) {
                 JSObject item = new JSObject();
-                try {
-                    item.put("name", name);
-                    item.put("relativePath", relative);
-                    item.put("uri", child.getUri().toString());
-                    item.put("size", child.length());
-                    item.put("lastModified", child.lastModified());
-                    entries.put(item);
-                } catch (JSONException ignored) {
-                    // Skip a malformed provider entry and continue scanning.
-                }
+                item.put("name", name);
+                item.put("relativePath", relative);
+                item.put("uri", child.getUri().toString());
+                item.put("size", child.length());
+                item.put("lastModified", child.lastModified());
+                entries.put(item);
             }
         }
     }
