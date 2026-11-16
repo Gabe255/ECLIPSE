@@ -74,8 +74,8 @@ jobs:
           gradle = Path("android/app/build.gradle")
           import os, re
           build = gradle.read_text()
-          build = re.sub(r'versionCode\\s+\\d+', 'versionCode ' + os.environ["GITHUB_RUN_NUMBER"], build, count=1)
-          build = re.sub(r'versionName\\s+"[^"]+"', 'versionName "' + os.environ["ECLIPSE_VERSION"] + '"', build, count=1)
+          build = re.sub(r'versionCode\s+\d+', 'versionCode ' + os.environ["GITHUB_RUN_NUMBER"], build, count=1)
+          build = re.sub(r'versionName\s+"[^"]+"', 'versionName "' + os.environ["ECLIPSE_VERSION"] + '"', build, count=1)
           dependency = '    implementation "androidx.documentfile:documentfile:1.0.1"'
           if dependency not in build:
               build = build.replace("dependencies {", "dependencies {\n" + dependency, 1)
