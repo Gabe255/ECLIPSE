@@ -365,8 +365,7 @@ async function refreshDisplayLayout(){
  if(Capacitor.isNativePlatform()){
   try{nativeDisplayInfo=await DisplayInfo.getLayout();}catch(error){console.info('Native display detection unavailable; using browser detection.',error);}
  }
- return applyInterfaceMode();
- applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
+ return applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
 }
 function applyDisplayLayout(mode=localStorage.getItem('eclipse-display-layout')||'auto'){
  const detected=detectDisplaySegments();
@@ -799,6 +798,7 @@ document.addEventListener('keydown',e=>{
   renderGames();$('#gameGrid').querySelector('[data-game="'+selectedGame+'"]')?.focus();
  }
 });
+applyInterfaceMode();
 applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
 refreshDisplayLayout();
 mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
