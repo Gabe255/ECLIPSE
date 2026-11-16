@@ -166,4 +166,6 @@ jobs:
 
             Check the release notes for included features and known limitations.
 
+            **Biggest Update Roadmap:** https://github.com/Gabe255/ECLIPSE/blob/main/docs/BIGGEST-UPDATE-ROADMAP.md
+
             **Download APK:** [app-debug.apk](https://github.com/Gabe255/ECLIPSE/releases/download/${{ github.event.inputs.release_tag || github.ref_name }}/app-debug.apk)
