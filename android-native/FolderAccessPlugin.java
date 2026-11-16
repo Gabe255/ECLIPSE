@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
 
 @CapacitorPlugin(name = "FolderAccess")
 public class FolderAccessPlugin extends Plugin {
-    private static final int MAX_FILES = 5000;
+    private static final int MAX_FILES = 1500;
     private static final String DATA_FILE = "eclipse-data.json";
     private static final String PREFS = "eclipse_native_storage";
     private final ExecutorService scanExecutor = Executors.newSingleThreadExecutor();
