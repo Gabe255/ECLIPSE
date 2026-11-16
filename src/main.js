@@ -124,7 +124,7 @@ document.querySelector('#app').innerHTML = `
     <button class="rail-btn" data-view="library" aria-label="Library">▤</button>
     <button class="rail-btn" data-view="android" aria-label="Android games">▣</button>
     <button class="rail-btn" data-view="settings" aria-label="Settings">⚙</button>
-    <div class="rail-bottom">ALPHA ${VERSION}</div>
+    <div class="rail-bottom">v${VERSION}</div>
   </aside>
   <main class="main">
     <header class="topbar">
