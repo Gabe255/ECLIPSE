@@ -1,7 +1,7 @@
 # ECLIPSE — Biggest Update Roadmap
 
-**Project version:** 3.0.0 development line  
-**Release policy:** Stable releases only. Do not publish a stable tag until the release checks below pass.  
+**Project version:** 4.0.0 — The Eclipse Experience  
+**Release policy:** Stable releases only. Do not publish the v4.0.0 stable tag until the release checks below pass.  
 **Status language:** “Implemented” means the code exists. “Build verified” means CI passed. “Device verified” means it was tested on real Android hardware. These are separate checks.
 
 ## Current release-readiness snapshot
@@ -141,4 +141,4 @@ A release is ready only when:
 6. Known limitations are documented.
 7. A stable signing/update path is verified before publishing a stable release.
 
-**Current decision:** The latest web CI and Android APK build both pass. Keep this work in the existing feature branch and draft pull request until real-device checks are complete.
+**Current decision:** The v4.0.0 feature set is present on `main`. The version/release preparation is in progress. Web CI and Android APK compilation must pass on the exact v4.0.0 commit, and real-device checks remain outstanding before publishing a stable tag.
