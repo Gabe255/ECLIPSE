@@ -630,3 +630,19 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 @keyframes systemFeatureSweep{0%,70%,100%{transform:translateX(-100%)}85%{transform:translateX(100%)}}
 @media(max-width:650px){.system-feature{grid-template-columns:110px minmax(0,1fr);gap:15px;min-height:170px;padding:16px;border-radius:20px}.system-feature-art{border-radius:17px}.system-feature-art strong{font-size:64px}.system-feature-art small{font-size:7px;bottom:7px}.system-feature-copy h2{font-size:25px}.system-feature-copy>p:not(.eyebrow){font-size:11px;margin-bottom:12px}.system-feature-copy .primary-btn{padding:10px 12px;font-size:9px}.system-feature-count{grid-column:1/-1;display:flex;justify-content:flex-end;align-items:baseline;gap:8px}.system-feature-count b{font-size:23px}.system-feature-count small{font-size:8px}.system-pick-card{flex-basis:126px;min-height:145px}}
 @media(prefers-reduced-motion:reduce){.eclipse-launch-boot,.system-feature:after,.launch-boot-track i{animation:none!important;transition:none!important}}
+
+
+/* ECLIPSE 4.0.2 — platform-specific hero artwork treatments.
+   These are original abstract visuals, not copied platform logos or game artwork. */
+.system-feature-art{isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 72% 26%,rgba(166,118,255,.38),transparent 42%),linear-gradient(135deg,#17132b,#080910 72%);}
+.system-feature-art::before{content:"";position:absolute;inset:12% 10% 12% 42%;border:1px solid rgba(255,255,255,.22);border-radius:50%;transform:rotate(-24deg) scaleY(.42);box-shadow:0 0 0 18px rgba(255,255,255,.025),0 0 0 38px rgba(255,255,255,.02);pointer-events:none;}
+.system-feature-art::after{content:"";position:absolute;width:44%;aspect-ratio:1;right:14%;top:18%;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.9),rgba(255,255,255,.08) 24%,rgba(255,255,255,.015) 60%,transparent 70%);filter:blur(.2px);pointer-events:none;}
+.system-feature-art #systemFeatureMark,.system-feature-art strong{position:relative;z-index:1;text-shadow:0 8px 38px rgba(0,0,0,.65);}
+#systemFeature[data-family="nintendo"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(255,66,93,.42),transparent 43%),linear-gradient(135deg,#30111c,#090910 72%);}
+#systemFeature[data-family="playstation"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(73,139,255,.44),transparent 43%),linear-gradient(135deg,#101b3b,#080910 72%);}
+#systemFeature[data-family="xbox"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(105,220,103,.38),transparent 43%),linear-gradient(135deg,#102a1c,#080910 72%);}
+#systemFeature[data-family="sega"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(73,190,255,.4),transparent 43%),linear-gradient(135deg,#10243c,#080910 72%);}
+#systemFeature[data-family="atari"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(255,177,77,.4),transparent 43%),linear-gradient(135deg,#34200f,#080910 72%);}
+#systemFeature[data-family="arcade"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(255,87,204,.4),transparent 43%),linear-gradient(135deg,#30102d,#080910 72%);}
+#systemFeature[data-family="pc"],#systemFeature[data-family="pc-gaming"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(125,145,255,.42),transparent 43%),linear-gradient(135deg,#171b37,#080910 72%);}
+#systemFeature[data-family="mobile"] .system-feature-art,#systemFeature[data-family="android"] .system-feature-art{background:radial-gradient(ellipse at 72% 28%,rgba(65,218,191,.38),transparent 43%),linear-gradient(135deg,#102c2b,#080910 72%);}
