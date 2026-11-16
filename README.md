@@ -23,7 +23,7 @@
 - Emulator/player assignment and system pages are organizational UI. End-to-end game launching into third-party emulators is not yet implemented.
 - Automatic metadata and artwork scraping, online theme marketplace, achievement-service integrations, and cloud sync are not included yet.
 - Foldable auto-detection requires Android to report a separating fold feature. Browser preview may not expose the same hardware information; the layout can be selected manually in that case.
-- Web CI and Android APK build results are tracked separately. A successful build does not replace testing on a real phone or foldable.
+- The latest branch web CI and Android APK build both pass. A successful build does not replace testing on a real phone or foldable.
 
 ECLIPSE does not include ROMs, BIOS files, emulator cores, or copyrighted game artwork. Only add game files and apps you have the right to use.
 
