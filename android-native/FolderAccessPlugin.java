@@ -27,12 +27,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @CapacitorPlugin(name = "FolderAccess")
 public class FolderAccessPlugin extends Plugin {
     private static final int MAX_FILES = 5000;
     private static final String DATA_FILE = "eclipse-data.json";
     private static final String PREFS = "eclipse_native_storage";
+    private final ExecutorService scanExecutor = Executors.newSingleThreadExecutor();
 
     @PluginMethod
     public void pickAndScan(PluginCall call) {
@@ -56,11 +59,10 @@ public class FolderAccessPlugin extends Plugin {
         } catch (Exception ignored) {
             // The current scan can still work even if the provider does not offer a persistent grant.
         }
-        try {
-            call.resolve(scanTree(treeUri));
-        } catch (Exception error) {
-            call.reject("Could not scan this folder: " + error.getMessage(), error);
-        }
+        scanExecutor.execute(() -> {
+            try { call.resolve(scanTree(treeUri)); }
+            catch (Exception error) { call.reject("Could not scan this folder: " + error.getMessage(), error); }
+        });
     }
 
     @PluginMethod
@@ -99,11 +101,13 @@ public class FolderAccessPlugin extends Plugin {
             call.reject("A saved folder URI is required.");
             return;
         }
-        try {
-            call.resolve(scanTree(Uri.parse(value)));
-        } catch (Exception error) {
-            call.reject("Could not rescan this folder: " + error.getMessage(), error);
-        }
+        Uri treeUri;
+        try { treeUri = Uri.parse(value); }
+        catch (Exception error) { call.reject("The saved folder reference is invalid.", error); return; }
+        scanExecutor.execute(() -> {
+            try { call.resolve(scanTree(treeUri)); }
+            catch (Exception error) { call.reject("Could not rescan this folder: " + error.getMessage(), error); }
+        });
     }
 
 
@@ -128,7 +132,8 @@ public class FolderAccessPlugin extends Plugin {
             getContext().getSharedPreferences(PREFS, 0).edit().putString("dataFolderUri", uri.toString()).apply();
             JSObject response = new JSObject();
             response.put("uri", uri.toString());
-            response.put("name", DocumentFile.fromTreeUri(getContext(), uri).getName());
+            DocumentFile selected = DocumentFile.fromTreeUri(getContext(), uri);
+            response.put("name", selected == null || selected.getName() == null ? "ECLIPSE Data" : selected.getName());
             call.resolve(response);
         } catch (Exception error) {
             call.reject("Could not save access to this data folder: " + error.getMessage(), error);
@@ -237,7 +242,7 @@ public class FolderAccessPlugin extends Plugin {
     }
 
     private void walk(DocumentFile directory, String parent, JSArray entries, int depth) {
-        if (entries.length() >= MAX_FILES || depth > 32 || directory == null) return;
+        if (entries.length() >= MAX_FILES || depth > 24 || directory == null) return;
         DocumentFile[] children;
         try {
             children = directory.listFiles();
@@ -263,7 +268,7 @@ public class FolderAccessPlugin extends Plugin {
                     item.put("lastModified", child.lastModified());
                     entries.put(item);
                 }
-            } catch (SecurityException | IllegalStateException ignored) {
+            } catch (RuntimeException ignored) {
                 // Some Android providers expose a folder but deny access to individual children.
             }
         }
