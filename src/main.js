@@ -626,7 +626,7 @@ async function autoFetchSgdbArtwork(){
  try{
   const matches=await sgdbFetch('search/autocomplete/'+encodeURIComponent(game.title));
   if(!matches.length)throw new Error('No SteamGridDB match found for '+game.title+'.');
-  const match=matches.find(item=>(item.name||'').toLowerCase()===game.title.toLowerCase())||matches[0];
+  const match=matches.find(item=>(item.name||'').trim().toLowerCase()===game.title.trim().toLowerCase());if(!match)throw new Error('No exact title match found. Use Browse Artwork to choose the correct edition.');
   const art={...(game.artwork||{}),source:'SteamGridDB',gameId:match.id};
   let found=0;
   for(const [type,field] of [['grids','grid'],['heroes','hero'],['logos','logo'],['icons','icon']]){
