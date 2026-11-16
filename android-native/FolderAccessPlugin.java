@@ -225,34 +225,46 @@ public class FolderAccessPlugin extends Plugin {
         DocumentFile root = DocumentFile.fromTreeUri(getContext(), treeUri);
         if (root == null || !root.canRead()) throw new SecurityException("ECLIPSE cannot read this folder.");
         JSArray entries = new JSArray();
-        String rootName = root.getName() == null ? "" : root.getName();
-        walk(root, rootName, entries);
+        String rootName = root.getName() == null ? "Game folder" : root.getName();
+        walk(root, rootName, entries, 0);
         JSObject response = new JSObject();
         response.put("uri", treeUri.toString());
+        response.put("rootName", rootName);
         response.put("files", entries);
         response.put("scannedCount", entries.length());
         response.put("truncated", entries.length() >= MAX_FILES);
         return response;
     }
 
-    private void walk(DocumentFile directory, String parent, JSArray entries) {
-        if (entries.length() >= MAX_FILES) return;
-        DocumentFile[] children = directory.listFiles();
+    private void walk(DocumentFile directory, String parent, JSArray entries, int depth) {
+        if (entries.length() >= MAX_FILES || depth > 32 || directory == null) return;
+        DocumentFile[] children;
+        try {
+            children = directory.listFiles();
+        } catch (SecurityException | IllegalStateException error) {
+            return;
+        }
+        if (children == null) return;
         for (DocumentFile child : children) {
             if (entries.length() >= MAX_FILES) return;
-            String name = child.getName();
-            if (name == null) continue;
-            String relative = parent.isEmpty() ? name : parent + "/" + name;
-            if (child.isDirectory()) {
-                walk(child, relative, entries);
-            } else if (child.isFile()) {
-                JSObject item = new JSObject();
-                item.put("name", name);
-                item.put("relativePath", relative);
-                item.put("uri", child.getUri().toString());
-                item.put("size", child.length());
-                item.put("lastModified", child.lastModified());
-                entries.put(item);
+            if (child == null) continue;
+            try {
+                String name = child.getName();
+                if (name == null) continue;
+                String relative = parent.isEmpty() ? name : parent + "/" + name;
+                if (child.isDirectory()) {
+                    walk(child, relative, entries, depth + 1);
+                } else if (child.isFile()) {
+                    JSObject item = new JSObject();
+                    item.put("name", name);
+                    item.put("relativePath", relative);
+                    item.put("uri", child.getUri().toString());
+                    item.put("size", child.length());
+                    item.put("lastModified", child.lastModified());
+                    entries.put(item);
+                }
+            } catch (SecurityException | IllegalStateException ignored) {
+                // Some Android providers expose a folder but deny access to individual children.
             }
         }
     }
