@@ -499,3 +499,14 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 :root[style*="--eclipse-preview-brightness"] #app{filter:brightness(var(--eclipse-preview-brightness))}
 @media(max-width:560px){.control-center-backdrop{padding:calc(env(safe-area-inset-top) + 8px) 8px 8px}.control-center-panel{padding:17px;border-radius:19px;max-height:calc(100dvh - 16px - env(safe-area-inset-top))}.control-center-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.control-tile{min-height:100px}.control-center-trigger{padding:8px 9px;font-size:8px}}
 @media(prefers-reduced-motion:reduce){.control-center-panel{animation:none}.control-tile{transition:none}}
+
+:root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto}
+:root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView>.welcome-row{grid-column:1;grid-row:1}
+:root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView>.system-stage{grid-column:1;grid-row:2;position:static;max-height:44vh;overflow:hidden}
+:root[data-display-layout="dual"][data-display-orientation="horizontal"] .system-carousel-shell{flex-direction:row;align-items:center}
+:root[data-display-layout="dual"][data-display-orientation="horizontal"] .system-picker{min-height:0;max-height:27vh;flex-direction:row;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory}
+:root[data-display-layout="dual"][data-display-orientation="horizontal"] .system-pick-card{width:148px;min-width:148px;min-height:175px;flex:0 0 148px;flex-direction:column}
+:root[data-display-layout="dual"][data-display-orientation="horizontal"] .system-card-bottom{align-items:center;text-align:center}
+:root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView>.page-toolbar{grid-column:1;grid-row:3}
+:root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView>.dashboard-grid{grid-column:1;grid-row:4;grid-template-columns:repeat(3,minmax(0,1fr))}
+:root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView>.home-games-shelf,:root[data-display-layout="dual"][data-display-orientation="horizontal"] #homeView>.feature-hero{grid-column:1}
