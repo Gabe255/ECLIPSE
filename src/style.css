@@ -650,8 +650,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 
 /* ECLIPSE Cocoon home: library-first, horizontal console shelves */
 :root[data-interface-mode="cocoon"] .welcome-row,
-:root[data-interface-mode="cocoon"] .system-stage,
-:root[data-interface-mode="cocoon"] .feature-hero{display:none!important}
+:root[data-interface-mode="cocoon"] .system-stage{display:none!important}
+:root[data-interface-mode="cocoon"] .feature-hero{display:flex;order:0;margin:0 0 4px;min-height:260px}
+:root[data-interface-mode="cocoon"] .home-games-shelf{order:1}
+:root[data-interface-mode="cocoon"] .home-apps-shelf{order:2}
+:root[data-interface-mode="cocoon"] .dashboard-grid{order:3}
 :root[data-interface-mode="cocoon"] .main{max-width:100%;padding-bottom:48px}
 :root[data-interface-mode="cocoon"] .topbar{position:sticky;top:0;z-index:12;background:rgba(8,9,18,.9);backdrop-filter:blur(18px);border-bottom:1px solid color-mix(in srgb,var(--accent) 22%,transparent)}
 :root[data-interface-mode="cocoon"] .wordmark{font-size:19px;letter-spacing:3px}
