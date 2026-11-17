@@ -982,3 +982,52 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
  .world-console-top,.world-desktop-heading,.world-xbox-heading,.world-switch-head{align-items:flex-start}
 }
 @media(prefers-reduced-motion:reduce){.world-app-icons button,.world-channel,.world-switch-dock button{transition:none}}
+
+
+/* Clear, lightweight home navigation */
+.welcome-row{display:none}
+.konsoru-welcome{min-height:260px}
+.konsoru-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.world-browse-toolbar{display:grid;gap:11px;margin:0 0 15px}
+.world-search-wrap{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border:1px solid #ffffff20;border-radius:13px;background:#ffffff08;color:#9d9bb2}
+.world-search-wrap>span{font-size:20px;color:var(--accent)}
+.world-search-wrap input{width:100%;min-width:0;border:0!important;outline:none;background:transparent!important;color:#fff!important;font:12px Inter,system-ui,sans-serif!important}
+.world-search-wrap input::placeholder{color:#85849b!important}
+.world-filter-row{display:flex;gap:7px;overflow-x:auto;padding:1px 1px 5px;scrollbar-width:none;overscroll-behavior-inline:contain}
+.world-filter-row::-webkit-scrollbar{display:none}
+.world-filter-row button{flex:0 0 auto;min-height:34px;padding:0 12px;border:1px solid #ffffff18;border-radius:999px;background:#ffffff06;color:#a8a7ba;font:700 8px 'DM Mono',monospace;letter-spacing:.8px;white-space:nowrap}
+.world-filter-row button.selected{border-color:color-mix(in srgb,var(--accent) 70%,transparent);background:color-mix(in srgb,var(--accent) 18%,transparent);color:#fff}
+.world-browse-hint{margin:0;color:#77778f;font:9px 'DM Mono',monospace;letter-spacing:.5px}
+.konsoru-world-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.konsoru-world-card{min-height:112px;padding:15px}
+.konsoru-world-card .konsoru-world-copy b{font-size:10px}
+.konsoru-world-card .konsoru-world-symbol{font-size:24px}
+.konsoru-world-card:focus-visible,.world-filter-row button:focus-visible,.rail-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.konsoru-bottom-grid{margin-top:28px}
+@media(min-width:761px){
+ .shell{grid-template-columns:178px minmax(0,1fr)}
+ .rail{align-items:stretch;padding:23px 13px}
+ .rail-brand{margin-left:3px}
+ .rail-btn{min-height:46px}
+}
+@media(max-width:760px){
+ .rail{height:76px;padding:7px max(10px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+ .rail-btn{min-width:0;height:58px;max-width:110px;gap:3px}
+ .rail-label{font-size:10px;font-weight:600}
+ .rail-icon{font-size:19px}
+ .konsoru-welcome{min-height:0;grid-template-columns:minmax(0,1fr) 100px;padding:19px}
+ .konsoru-welcome-copy h1{font-size:clamp(30px,8vw,43px)}
+ .konsoru-world-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .konsoru-world-card{min-height:105px}
+ .konsoru-bottom-grid{grid-template-columns:1fr}
+}
+@media(max-width:390px){
+ .konsoru-welcome{grid-template-columns:1fr}
+ .konsoru-core-art{display:none}
+ .konsoru-world-card{min-height:96px;padding:10px}
+ .konsoru-world-copy b{font-size:9px}
+ .world-filter-row button{padding:0 10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .konsoru-world-card,.rail-btn{transition:none!important;animation:none!important}
+}
