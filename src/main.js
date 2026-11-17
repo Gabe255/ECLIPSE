@@ -605,7 +605,10 @@ function openConsolePage(name){
   'Saturn':{accent:'#ffb45c',secondary:'#ffe1b8',line:'SATURN SYSTEM ONLINE',tag:'A NEW DIMENSION'},
   'Dreamcast':{accent:'#ff805d',secondary:'#ffd8ca',line:'DREAMCAST CONNECTION READY',tag:'WELCOME TO THE FUTURE'}
  };
- const style=consoleStyles[system.name]||styles[system.family]||{accent:'#b59aff',secondary:'#e0d4ff',line:'PREPARING YOUR GAME WORLD',tag:'SYSTEM ONLINE'};
+ const nameSeed=Array.from(system.name).reduce((sum,char)=>sum+char.charCodeAt(0),0);
+ const uniqueHue=(nameSeed*47)%360;
+ const familyStyle=styles[system.family]||{accent:'hsl('+uniqueHue+' 82% 70%)',secondary:'hsl('+uniqueHue+' 100% 88%)'};
+ const style=consoleStyles[system.name]||{accent:'hsl('+uniqueHue+' 82% 70%)',secondary:'hsl('+uniqueHue+' 100% 88%)',line:'BOOTING '+system.name.toUpperCase(),tag:system.family.toUpperCase()+' SYSTEM READY'};
  boot.dataset.family=system.family.toLowerCase().replace(/[^a-z]+/g,'-');
  boot.style.setProperty('--boot-accent',style.accent);boot.style.setProperty('--boot-secondary',style.secondary);
  $('#bootSystemName').textContent=system.name.toUpperCase();
@@ -618,7 +621,8 @@ function openConsolePage(name){
 function renderConsoleHome(system){
  const name=system.name;activeConsoleName=name;window.EclipseExperienceApplySystemTheme?.(name);
  const familyAccents={Nintendo:'#ff5368',PlayStation:'#6b9dff',Xbox:'#65d979',Sega:'#5b9dff',Atari:'#ffbd65',Arcade:'#ff73dc',PC:'#b59aff','PC Gaming':'#b59aff',Android:'#82e5a3',Mobile:'#82e5a3'};
- const accent=familyAccents[system.family]||'#b59aff';
+ const nameHue=(Array.from(name).reduce((sum,char)=>sum+char.charCodeAt(0),0)*47)%360;
+ const accent='hsl('+nameHue+' 82% 70%)';
  $('#consoleBanner')?.style.setProperty('--console-accent',accent);
  const titles=gamesForSystem(name);
  $('#consoleTitle')?.remove();
