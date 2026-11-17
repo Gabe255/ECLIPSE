@@ -37,7 +37,7 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             ECLIPSE_VERSION="${GITHUB_REF_NAME#v}"
           else
-            ECLIPSE_VERSION="4.10.0"
+            ECLIPSE_VERSION="4.11.0"
           fi
           echo "ECLIPSE_VERSION=$ECLIPSE_VERSION" >> "$GITHUB_ENV"
       - name: Validate stable version
@@ -191,9 +191,9 @@ jobs:
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/ECLIPSE-v${{ env.ECLIPSE_VERSION }}.apk
           body: |
-            # ECLIPSE 4.0.2 — Stability & Discovery Update
+            # ECLIPSE 4.11.0 — Console & Emulator Update
 
-            A major ECLIPSE update focused on making the launcher feel like a complete gaming home.
+            A major ECLIPSE update focused on the full console interface, reliable startup, and broader Android emulator handoff.
 
             **Highlights**
             - Eclipse mascot and first-run onboarding for storage and display setup

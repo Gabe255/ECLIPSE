@@ -776,3 +776,39 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .game-detail-logo:empty{display:none}
 .game-detail-logo img{display:block;max-width:min(230px,60vw);max-height:54px;object-fit:contain;object-position:left center;filter:drop-shadow(0 2px 8px #0009)}
 .sgdb-art-card:focus-visible,.sgdb-match:focus-visible{outline:2px solid #c4b2ff;outline-offset:2px}
+
+
+/* ECLIPSE 4.11 — console identities + banner-led horizontal home */
+.system-boot{
+ background:
+  radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--boot-accent,#b59aff) 28%,#111322),transparent 35%),
+  radial-gradient(ellipse at 50% 100%,color-mix(in srgb,var(--boot-accent,#b59aff) 12%,transparent),transparent 58%),
+  #05060d;
+}
+.system-boot:before,.system-boot:after{content:"";position:absolute;inset:10%;border:1px solid color-mix(in srgb,var(--boot-accent,#b59aff) 18%,transparent);border-radius:50%;transform:scaleX(1.5) rotate(-18deg);animation:consoleOrbit 7s linear infinite;pointer-events:none}
+.system-boot:after{inset:17%;transform:scaleX(1.5) rotate(28deg);animation-direction:reverse;opacity:.55}
+.boot-orbit{position:relative;z-index:1;width:118px;height:118px;border:1px solid color-mix(in srgb,var(--boot-accent,var(--accent)) 75%,transparent);background:radial-gradient(circle,color-mix(in srgb,var(--boot-accent,var(--accent)) 22%,#090a14),#090a14 68%);box-shadow:0 0 70px color-mix(in srgb,var(--boot-accent,var(--accent)) 35%,transparent),inset 0 0 28px color-mix(in srgb,var(--boot-accent,var(--accent)) 20%,transparent)}
+.boot-orbit span{width:auto;height:auto;border:0;background:none;color:var(--boot-secondary,#e0d4ff);font:700 47px Inter,system-ui,sans-serif;text-shadow:0 0 32px var(--boot-accent,var(--accent));animation:bootMarkIn .75s cubic-bezier(.2,.8,.2,1) both}
+.system-boot h2{position:relative;z-index:1;font-size:clamp(25px,7vw,48px);letter-spacing:3px;text-shadow:0 0 35px color-mix(in srgb,var(--boot-accent,var(--accent)) 35%,transparent)}
+.system-boot .eyebrow,.system-boot small,.boot-progress,.boot-brand{position:relative;z-index:1}
+.system-boot .eyebrow{color:var(--boot-secondary,#e0d4ff);letter-spacing:3px}
+.boot-progress{height:4px;background:#ffffff1c}
+.boot-progress span{background:var(--boot-accent,var(--accent));box-shadow:0 0 18px var(--boot-accent,var(--accent))}
+.boot-brand{margin-top:20px;color:#ffffff83;font:700 10px 'DM Mono';letter-spacing:4px}
+.boot-brand i{font-style:normal;color:var(--boot-secondary,#e0d4ff)}
+@keyframes consoleOrbit{to{transform:scaleX(1.5) rotate(342deg)}}
+@keyframes bootMarkIn{from{opacity:0;transform:scale(.45) rotate(-20deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.console-banner{border-color:color-mix(in srgb,var(--console-accent,var(--accent)) 42%,#ffffff20);background:radial-gradient(ellipse at 78% 45%,color-mix(in srgb,var(--console-accent,var(--accent)) 25%,transparent),transparent 45%),linear-gradient(115deg,#171827,#0d0f1b 75%)}
+.console-banner-mark{color:var(--console-accent,var(--accent));border-color:color-mix(in srgb,var(--console-accent,var(--accent)) 55%,transparent);text-shadow:0 0 40px var(--console-accent,var(--accent))}
+.console-banner-copy .eyebrow{color:var(--console-accent,var(--accent))}
+.home-shelf-heading h2{display:flex;align-items:center;gap:10px}
+.home-row-icon{display:inline-grid;place-items:center;width:27px;height:27px;border:1px solid color-mix(in srgb,var(--accent) 48%,transparent);border-radius:8px;background:color-mix(in srgb,var(--accent) 13%,transparent);color:var(--accent);font-size:14px;line-height:1}
+.cocoon-shelf{padding-top:4px}
+.cocoon-game-cover .sgdb-cover-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cocoon-game-cover .sgdb-cover-image~i,.cocoon-game-cover .sgdb-cover-image~small{z-index:1;text-shadow:0 2px 8px #000}
+@media(max-width:600px){
+ .boot-orbit{width:94px;height:94px}
+ .boot-orbit span{font-size:38px}
+ .system-boot:before,.system-boot:after{inset:20% 5%}
+ .home-row-icon{width:24px;height:24px}
+}
