@@ -167,13 +167,16 @@ document.documentElement.dataset.theme = activeTheme;
 
 document.querySelector('#app').innerHTML = `
 <div class="shell">
-  <aside class="rail">
-    <div class="brand-mark">E<span>.</span></div>
-    <button class="rail-btn active" data-view="home" aria-label="Home">⌂</button>
-    <button class="rail-btn" data-view="library" aria-label="Library">▤</button>
-    <button class="rail-btn" data-view="android" aria-label="Android games">▣</button>
-    <button class="rail-btn" data-view="settings" aria-label="Settings">⚙</button>
-    <div class="rail-bottom">v${VERSION}</div>
+  <aside class="rail" aria-label="Main navigation">
+    <div class="rail-brand"><span class="brand-mark">E<span>.</span></span><small>GAMING OS</small></div>
+    <div class="rail-group-label">WORKSPACE</div>
+    <button class="rail-btn active" data-view="home" aria-label="Home"><span class="rail-icon">⌂</span><span class="rail-label">Home</span></button>
+    <button class="rail-btn" data-view="library" aria-label="Game library"><span class="rail-icon">▤</span><span class="rail-label">Library</span></button>
+    <button class="rail-btn" data-view="android" aria-label="Apps library"><span class="rail-icon">▣</span><span class="rail-label">Apps</span></button>
+    <div class="rail-spacer"></div>
+    <div class="rail-group-label">PREFERENCES</div>
+    <button class="rail-btn" data-view="settings" aria-label="Settings"><span class="rail-icon">⚙</span><span class="rail-label">Settings</span></button>
+    <div class="rail-bottom">ECLIPSE <span>v${VERSION}</span></div>
   </aside>
   <main class="main">
     <header class="topbar">
@@ -193,25 +196,12 @@ document.querySelector('#app').innerHTML = `
           <div class="konsoru-core-art" aria-hidden="true"><span class="konsoru-core-orbit orbit-one"></span><span class="konsoru-core-orbit orbit-two"></span><span class="konsoru-core">E</span><small>INFINITE PLAY</small></div>
           <div class="konsoru-hero-stats"><div><b id="konsoruGameCount">0</b><small>GAMES</small></div><div><b id="konsoruSystemCount">0</b><small>SYSTEMS</small></div></div>
         </div>
-        <nav class="konsoru-nav" aria-label="Konsoru shortcuts"><button class="selected" data-konsoru-jump="home">⌂ <span>HOME</span></button><button data-konsoru-jump="library">▤ <span>LIBRARY</span></button><button data-konsoru-jump="android">▣ <span>APPS</span></button><button data-konsoru-jump="settings">⚙ <span>SETTINGS</span></button></nav>
+        
         <section class="konsoru-section"><div class="konsoru-section-head"><div><p class="eyebrow">CHOOSE YOUR UNIVERSE</p><h2>GAMING WORLDS</h2></div><span>01 / SYSTEMS</span></div><div class="konsoru-world-grid" id="konsoruWorldGrid"></div></section>
         <section class="konsoru-section"><div class="konsoru-section-head"><div><p class="eyebrow">BACK IN THE GAME</p><h2>RECENTLY ADDED</h2></div><button class="konsoru-text-button" id="konsoruAllGames">VIEW ALL ↗</button></div><div class="konsoru-recent-row" id="konsoruRecentRow"></div></section>
         <section class="konsoru-bottom-grid"><article><p class="eyebrow">YOUR SPACE</p><h3>MAKE IT YOURS.</h3><p>Organize your collection, choose your players, and shape your ECLIPSE setup.</p><button class="konsoru-secondary" id="konsoruCustomize">CUSTOMIZE ECLIPSE ↗</button></article><article><p class="eyebrow">QUICK STATUS</p><div class="konsoru-status-line"><span>LIBRARY STATUS</span><b id="konsoruLibraryStatus">READY</b></div><div class="konsoru-status-line"><span>ACTIVE INTERFACE</span><b>KONSORU</b></div><div class="konsoru-status-line"><span>DEVICE MODE</span><b>HANDHELD</b></div></article></section>
       </section>
-      <section class="system-stage" aria-label="Choose a gaming system">
-        <div class="stage-heading"><div><p class="eyebrow">THE MULTIVERSE</p><h2>CHOOSE YOUR <em>WORLD.</em></h2><p>One tap takes you into that system's own space.</p></div><span class="stage-index">01 <i>/</i> SYSTEMS</span></div>
-        <section class="system-feature" id="systemFeature" aria-live="polite">
-          <div class="system-feature-art"><span class="system-feature-orbit"></span><strong id="systemFeatureMark">✦</strong><small id="systemFeatureFamily">PLATFORM</small></div>
-          <div class="system-feature-copy"><p class="eyebrow">SELECTED SYSTEM</p><h2 id="systemFeatureName">NINTENDO</h2><p id="systemFeatureMeta">Your platform library</p><button class="primary-btn" id="enterFeaturedSystem">ENTER SYSTEM ↗</button></div>
-          <div class="system-feature-count"><b id="systemFeatureCount">0</b><small>GAMES IN LIBRARY</small></div>
-        </section>
-        <div class="system-carousel-shell">
-          <button class="carousel-arrow" id="systemPrev" aria-label="Previous systems">‹</button>
-          <div class="system-picker" id="systemPicker" tabindex="0" aria-label="Available systems"></div>
-          <button class="carousel-arrow" id="systemNext" aria-label="Next systems">›</button>
-        </div>
-        <div class="stage-footer"><span id="systemPickerCount">37 WORLDS AVAILABLE</span><button class="text-link" data-view="library">EXPLORE FULL LIBRARY <b>↗</b></button></div>
-      </section>
+      <section class="system-stage legacy-system-stage" aria-label="Legacy system selector" hidden></section>
       <div class="page-toolbar"><div class="page-tabs" id="pageTabs"></div><div class="page-actions"><button class="subtle-btn" id="addPage">+ PAGE</button><button class="subtle-btn" id="editWidgets">EDIT HOME</button></div></div>
       <section class="dashboard-grid" id="widgetGrid"></section>
       <section class="home-games-shelf hidden" id="homeGamesShelf"></section>
@@ -492,10 +482,10 @@ function renderKonsoruHome(){
  const latest=games.length?games[games.length-1]:null;const resume=$('#konsoruResume');
  if(resume){resume.textContent=latest?'▶  OPEN · '+latest.title:'＋  ADD YOUR FIRST GAME';resume.onclick=()=>latest?showGameDetails(latest):(showView('library'),chooseGameFolder());}
  const status=$('#konsoruLibraryStatus');if(status)status.textContent=games.length?'COLLECTION READY':'AWAITING GAMES';
- const families=[...new Set(systems.map(item=>item.family))];const marks={Nintendo:'◈',PlayStation:'△',Xbox:'✕',Sega:'◉',Atari:'▥',Arcade:'✦',PC:'⌘','PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
+ const marks={Nintendo:'◈',PlayStation:'△',Xbox:'✕',Sega:'◉',Atari:'▥',Arcade:'✦',PC:'⌘','PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
  const worldGrid=$('#konsoruWorldGrid');
- if(worldGrid)worldGrid.innerHTML=families.map((family,index)=>{const members=systems.filter(item=>item.family===family);const total=members.reduce((sum,item)=>sum+gamesForSystem(item.name).length,0);return '<button class="konsoru-world-card world-'+family.toLowerCase().replace(/[^a-z]+/g,'-')+'" data-konsoru-family="'+escapeHTML(family)+'" style="--world-index:'+index+'"><span class="konsoru-world-symbol">'+(marks[family]||'✦')+'</span><span class="konsoru-world-copy"><b>'+escapeHTML(family.toUpperCase())+'</b><small>'+members.length+' SYSTEMS · '+total+' GAMES</small></span><span class="konsoru-world-arrow">↗</span></button>';}).join('');
- worldGrid?.querySelectorAll('[data-konsoru-family]').forEach(button=>button.addEventListener('click',()=>{const first=systems.find(item=>item.family===button.dataset.konsoruFamily);if(first)openConsolePage(first.name);}));
+ if(worldGrid)worldGrid.innerHTML=systems.map((system,index)=>{const total=gamesForSystem(system.name).length;const familyClass=String(system.family).toLowerCase().replace(/[^a-z]+/g,'-');return '<button class="konsoru-world-card world-'+familyClass+'" data-konsoru-system="'+escapeHTML(system.name)+'" style="--world-index:'+index+'"><span class="konsoru-world-symbol">'+(marks[system.family]||system.icon||'✦')+'</span><span class="konsoru-world-copy"><small>'+escapeHTML(system.family.toUpperCase())+'</small><b>'+escapeHTML(system.name.toUpperCase())+'</b><small>'+total+' '+(total===1?'GAME':'GAMES')+'</small></span><span class="konsoru-world-arrow">↗</span></button>';}).join('');
+ worldGrid?.querySelectorAll('[data-konsoru-system]').forEach(button=>button.addEventListener('click',()=>openConsolePage(button.dataset.konsoruSystem)));
  const recent=$('#konsoruRecentRow');
  if(recent)recent.innerHTML=games.length?games.slice().reverse().slice(0,10).map(game=>'<button class="konsoru-recent-card" data-konsoru-game="'+games.indexOf(game)+'"><span class="konsoru-cover"><i>✦</i><small>'+escapeHTML(game.system)+'</small></span><b>'+escapeHTML(game.title)+'</b><small>'+escapeHTML(game.system)+'</small></button>').join(''):'<div class="konsoru-empty"><span>✦</span><b>YOUR COLLECTION STARTS HERE</b><p>Add a game folder to build your library.</p><button class="konsoru-secondary" id="konsoruEmptyScan">ADD GAMES ↗</button></div>';
  recent?.querySelectorAll('[data-konsoru-game]').forEach(card=>{const game=games[Number(card.dataset.konsoruGame)],url=game?.artwork?.grid;if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='lazy';img.className='sgdb-cover-image';card.querySelector('.konsoru-cover')?.prepend(img);}});
