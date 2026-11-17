@@ -841,3 +841,46 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 :root[data-interface-mode="cocoon"] #homeView > .feature-hero:not(.hidden) {
   display: flex !important;
 }
+
+
+/* ECLIPSE Prism navigation and system picker refresh */
+.shell{grid-template-columns:208px minmax(0,1fr);gap:0;max-width:1680px;padding:0 28px}
+.rail{position:sticky;top:0;height:100dvh;align-items:stretch;gap:7px;padding:26px 16px 18px 0;border-right:1px solid #ffffff12}
+.rail-brand{display:flex;align-items:center;gap:11px;margin:0 0 34px 8px}
+.rail-brand .brand-mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:14px;background:color-mix(in srgb,var(--accent) 13%,#11121d);font-size:22px;box-shadow:0 8px 28px color-mix(in srgb,var(--accent) 13%,transparent)}
+.rail-brand .brand-mark span{color:var(--accent)}
+.rail-brand>small{font:800 9px 'DM Mono',monospace;letter-spacing:2px;color:#a7a5bc}
+.rail-group-label{margin:9px 0 6px 12px;color:#6f7087;font:800 8px 'DM Mono',monospace;letter-spacing:1.8px}
+.rail-btn{width:100%;height:46px;display:flex;align-items:center;justify-content:flex-start;gap:13px;padding:0 13px;border:1px solid transparent;border-radius:13px;background:transparent;color:#9898ad;text-align:left;font:600 12px Inter,system-ui,sans-serif;transition:background .2s,border-color .2s,color .2s,transform .2s}
+.rail-icon{width:23px;display:grid;place-items:center;font-size:18px}
+.rail-label{font-size:12px;letter-spacing:.1px}
+.rail-btn:hover,.rail-btn.active{background:color-mix(in srgb,var(--accent) 13%,#11121d);border-color:color-mix(in srgb,var(--accent) 27%,transparent);color:#fff;transform:translateX(2px);box-shadow:inset 3px 0 var(--accent)}
+.rail-spacer{flex:1}
+.rail-bottom{display:flex;flex-direction:column;gap:5px;margin:20px 0 0 12px;writing-mode:initial;transform:none;color:#77778e;font:800 8px 'DM Mono',monospace;letter-spacing:1.4px}
+.rail-bottom span{color:#55566b;font-weight:500}
+.main{max-width:none;padding:0 0 54px 28px}
+.topbar{height:78px;margin-bottom:26px}
+.wordmark{font-size:16px;letter-spacing:3.5px}
+.konsoru-welcome{min-height:315px;border-radius:27px;border-color:#a78bfa38;background:radial-gradient(ellipse at 78% 48%,#8b65f33b,transparent 38%),radial-gradient(ellipse at 8% 110%,#4052a733,transparent 50%),linear-gradient(115deg,#19172d,#0c1020 68%,#111326);box-shadow:0 24px 80px #0007,inset 0 1px #ffffff12}
+.konsoru-welcome-copy h1{font-size:clamp(36px,5.2vw,68px);letter-spacing:-3.5px}
+.konsoru-welcome-copy h1 em{background:linear-gradient(90deg,#d9caff,#a68bff 60%,#87b5ff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+.konsoru-world-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.konsoru-world-card{min-height:116px;align-items:flex-start;flex-direction:column;gap:10px;padding:15px 16px;border-radius:17px;background:linear-gradient(145deg,#1a1a30,#111323 72%);box-shadow:inset 0 1px #ffffff0c;animation-delay:calc(var(--world-index)*18ms)}
+.konsoru-world-card:before{background:radial-gradient(circle at 92% 8%,color-mix(in srgb,var(--world-accent,#a78bfa) 24%,transparent),transparent 58%)}
+.konsoru-world-symbol{width:35px;height:35px;flex-basis:35px;border-radius:11px;font-size:18px;background:color-mix(in srgb,var(--world-accent,#a78bfa) 15%,#111323);border-color:color-mix(in srgb,var(--world-accent,#a78bfa) 45%,transparent);color:var(--world-accent,#c9b8ff)}
+.konsoru-world-copy{gap:3px}
+.konsoru-world-copy>small:first-child{font:700 7px 'DM Mono',monospace;letter-spacing:1.3px;color:#85849f}
+.konsoru-world-copy b{font-size:10px;letter-spacing:.5px;line-height:1.25}
+.konsoru-world-copy>small:last-child{font:8px 'DM Mono',monospace;color:#9998b0}
+.konsoru-world-arrow{position:absolute;right:15px;top:16px;color:var(--world-accent,#a78bfa)}
+.world-nintendo{--world-accent:#ff6b82}.world-playstation{--world-accent:#6ca9ff}.world-xbox{--world-accent:#66d98a}.world-sega{--world-accent:#6e91ff}.world-atari{--world-accent:#ffc16d}.world-arcade{--world-accent:#e98cff}.world-pc,.world-pc-gaming{--world-accent:#b99bff}.world-mobile,.world-android{--world-accent:#83dfad}
+.konsoru-section{margin-top:34px}
+.konsoru-section-head{margin-bottom:16px}
+.konsoru-section-head h2{font-size:22px;letter-spacing:-.4px}
+.konsoru-recent-card{border-radius:15px}
+.konsoru-bottom-grid article{border-radius:18px}
+.system-stage.legacy-system-stage{display:none!important}
+@media(max-width:1000px){.shell{grid-template-columns:178px minmax(0,1fr);padding:0 18px}.main{padding-left:20px}.konsoru-world-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.shell{grid-template-columns:1fr;padding:0 14px}.rail{position:fixed;left:0;right:0;bottom:0;top:auto;height:72px;flex-direction:row;align-items:center;justify-content:space-around;gap:5px;padding:7px 10px;border-top:1px solid #ffffff18;border-right:0;background:rgba(9,10,20,.94);backdrop-filter:blur(22px);z-index:40}.rail-brand,.rail-group-label,.rail-spacer,.rail-bottom{display:none}.rail-btn{width:auto;min-width:62px;height:54px;flex:1;flex-direction:column;justify-content:center;gap:2px;padding:5px;border-radius:12px;transform:none!important;box-shadow:none!important}.rail-icon{font-size:17px}.rail-label{font-size:9px}.rail-btn.active{box-shadow:inset 0 2px var(--accent)!important}.main{padding:0 0 92px;max-width:none}.topbar{height:62px;margin-bottom:19px}.konsoru-welcome{grid-template-columns:1fr minmax(100px,.45fr);min-height:245px;padding:20px;gap:8px}.konsoru-welcome-copy h1{font-size:clamp(30px,8vw,46px);letter-spacing:-2px}.konsoru-hero-stats{grid-column:1/-1;display:flex;gap:28px}.konsoru-world-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.konsoru-world-card{min-height:105px;padding:12px;border-radius:14px}.konsoru-world-copy b{font-size:9px}.konsoru-section{margin-top:27px}}
+@media(max-width:390px){.konsoru-welcome{grid-template-columns:1fr}.konsoru-core-art{display:none}.top-actions>span:not(.online-dot){display:none}.konsoru-world-grid{gap:7px}.konsoru-world-card{min-height:98px;padding:10px}}
+@media(prefers-reduced-motion:reduce){.rail-btn,.konsoru-world-card{transition:none!important;animation:none!important}}
