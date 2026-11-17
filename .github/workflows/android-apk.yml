@@ -186,8 +186,12 @@ jobs:
       - name: Verify APK package and version
         run: |
           APK="android/app/build/outputs/apk/debug/ECLIPSE-v${ECLIPSE_VERSION}.apk"
-          aapt dump badging "$APK" | grep -E "^(package:|sdkVersion:)"
-          apksigner verify --verbose "$APK"
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT}}"
+          AAPT="$(find "$SDK_ROOT/build-tools" -type f -name aapt | sort -V | tail -n 1)"
+          APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -n "$AAPT" && test -n "$APKSIGNER"
+          "$AAPT" dump badging "$APK" | grep -E "^(package:|sdkVersion:)"
+          "$APKSIGNER" verify --verbose "$APK"
           echo "Built ECLIPSE v${ECLIPSE_VERSION}; Android versionCode is ${GITHUB_RUN_NUMBER}."
       - name: Upload APK
         uses: actions/upload-artifact@v4
