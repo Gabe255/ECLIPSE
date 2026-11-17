@@ -221,14 +221,37 @@ public class FolderAccessPlugin extends Plugin {
         }
         try {
             Uri gameUri = Uri.parse(uriValue);
-            Intent launch = new Intent(Intent.ACTION_VIEW);
             String path = gameUri.getLastPathSegment() == null ? "" : gameUri.getLastPathSegment();
             String extension = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1).toLowerCase() : "";
             String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-            launch.setDataAndType(gameUri, mime == null ? "application/octet-stream" : mime);
-            launch.setPackage(packageName);
-            launch.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-            getContext().startActivity(launch);
+            if (mime == null) mime = "application/octet-stream";
+
+            Intent targeted = new Intent(Intent.ACTION_VIEW);
+            targeted.setDataAndType(gameUri, mime);
+            targeted.setPackage(packageName);
+            targeted.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            targeted.setClipData(android.content.ClipData.newRawUri("ECLIPSE game", gameUri));
+
+            Intent resolved = targeted;
+            PackageManager manager = getContext().getPackageManager();
+            if (targeted.resolveActivity(manager) == null) {
+                Intent generic = new Intent(Intent.ACTION_VIEW);
+                generic.setDataAndType(gameUri, mime);
+                generic.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                generic.setClipData(android.content.ClipData.newRawUri("ECLIPSE game", gameUri));
+                generic.setDataAndType(gameUri, "*/*");
+                // Android's resolver is the compatibility fallback: emulator apps may
+                // advertise wildcard or vendor-specific MIME handlers not visible here.
+                resolved = Intent.createChooser(generic, "Choose an emulator for this game");
+                resolved.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            } else {
+                try {
+                    getContext().grantUriPermission(packageName, gameUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (Exception ignored) {
+                    // The activity launch still carries a temporary read grant.
+                }
+            }
+            getContext().startActivity(resolved);
             JSObject response = new JSObject(); response.put("launched", true); call.resolve(response);
         } catch (Exception error) {
             call.reject("This emulator did not accept the game file. Check its supported launch format and try another player. " + error.getMessage(), error);
