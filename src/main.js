@@ -506,18 +506,40 @@ function renderKonsoruHome(){
 function renderHomeHero(){
  renderKonsoruHome();
  const hero=$('#homeLibraryHero');if(!hero)return;
+ const featured=games.slice().reverse().find(game=>game.artwork?.hero)||games[games.length-1];
  hero.classList.toggle('hidden',games.length===0||!preferences.showHero||interfaceMode==='cocoon');
- if(games.length){$('#homeHeroTitle').textContent=games[games.length-1].title;$('#homeHeroMeta').textContent=games[games.length-1].system+' · '+games.length+' GAMES IN YOUR LIBRARY';}
+ if(featured){
+  $('#homeHeroTitle').textContent=featured.title;
+  $('#homeHeroMeta').textContent=featured.system+' · '+games.length+' GAMES IN YOUR LIBRARY';
+  const art=hero.querySelector('.feature-art');
+  const heroUrl=sgdbSafeUrl(featured.artwork?.hero);
+  if(art){art.style.backgroundImage=heroUrl?'linear-gradient(90deg,#090a14aa,#090a1422),url("'+heroUrl+'")':'';art.style.backgroundSize='cover';art.style.backgroundPosition='center';}
+  const symbol=hero.querySelector('.feature-symbol');if(symbol)symbol.textContent=systemIconFor(featured.system);
+  const kicker=hero.querySelector('.feature-kicker');if(kicker)kicker.textContent='FEATURED GAME · '+featured.system;
+  const launch=$('#homeScanBtn');if(launch){launch.textContent='VIEW GAME ↗';launch.onclick=()=>showGameDetails(featured);}
+  const count=hero.querySelector('.feature-count');if(count)count.innerHTML='<span>'+games.length+'</span> TITLES IN YOUR VAULT';
+ }
  const shelf=$('#homeGamesShelf');if(!shelf)return;
  shelf.classList.toggle('hidden',games.length===0);
  if(!games.length){shelf.innerHTML='';return;}
  const groups=[...new Set(games.map(game=>game.system))];
- const makeTile=game=>'<button class="cocoon-game-tile" data-home-game="'+games.indexOf(game)+'" type="button"><span class="cocoon-game-cover" data-art-game="'+games.indexOf(game)+'"><i>✦</i><small>'+escapeHTML(game.system)+'</small></span><b>'+escapeHTML(game.title)+'</b><small class="cocoon-game-platform">'+escapeHTML(game.system)+'</small></button>';
+ const makeTile=game=>'<button class="cocoon-game-tile" data-home-game="'+games.indexOf(game)+'" type="button"><span class="cocoon-game-cover" data-art-game="'+games.indexOf(game)+'"><i>'+systemIconFor(game.system)+'</i><small>'+escapeHTML(game.system)+'</small></span><b>'+escapeHTML(game.title)+'</b><small class="cocoon-game-platform">'+escapeHTML(game.system)+'</small></button>';
  const recent=games.slice().reverse().slice(0,14);
- shelf.innerHTML='<section class="cocoon-shelf"><div class="home-shelf-heading"><div><p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p><h2>YOUR COLLECTION</h2></div><span>'+games.length+' GAMES</span></div><div class="cocoon-game-row">'+recent.map(makeTile).join('')+'</div></section>'+
- groups.map(system=>{const items=games.filter(game=>game.system===system);return '<section class="cocoon-shelf"><div class="home-shelf-heading"><div><p class="eyebrow">YOUR LIBRARY</p><h2>'+escapeHTML(system)+'</h2></div><span>'+items.length+' '+(items.length===1?'GAME':'GAMES')+'</span></div><div class="cocoon-game-row">'+items.map(makeTile).join('')+'</div></section>';}).join('');
+ shelf.innerHTML='<section class="cocoon-shelf"><div class="home-shelf-heading"><div><p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p><h2><span class="home-row-icon">◷</span> JUMP BACK IN</h2></div><span>'+games.length+' GAMES</span></div><div class="cocoon-game-row">'+recent.map(makeTile).join('')+'</div></section>'+
+ groups.map(system=>{const items=games.filter(game=>game.system===system);return '<section class="cocoon-shelf"><div class="home-shelf-heading"><div><p class="eyebrow">YOUR LIBRARY</p><h2><span class="home-row-icon">'+systemIconFor(system)+'</span> '+escapeHTML(system)+'</h2></div><span>'+items.length+' '+(items.length===1?'GAME':'GAMES')+'</span></div><div class="cocoon-game-row">'+items.map(makeTile).join('')+'</div></section>';}).join('');
  shelf.querySelectorAll('[data-art-game]').forEach(cover=>{const url=games[Number(cover.dataset.artGame)]?.artwork?.grid;if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='lazy';img.className='sgdb-cover-image';cover.prepend(img);}});
  shelf.querySelectorAll('[data-home-game]').forEach(button=>button.addEventListener('click',()=>showGameDetails(games[Number(button.dataset.homeGame)])));
+}
+function systemIconFor(system){
+ const value=String(system||'').toUpperCase();
+ if(value.includes('PLAYSTATION')||value==='PSP'||value==='PS VITA')return '△';
+ if(value.includes('XBOX'))return '✕';
+ if(value.includes('NINTENDO')||value==='NES'||value==='SNES'||value.includes('GAME BOY')||value==='GAMECUBE'||value==='WII')return '◈';
+ if(value.includes('SEGA')||value==='GENESIS / MEGA DRIVE'||value==='DREAMCAST'||value==='SATURN')return '◉';
+ if(value.includes('ATARI'))return '▥';
+ if(value.includes('ARCADE')||value==='MAME'||value==='FBNEO')return '✦';
+ if(value.includes('PC')||value==='DOS'||value==='SCUMMVM')return '⌘';
+ return '✧';
 }
 function renderHomeAppsShelf(){
  const shelf=$('#homeAppsShelf');if(!shelf)return;
@@ -543,16 +565,34 @@ let systemBootTimer=null;
 function openConsolePage(name){
  const system=systems.find(s=>s.name===name)||{name,icon:'✦',family:'Platform'};
  const boot=$('#systemBoot');if(systemBootTimer)window.clearTimeout(systemBootTimer);
- $('#bootSystemName').textContent='OPENING '+system.name.toUpperCase();
+ const styles={
+  Nintendo:{accent:'#ff4b62',secondary:'#ff9aa7',line:'POWERING UP YOUR PLAY WORLD',tag:'READY WHEN YOU ARE'},
+  PlayStation:{accent:'#6b9dff',secondary:'#b7d1ff',line:'WELCOME BACK, PLAYER',tag:'YOUR NEXT ADVENTURE AWAITS'},
+  Xbox:{accent:'#70e68a',secondary:'#c2ffd0',line:'PREPARING YOUR GAME SPACE',tag:'LET’S PLAY'},
+  Sega:{accent:'#5b9dff',secondary:'#c5dcff',line:'INSERT COIN. ENTER WORLD.',tag:'SEGA FOREVER'},
+  Atari:{accent:'#ffbd65',secondary:'#ffe0ad',line:'A CLASSIC WORLD IS LOADING',tag:'PRESS START'},
+  Arcade:{accent:'#ff73dc',secondary:'#ffd0f4',line:'LOADING THE ARCADE',tag:'PLAYER ONE READY'},
+  PC:{accent:'#b59aff',secondary:'#e0d4ff',line:'INITIALIZING YOUR LIBRARY',tag:'SYSTEM ONLINE'},
+  'PC Gaming':{accent:'#b59aff',secondary:'#e0d4ff',line:'INITIALIZING YOUR LIBRARY',tag:'SYSTEM ONLINE'},
+  Android:{accent:'#82e5a3',secondary:'#d0ffe0',line:'CONNECTING YOUR APPS',tag:'DEVICE READY'},
+  Mobile:{accent:'#82e5a3',secondary:'#d0ffe0',line:'CONNECTING YOUR APPS',tag:'DEVICE READY'}
+ };
+ const style=styles[system.family]||{accent:'#b59aff',secondary:'#e0d4ff',line:'PREPARING YOUR GAME WORLD',tag:'SYSTEM ONLINE'};
+ boot.dataset.family=system.family.toLowerCase().replace(/[^a-z]+/g,'-');
+ boot.style.setProperty('--boot-accent',style.accent);boot.style.setProperty('--boot-secondary',style.secondary);
+ $('#bootSystemName').textContent=system.name.toUpperCase();
+ $('#bootSystemMark').textContent=system.icon||systemIconFor(system.name);
+ $('#bootSystemLine').textContent=style.line;
+ $('#bootSystemTag').textContent=style.tag;
  renderConsoleHome(system);showView('console');boot.classList.remove('hidden');
- systemBootTimer=window.setTimeout(()=>{boot.classList.add('hidden');systemBootTimer=null;},420);
+ systemBootTimer=window.setTimeout(()=>{boot.classList.add('hidden');systemBootTimer=null;},1450);
 }
 function renderConsoleHome(system){
  const name=system.name;activeConsoleName=name;window.EclipseExperienceApplySystemTheme?.(name);
  const titles=gamesForSystem(name);
  $('#consoleTitle')?.remove();
  $('#consoleGeneration').textContent=system.family.toUpperCase()+' PLATFORM';
- $('#consoleBanner').innerHTML='<div class="console-banner-mark">'+system.icon+'</div><div class="console-banner-copy"><p class="eyebrow">SYSTEM HOME</p><h1>'+system.name.toUpperCase()+'</h1><p>Your '+system.name+' dashboard. Review imported games and choose the player for this system.</p></div><div class="console-banner-index">SYSTEM / '+String(systems.indexOf(system)+1).padStart(2,'0')+'</div>';
+ $('#consoleBanner').innerHTML='<div class="console-banner-mark">'+systemIconFor(system.name)+'</div><div class="console-banner-copy"><p class="eyebrow">'+system.family.toUpperCase()+' · CONSOLE HOME</p><h1>'+system.name.toUpperCase()+'</h1><p>Your '+system.name+' home menu. Browse your collection, choose a player, and launch a game from this system.</p></div><div class="console-banner-index">SYSTEM / '+String(systems.indexOf(system)+1).padStart(2,'0')+'</div>';
  const profile=emulatorOptions[name];
  $('#emulatorPanel').innerHTML='<div class="emulator-panel-head"><div><p class="eyebrow">PLAYER SETUP</p><h3>CHOOSE YOUR EMULATOR / APP</h3></div><span class="feature-tag">'+(profile?'SYSTEM PROFILE':'PLAYER ROUTING')+'</span></div>'+(profile?'<p class="settings-note">Suggested player references only. These are not proof that an app is installed or compatible with every game.</p><div class="emulator-option-list">'+profile.items.map(item=>'<span class="emulator-option">'+item+'</span>').join('')+'</div><p class="settings-note">'+profile.note+'</p>':'<p class="settings-note">Choose an installed app for this system.</p>')+'<div class="player-picker-row"><label>PLAYER FOR '+name.toUpperCase()+'<select id="systemPlayerSelect"><option value="">Choose an installed app…</option></select></label><button class="subtle-btn" id="scanSystemPlayers">SCAN APPS</button><button class="subtle-btn" id="autoSystemPlayer">AUTO-SELECT</button></div><p class="settings-note" id="systemPlayerStatus">Scan installed apps, then choose the player you want to use.</p>';
 populatePlayerSelect($('#systemPlayerSelect'),name);
@@ -574,7 +614,7 @@ $('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
  $('#systemHome').querySelectorAll('[data-system-folder]').forEach(button=>button.addEventListener('click',()=>$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth'})));
  $('#systemHome').querySelector('[data-go-scan]')?.addEventListener('click',()=>{showView('library');chooseGameFolder();});
  const menu=$('#systemMenu');
- menu.innerHTML=[['overview','OVERVIEW'],['games','GAMES'],['players','PLAYERS'],['scan','SCAN GAMES'],['settings','SYSTEM SETTINGS']].map(([key,label],index)=>'<button class="system-menu-item '+(index===0?'active':'')+'" data-system-menu="'+key+'">'+label+'</button>').join('');
+ menu.innerHTML=[['overview','⌂ HOME'],['games','▤ GAMES'],['players','◈ PLAYERS'],['scan','＋ SCAN GAMES'],['settings','⚙ SYSTEM SETTINGS']].map(([key,label],index)=>'<button class="system-menu-item '+(index===0?'active':'')+'" data-system-menu="'+key+'">'+label+'</button>').join('');
  menu.querySelectorAll('[data-system-menu]').forEach(button=>button.addEventListener('click',()=>{
   menu.querySelectorAll('[data-system-menu]').forEach(item=>item.classList.toggle('active',item===button));
   const action=button.dataset.systemMenu;
