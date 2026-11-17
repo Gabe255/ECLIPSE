@@ -1,6 +1,6 @@
-# ECLIPSE 4.0.0 — The Eclipse Experience
+# ECLIPSE 11.1.0 — The Eclipse Experience
 
-**ECLIPSE 4.0.0 — The Eclipse Experience** is an Android-first gaming home and library experience built with Vite and Capacitor. It organizes the games and apps you already have; it is not an emulator and does not distribute game files.
+**ECLIPSE 11.1.0 — The Eclipse Experience** is an Android-first gaming home and library experience built with Vite and Capacitor. It organizes the games and apps you already have; it is not an emulator and does not distribute game files.
 
 ## Current experience
 
@@ -23,7 +23,7 @@
 - Emulator/player assignment and system pages are organizational UI. End-to-end game launching into third-party emulators is not yet implemented.
 - Automatic metadata and artwork scraping, online theme marketplace, achievement-service integrations, and cloud sync are not included yet.
 - Foldable auto-detection requires Android to report a separating fold feature. Browser preview may not expose the same hardware information; the layout can be selected manually in that case.
-- The release/v4.0.2 branch is being prepared for CI verification. Folder scanning now has bounded traversal time and safer large-library deduplication; a successful build does not replace testing on a real phone or foldable.
+- Version 11.1.0 uses the Cocoon-style library-first home by default. A successful build does not replace testing on a real phone or foldable.
 
 ECLIPSE does not include ROMs, BIOS files, emulator cores, or copyrighted game artwork. Only add game files and apps you have the right to use.
 
