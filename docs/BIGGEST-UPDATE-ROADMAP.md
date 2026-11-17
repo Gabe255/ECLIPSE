@@ -1,19 +1,19 @@
 # ECLIPSE — Biggest Update Roadmap
 
-**Project version:** 4.0.0 — The Eclipse Experience  
-**Release policy:** Stable releases only. Do not publish the v4.0.0 stable tag until the release checks below pass.  
+**Project version:** 11.2.0 — Your Gaming Universe  
+**Release policy:** Publish a stable tag only after the release checks below pass.  
 **Status language:** “Implemented” means the code exists. “Build verified” means CI passed. “Device verified” means it was tested on real Android hardware. These are separate checks.
 
 ## Current release-readiness snapshot
 
 | Area | Current status | Notes |
 |---|---|---|
-| Web dashboard and system picker | Implemented; latest web CI passing | 37 system categories and system landing-page UI |
+| Web dashboard and system picker | Implemented; verify CI on the exact release commit | 37 system categories and system landing-page UI |
 | Experience Studio | Implemented | Themes, wallpaper, profiles, motion settings, JSON backup/restore |
 | Apps Library | Implemented foundation | Android app discovery, Treat as Game labels, manual playtime |
-| Folder scanning and backup folder | Native implementation present; bounded scan duration added in v4.0.2 branch | Requires Odin testing with large folders, slow providers, revoked permissions, and duplicate rescans |
+| Folder scanning and backup folder | Native implementation present; scanning runs off the UI thread with bounded traversal | Requires real-device testing with large folders, slow providers, revoked permissions, and duplicate rescans |
 | Mascot and first-run setup | Implemented | Eclipse orb mascot; display, default Home, and storage setup |
-| Single/dual display | Implemented; Android APK build verified | AndroidX WindowManager detection; real foldable/phone validation still required |
+| Single/dual display | Implemented; verify the APK build and device behavior for each release | AndroidX WindowManager detection; real foldable/phone validation still required |
 | Default Android Home request | Implemented; Android APK build verified | User must confirm through Android's system role picker; device behavior still needs validation |
 | Control Center | Implemented in web and native code | Android panels, app-window brightness, battery status; APK/device validation required |
 | Game Mode | Implemented as an ECLIPSE UI mode | Reduces interface effects only; no CPU/GPU tuning |
@@ -32,7 +32,7 @@
 - Auto-detection through AndroidX WindowManager when Android reports a separating fold feature.
 - Manual Auto / Single Screen / Dual Screen override for devices or previews that do not expose display-segment information.
 
-**Build status:** The Android APK workflow has compiled and uploaded a test APK. **Remaining:** Test on a normal phone, a foldable/dual-screen device, portrait/landscape, and app resize/posture changes. Do not claim hardware auto-detection works on every foldable until verified.
+**Build status:** The Android workflow is configured to compile and upload a test APK. **Remaining:** Verify the exact release commit on a normal phone, a foldable/dual-screen device, portrait/landscape, and app resize/posture changes. Do not claim hardware auto-detection works on every foldable until verified.
 
 ## 2. Apps and game library
 
@@ -82,7 +82,7 @@ Implemented in the current branch:
 - Android decides the final default-launcher confirmation.
 - Settings can request the Home-app chooser again and change display preference.
 
-**Build status:** Native launcher integration compiled into the test APK. **Remaining:** Device-test first launch, returning launch, cancel/skip paths, and default-Home selection on supported Android versions. Keep onboarding dismissible.
+**Build status:** Native launcher integration is included in the Android build workflow. **Remaining:** Device-test first launch, returning launch, cancel/skip paths, and default-Home selection on supported Android versions. Keep onboarding dismissible.
 
 ## 6. Control Center and Game Mode
 
@@ -96,7 +96,7 @@ Implemented foundation:
 - Do Not Disturb shortcut opens Android's DND access settings.
 - Game Mode reduces ECLIPSE interface effects.
 
-**Build status:** Native control bridge compiled into the test APK. **Important platform limits:** These shortcuts do not bypass Android restrictions. ECLIPSE cannot silently toggle restricted system settings or claim to boost device CPU/GPU performance. Test each shortcut on supported Android versions.
+**Build status:** The native control bridge is included in the Android build workflow. **Important platform limits:** These shortcuts do not bypass Android restrictions. ECLIPSE cannot silently toggle restricted system settings or claim to boost device CPU/GPU performance. Test each shortcut on supported Android versions.
 
 ## 7. Data, backups, and privacy
 
@@ -141,14 +141,14 @@ A release is ready only when:
 6. Known limitations are documented.
 7. A stable signing/update path is verified before publishing a stable release.
 
-**Current decision:** The v4.0.0 feature set is present on `main`. The version/release preparation is in progress. Web CI and Android APK compilation must pass on the exact v4.0.0 commit, and real-device checks remain outstanding before publishing a stable tag.
+**Current decision:** The repository baseline is 11.2.0. The main branch contains the current ECLIPSE feature set, but implemented, build-verified, and device-verified are separate statuses. Run web CI and the Android APK workflow on the exact release commit, complete device checks, and confirm persistent signing before publishing a stable tag.
 
 
-## v4.0.2 branch changes
+## Current main-branch implementation notes
 
 - Large-library scan deduplication uses a `Set` rather than repeatedly searching the full library for every discovered file.
 - Library persistence is guarded so storage quota errors produce a visible message instead of leaving in-memory state half-updated.
 - Native folder traversal has a 20-second time budget in addition to file, directory, and depth limits. A time-limited scan reports itself as truncated; rescan a narrower folder to continue.
-- The selected-system hero art now uses original platform-family visual treatments rather than relying only on a symbol.
+- The selected-system hero art uses original platform-family visual treatments rather than relying only on a symbol.
 - Settings copy now reflects active gamepad navigation alongside keyboard controls.
 - Emulator handoff remains device/emulator-dependent; manual playtime, Steam integration, and privileged Android Quick Settings remain separate unfinished integrations.
