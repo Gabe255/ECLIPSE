@@ -1,4 +1,5 @@
 import './style.css';
+import { mountPegasusNavigation } from './pegasus-ui.js';
 import { mountExperience } from './experience.js';
 import { mountControlCenter } from './controls.js';
 import { Capacitor, registerPlugin } from '@capacitor/core';
@@ -1210,6 +1211,7 @@ applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
 refreshDisplayLayout();
 mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
 mountControlCenter({ notify });
+mountPegasusNavigation({ navigate: showView });
 renderSystemPicker();renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();
 // Polished launcher startup: keep the first frame intentional while local UI initializes.
 (function showLauncherBoot(){
