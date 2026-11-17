@@ -577,7 +577,35 @@ function openConsolePage(name){
   Android:{accent:'#82e5a3',secondary:'#d0ffe0',line:'CONNECTING YOUR APPS',tag:'DEVICE READY'},
   Mobile:{accent:'#82e5a3',secondary:'#d0ffe0',line:'CONNECTING YOUR APPS',tag:'DEVICE READY'}
  };
- const style=styles[system.family]||{accent:'#b59aff',secondary:'#e0d4ff',line:'PREPARING YOUR GAME WORLD',tag:'SYSTEM ONLINE'};
+ const consoleStyles={
+  'NES':{accent:'#e84b45',secondary:'#ffd0ca',line:'8-BIT POWER ON',tag:'THE CLASSICS ARE CALLING'},
+  'SNES':{accent:'#b7a4e8',secondary:'#e8ddff',line:'16-BIT WORLD INITIALIZING',tag:'PRESS START TO CONTINUE'},
+  'Nintendo 64':{accent:'#6c8cff',secondary:'#d0d9ff',line:'ENTER THE 3D ERA',tag:'FOUR PLAYER ENERGY'},
+  'Game Boy':{accent:'#a8c66c',secondary:'#e1f0b5',line:'POCKET POWER ACTIVATED',tag:'TAKE YOUR GAMES ANYWHERE'},
+  'Game Boy Advance':{accent:'#a58cff',secondary:'#e1d8ff',line:'ADVANCE SYSTEM ONLINE',tag:'YOUR ADVENTURE STARTS HERE'},
+  'Nintendo DS':{accent:'#8ac9ed',secondary:'#d8f2ff',line:'DUAL SCREEN SYSTEM READY',tag:'TOUCH TO CONTINUE'},
+  'Nintendo 3DS':{accent:'#ef6b75',secondary:'#ffd6da',line:'3D WORLD COMING INTO VIEW',tag:'WELCOME BACK'},
+  'GameCube':{accent:'#9c82ff',secondary:'#ddd2ff',line:'CUBE CORE ONLINE',tag:'LET THE GAME BEGIN'},
+  'Wii':{accent:'#8ed9ef',secondary:'#d9f8ff',line:'WII WOULD LIKE TO PLAY',tag:'YOUR LIVING ROOM IS READY'},
+  'Wii U':{accent:'#54b8e8',secondary:'#ccefff',line:'GAMEPAD LINK ESTABLISHED',tag:'TWO SCREENS. ONE WORLD.'},
+  'Nintendo Switch':{accent:'#ff5368',secondary:'#ffd0d6',line:'CONSOLE MODE: READY',tag:'PLAY ANYWHERE'},
+  'Nintendo Switch 2':{accent:'#ff596e',secondary:'#ffd7dd',line:'NEXT GENERATION READY',tag:'WELCOME TO YOUR NEXT WORLD'},
+  'PlayStation 2':{accent:'#6c83ff',secondary:'#d1d8ff',line:'THE NEXT LEVEL IS LOADING',tag:'WELCOME TO YOUR PLAYSTATION 2'},
+  'PlayStation 3':{accent:'#d8d8e6',secondary:'#ffffff',line:'CELL SYSTEM INITIALIZING',tag:'WELCOME BACK'},
+  'PlayStation 4 / Pro':{accent:'#4b9bff',secondary:'#c8e2ff',line:'LIVE FROM YOUR PLAYSTATION',tag:'READY TO PLAY'},
+  'PlayStation 5 / Pro':{accent:'#b5a2ff',secondary:'#e3d9ff',line:'WELCOME TO THE NEW GENERATION',tag:'YOUR NEXT GREAT ADVENTURE'},
+  'PSP':{accent:'#6eafff',secondary:'#d4e8ff',line:'PORTABLE PLAY READY',tag:'TAKE THE GAME WITH YOU'},
+  'PS Vita':{accent:'#61c5d9',secondary:'#d0f8ff',line:'VITA SYSTEM ONLINE',tag:'PLAY IS IN YOUR HANDS'},
+  'Xbox':{accent:'#65d979',secondary:'#d3ffda',line:'POWERING UP YOUR XBOX',tag:'JUMP BACK IN'},
+  'Xbox 360':{accent:'#8bdc75',secondary:'#e0ffd7',line:'XBOX LIVE SESSION READY',tag:'IT’S GAME TIME'},
+  'Xbox One':{accent:'#3bc66c',secondary:'#c8ffda',line:'ALL SYSTEMS GO',tag:'WELCOME HOME'},
+  'Xbox Series X|S':{accent:'#50d77d',secondary:'#d0ffe0',line:'VELOCITY ARCHITECTURE ONLINE',tag:'POWER YOUR DREAMS'},
+  'Master System':{accent:'#6d9dff',secondary:'#d6e3ff',line:'SEGA 8-BIT SYSTEM READY',tag:'WELCOME TO THE ARCADE'},
+  'Genesis / Mega Drive':{accent:'#7b91ff',secondary:'#d8deff',line:'16-BIT SEGA POWER',tag:'GENESIS DOES'},
+  'Saturn':{accent:'#ffb45c',secondary:'#ffe1b8',line:'SATURN SYSTEM ONLINE',tag:'A NEW DIMENSION'},
+  'Dreamcast':{accent:'#ff805d',secondary:'#ffd8ca',line:'DREAMCAST CONNECTION READY',tag:'WELCOME TO THE FUTURE'}
+ };
+ const style=consoleStyles[system.name]||styles[system.family]||{accent:'#b59aff',secondary:'#e0d4ff',line:'PREPARING YOUR GAME WORLD',tag:'SYSTEM ONLINE'};
  boot.dataset.family=system.family.toLowerCase().replace(/[^a-z]+/g,'-');
  boot.style.setProperty('--boot-accent',style.accent);boot.style.setProperty('--boot-secondary',style.secondary);
  $('#bootSystemName').textContent=system.name.toUpperCase();
@@ -589,6 +617,9 @@ function openConsolePage(name){
 }
 function renderConsoleHome(system){
  const name=system.name;activeConsoleName=name;window.EclipseExperienceApplySystemTheme?.(name);
+ const familyAccents={Nintendo:'#ff5368',PlayStation:'#6b9dff',Xbox:'#65d979',Sega:'#5b9dff',Atari:'#ffbd65',Arcade:'#ff73dc',PC:'#b59aff','PC Gaming':'#b59aff',Android:'#82e5a3',Mobile:'#82e5a3'};
+ const accent=familyAccents[system.family]||'#b59aff';
+ $('#consoleBanner')?.style.setProperty('--console-accent',accent);
  const titles=gamesForSystem(name);
  $('#consoleTitle')?.remove();
  $('#consoleGeneration').textContent=system.family.toUpperCase()+' PLATFORM';
