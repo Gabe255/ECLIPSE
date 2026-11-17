@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Existing release tag to replace its APK (for example v3.0.0)'
+        description: 'Existing release tag to replace its APK (for example v11.2.0)'
         required: false
         type: string
         default: ''
@@ -191,15 +191,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.release_tag || (github.ref == 'refs/heads/main' && format('v{0}', env.ECLIPSE_VERSION)) || github.ref_name }}
-          name: ECLIPSE — The Eclipse Experience (v${{ env.ECLIPSE_VERSION }})
+          name: ECLIPSE — Your Gaming Universe (v${{ env.ECLIPSE_VERSION }})
           prerelease: false
           overwrite_files: true
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/ECLIPSE-v${{ env.ECLIPSE_VERSION }}.apk
           body: |
-            # ECLIPSE v${{ env.ECLIPSE_VERSION }} — Console & Emulator Update
+            # ECLIPSE v${{ env.ECLIPSE_VERSION }} — Your Gaming Universe
 
-            A major ECLIPSE update focused on the full console interface, reliable startup, and broader Android emulator handoff.
+            An Android-first gaming frontend update focused on the ECLIPSE console experience, game-library organization, and reliable Android integration.
 
             **Highlights**
             - Eclipse mascot and first-run onboarding for storage and display setup
