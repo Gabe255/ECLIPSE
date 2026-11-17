@@ -999,7 +999,7 @@ async function checkUpdates(){
   if(comparison>0){
    const note=document.createElement('p');note.textContent=latest.body?.replace(/\s+/g,' ').slice(0,260)||'A newer ECLIPSE build is ready.';
    result.append(note);addSafeLink(result,asset.browser_download_url,'DOWNLOAD '+latest.tag_name+' APK ↗');
-   const caution=document.createElement('p');caution.textContent='Install compatibility depends on the same app ID, a newer Android version code, and the same signing certificate. Back up important app data before updating.';result.append(caution);
+   const caution=document.createElement('p');caution.textContent='Android should show Update when the app ID, signing certificate, and version code match. If it says App not installed, the APK may use a different signing key or an older version code. Do not uninstall ECLIPSE until you have backed up your data.';result.append(caution);
   }else{
    const note=document.createElement('p');note.textContent='Latest release: '+latest.tag_name+'. Check the release history below for older builds.';result.append(note);
   }
