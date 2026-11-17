@@ -57,7 +57,7 @@ export function mountExperience({ $, themes, setTheme, notify, systems, games, f
           <label class="studio-field">Animation speed <output id="motionValue">${motionSpeed.toFixed(1)}×</output><input id="motionSpeed" type="range" min="0" max="1.5" step="0.1" value="${motionSpeed}"></label>
           <div class="studio-controls"><button class="studio-secondary" id="motionReduced" type="button">REDUCED MOTION</button><button class="studio-secondary" id="motionDefault" type="button">DEFAULT MOTION</button></div>
           <label class="studio-check"><input type="checkbox" id="systemStartupEnabled" ${localStorage.getItem("eclipse-system-startup-enabled") !== "false" ? "checked" : ""}> Play a startup sequence when entering a system</label>
-          <label class="studio-check"><input type="checkbox" id="systemBootSound" ${localStorage.getItem("eclipse-system-boot-sound") === "true" ? "checked" : ""}> Play the original ECLIPSE startup sound</label>
+          <label class="studio-check"><input type="checkbox" id="systemBootSound" ${localStorage.getItem("eclipse-system-boot-sound") === "true" ? "checked" : ""}> Play a subtle startup sound</label>
           <label class="studio-check"><input type="checkbox" id="performanceLite" ${localStorage.getItem('eclipse-performance-lite')==='true'?'checked':''}> Lightweight mode (reduce decorative effects)</label>
           <p class="studio-hint">Your device's Reduce Motion accessibility setting is always respected.</p>
         </section>
