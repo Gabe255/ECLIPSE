@@ -1,4 +1,4 @@
-# ECLIPSE 11.2.0 — Your Gaming Universe
+# ECLIPSE 11.3.0 — Your Gaming Universe
 
 **ECLIPSE is an Android-first gaming frontend evolving into one unified gaming home.** The goal is to bring together the strongest parts of NeoStation, Pegasus, and iiSU in a single ECLIPSE experience—not three separate apps.
 
@@ -9,7 +9,7 @@
 - **iiSU — visual system:** adapt its icon and theme direction, and reuse assets only where their licenses and permissions allow.
 - **ECLIPSE — the finished product:** one identity, one home screen, one settings system, one APK, and a consistent console-first experience.
 
-This is the target architecture, not a claim that those projects have already been merged. The current 11.2.0 repository is still built with Vite and Capacitor. Before migration, each upstream codebase and asset set must be checked for technical compatibility and license requirements. Features that do not fit the chosen foundation will be ported or rebuilt rather than blindly combining entire repositories.
+This is the target architecture, not a claim that those projects have already been merged. The current 11.3.0 repository is still built with Vite and Capacitor. Before migration, each upstream codebase and asset set must be checked for technical compatibility and license requirements. Features that do not fit the chosen foundation will be ported or rebuilt rather than blindly combining entire repositories.
 
 ## Current ECLIPSE experience
 
