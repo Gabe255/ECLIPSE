@@ -7,7 +7,7 @@ const UpdateDownload = registerPlugin('UpdateDownload');
 const LauncherSetup = registerPlugin('LauncherSetup');
 const DisplayInfo = registerPlugin('DisplayInfo');
 
-const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '4.11.0';
+const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '4.11.1';
 const REPO = 'Gabe255/ECLIPSE';
 const systems = [
   { name: 'Nintendo', icon: '◈', family: 'Nintendo' },
@@ -150,8 +150,8 @@ let currentPage = 0;
 let playCount = load('eclipse-play-count', 0);
 let folderPaths = load('eclipse-folders', []);
 let systemShelfRows = Math.max(1, Math.min(4, Number(load('eclipse-system-shelf-rows', 2)) || 2));
-let interfaceMode = load('eclipse-interface-mode', 'konsoru');
-if(!['console','konsoru','cocoon','hybrid'].includes(interfaceMode)) interfaceMode='konsoru';
+let interfaceMode = 'cocoon';
+localStorage.setItem('eclipse-interface-mode', JSON.stringify(interfaceMode));
 let systemFolders = load('eclipse-system-folders', {});
 let preferences = load('eclipse-preferences', {showHero:true,compactRows:false,systemCounts:true,startPage:'home'});
 let installedApps = load('eclipse-installed-apps', []);
@@ -248,7 +248,7 @@ document.querySelector('#app').innerHTML = `
           <div class="settings-panel-head"><div><p class="eyebrow">MAKE ECLIPSE YOURS</p><h3>PERSONALIZE</h3></div><button class="subtle-btn" id="resetAllDefaults">RESTORE DEFAULTS</button></div>
           <div class="settings-grid">
             <article class="settings-card"><p class="eyebrow">APPEARANCE</p><h3>THEME</h3><label>Built-in theme<select id="settingsTheme">${themes.map(([id,name])=>`<option value="${id}" ${id===activeTheme?'selected':''}>${name}</option>`).join('')}</select></label><p class="settings-note">Choose a visual preset. Your selection is saved on this device.</p></article>
-            <article class="settings-card"><p class="eyebrow">HOME SCREEN</p><h3>LAYOUT OPTIONS</h3><label class="setting-toggle"><input type="checkbox" id="showHeroSetting" checked><span>Show featured hero</span></label><label class="setting-toggle"><input type="checkbox" id="compactRowsSetting"><span>Compact home rows</span></label><label class="setting-toggle"><input type="checkbox" id="systemCountsSetting" checked><span>Show game counts on systems</span></label><label>Start page<select id="startPageSetting"><option value="home">Home</option><option value="library">Library</option><option value="android">Android games</option></select></label><label>Interface style<select id="interfaceModeSetting"><option value="console">Console Interface</option><option value="konsoru">Konsoru Console</option><option value="cocoon">Cocoon-style Interface</option><option value="hybrid">Hybrid · Both</option></select></label><p class="settings-note">Hybrid keeps your unified home, folders and collections alongside a dedicated page for every system.</p><label>Games per shelf row<select id="systemShelfRowsSetting"><option value="1">1 row</option><option value="2">2 rows</option><option value="3">3 rows</option><option value="4">4 rows</option></select></label><label>Display layout<select id="settingsDisplayLayout"><option value="auto">Auto detect</option><option value="single">Single screen</option><option value="dual">Dual screen / foldable</option></select></label></article>
+            <article class="settings-card"><p class="eyebrow">HOME SCREEN</p><h3>LAYOUT OPTIONS</h3><label class="setting-toggle"><input type="checkbox" id="showHeroSetting" checked><span>Show featured hero</span></label><label class="setting-toggle"><input type="checkbox" id="compactRowsSetting"><span>Compact home rows</span></label><label class="setting-toggle"><input type="checkbox" id="systemCountsSetting" checked><span>Show game counts on systems</span></label><label>Start page<select id="startPageSetting"><option value="home">Home</option><option value="library">Library</option><option value="android">Android games</option></select></label><p class="settings-note">Cocoon home is the ECLIPSE default: horizontal game shelves, featured artwork, custom pages, widgets, and controller-friendly navigation.</p><label>Games per shelf row<select id="systemShelfRowsSetting"><option value="1">1 row</option><option value="2">2 rows</option><option value="3">3 rows</option><option value="4">4 rows</option></select></label><label>Display layout<select id="settingsDisplayLayout"><option value="auto">Auto detect</option><option value="single">Single screen</option><option value="dual">Dual screen / foldable</option></select></label></article>
             <article class="settings-card"><p class="eyebrow">ARTWORK PROVIDER</p><h3>STEAMGRIDDB</h3><label>API key<input id="sgdbApiKey" type="password" autocomplete="off" placeholder="Paste your SteamGridDB API key"></label><div class="sgdb-settings-actions"><button class="primary-btn" id="saveSgdbKey">SAVE API KEY</button><button class="subtle-btn" id="clearSgdbKey">CLEAR</button></div><p class="settings-note" id="sgdbKeyStatus">Your key is saved only in this browser's local app storage. Don't put it in the GitHub source code.</p><p class="settings-note">Get your own key from your SteamGridDB profile preferences. Artwork is optional; the rest of ECLIPSE works without it.</p></article><article class="settings-card"><p class="eyebrow">HOME PAGES</p><h3>YOUR PAGES</h3><p class="settings-note">Add up to five pages and arrange the widgets on each page.</p><button class="subtle-btn" id="settingsAddPage">+ ADD PAGE</button><div id="settingsPageList" class="settings-page-list"></div></article>
             <article class="settings-card"><p class="eyebrow">WIDGETS</p><h3>HOME CONTENT</h3><p class="settings-note">Choose which shelves appear and change their order.</p><button class="primary-btn" id="settingsEditWidgets">EDIT HOME WIDGETS</button><button class="subtle-btn" id="resetWidgets">RESET WIDGETS</button></article>
           </div>
@@ -507,7 +507,7 @@ function renderHomeHero(){
  renderKonsoruHome();
  const hero=$('#homeLibraryHero');if(!hero)return;
  const featured=games.slice().reverse().find(game=>game.artwork?.hero)||games[games.length-1];
- hero.classList.toggle('hidden',games.length===0||!preferences.showHero||interfaceMode==='cocoon');
+ hero.classList.toggle('hidden',games.length===0||!preferences.showHero);
  if(featured){
   $('#homeHeroTitle').textContent=featured.title;
   $('#homeHeroMeta').textContent=featured.system+' · '+games.length+' GAMES IN YOUR LIBRARY';
