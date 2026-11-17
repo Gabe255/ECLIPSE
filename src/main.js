@@ -618,6 +618,10 @@ $('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
  $('#systemHome').querySelectorAll('[data-system-game]').forEach(button=>button.addEventListener('click',()=>{const game=games[Number(button.dataset.systemGame)];if(game)showGameDetails(game);}));
  $('#systemHome').querySelectorAll('[data-system-folder]').forEach(button=>button.addEventListener('click',()=>$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth'})));
  $('#systemHome').querySelector('[data-go-scan]')?.addEventListener('click',()=>{showView('library');chooseGameFolder();});
+ $('#systemHome').querySelectorAll('[data-system-menu]').forEach(button=>button.addEventListener('click',()=>{
+  const action=button.dataset.systemMenu;
+  $('#systemMenu').querySelector('[data-system-menu="'+action+'"]')?.click();
+ }));
  const menu=$('#systemMenu');
  menu.innerHTML=[['overview','⌂ HOME'],['games','▤ GAMES'],['players','◈ PLAYERS'],['scan','＋ SCAN GAMES'],['settings','⚙ SYSTEM SETTINGS']].map(([key,label],index)=>'<button class="system-menu-item '+(index===0?'active':'')+'" data-system-menu="'+key+'">'+label+'</button>').join('');
  menu.querySelectorAll('[data-system-menu]').forEach(button=>button.addEventListener('click',()=>{
