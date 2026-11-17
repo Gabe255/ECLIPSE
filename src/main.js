@@ -487,6 +487,7 @@ function renderKonsoruHome(){
  const marks={Nintendo:'◈',PlayStation:'△',Xbox:'✕',Sega:'◉',Atari:'▥',Arcade:'✦',PC:'⌘','PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
  const worldGrid=$('#konsoruWorldGrid');
  const featuredNames=['Nintendo Switch','Nintendo 3DS','Wii','Nintendo DS','PlayStation 5 / Pro','PlayStation 2','PSP','Xbox 360','Nintendo Switch 2','Windows PC'];
+ const pickerCount=$('#systemPickerCount');if(pickerCount)pickerCount.textContent=featuredNames.length+' FEATURED / '+systems.length+' TOTAL';
  const matchesFilter=system=>{
   if(worldSearchQuery)return (system.name+' '+system.family).toLowerCase().includes(worldSearchQuery);
   if(activeWorldFilter==='featured')return featuredNames.includes(system.name);
