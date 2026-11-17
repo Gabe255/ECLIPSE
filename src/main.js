@@ -559,6 +559,39 @@ function openConsolePage(name){
  showView('console');
  startSystemBoot({root:$('#systemBoot'),system,config:getSystemConfig(system)});
 }
+function buildConsoleWorldHome({system,titles,featured,artFor,cardFor,name}){
+ const family=system.family;
+ const is3DS=name==='Nintendo 3DS';
+ const isWii=name==='Wii';
+ const isWiiU=name==='Wii U';
+ const isSwitch=name==='Nintendo Switch'||name==='Nintendo Switch 2';
+ const isPlayStation=family==='PlayStation';
+ const isXbox=family==='Xbox';
+ const isSega=family==='Sega';
+ const isArcade=family==='Arcade'||family==='Atari';
+ const count=titles.length;
+ const hero=featured?'<div class="world-feature-art">'+artFor(featured)+'</div><div class="world-feature-copy"><p class="eyebrow">NOW IN YOUR LIBRARY</p><h2>'+escapeHTML(featured.title)+'</h2><p>'+escapeHTML(featured.tag||name)+' · '+escapeHTML(featured.year||'')+'</p><button class="primary-btn" data-system-game="'+games.indexOf(featured)+'">OPEN GAME ↗</button></div>':'<div class="world-empty"><p class="eyebrow">YOUR NEXT ADVENTURE</p><h2>READY WHEN YOU ARE.</h2><p>Add games to this system to build your collection.</p><button class="primary-btn" data-go-scan>ADD GAMES ↗</button></div>';
+ const shelf='<section class="system-shelf world-library"><div class="system-row-label"><div><p class="eyebrow">YOUR COLLECTION</p><h3>ALL GAMES</h3></div><span>'+count+' TITLES</span></div><div class="system-game-row" style="--system-shelf-rows:'+systemShelfRows+'">'+(count?titles.map(cardFor).join(''):'<p class="settings-note">No supported game files were found for this system.</p>')+'</div></section>';
+ if(is3DS||isWiiU){
+  return '<div class="world-shell world-dual-screen '+(isWiiU?'world-wiiu':'world-3ds')+'"><div class="world-console-top"><div><p class="eyebrow">'+(isWiiU?'WII U · GAMEPAD VIEW':'NINTENDO 3DS · DUAL SCREEN')+'</p><h2>'+(isWiiU?'GAMEPAD HOME':'HOME MENU')+'</h2><span>'+count+' GAMES READY</span></div><span class="world-console-clock">ECLIPSE OS</span></div><div class="world-dual-panels"><section class="world-upper-screen"><div class="world-screen-label">TOP SCREEN <span>01</span></div>'+hero+'</section><section class="world-lower-screen"><div class="world-screen-label">BOTTOM SCREEN <span>02</span></div><div class="world-app-icons"><button data-system-menu="games">▦<small>GAMES</small></button><button data-system-menu="players">◈<small>PLAYERS</small></button><button data-system-menu="scan">＋<small>ADD</small></button><button data-system-menu="settings">⚙<small>SETTINGS</small></button></div></section></div>'+shelf+'</div>';
+ }
+ if(isWii){
+  return '<div class="world-shell world-wii"><div class="world-console-top"><div><p class="eyebrow">WII MENU · CHANNEL SELECT</p><h2>WHAT’S ON TODAY?</h2></div><span class="world-console-clock">ECLIPSE CHANNELS</span></div><div class="world-wii-channels"><button class="world-channel world-channel-feature" data-system-menu="games"><span>▶</span><b>GAME CHANNEL</b><small>'+count+' TITLES</small></button><button class="world-channel" data-system-menu="players"><span>◉</span><b>PLAYER CHANNEL</b><small>CHOOSE PLAYER</small></button><button class="world-channel" data-system-menu="scan"><span>＋</span><b>ADD CHANNEL</b><small>IMPORT GAMES</small></button><button class="world-channel" data-system-menu="settings"><span>⚙</span><b>WII SETTINGS</b><small>PERSONALIZE</small></button></div>'+shelf+'</div>';
+ }
+ if(isSwitch){
+  return '<div class="world-shell world-switch"><div class="world-switch-head"><div><p class="eyebrow">NINTENDO SWITCH · HOME</p><h2>GOOD TO SEE YOU.</h2><span>'+count+' GAMES IN YOUR LIBRARY</span></div><div class="world-switch-user">●<small>PLAYER 1</small></div></div>'+hero+'<div class="world-switch-dock"><button data-system-menu="games"><span>▦</span><small>ALL SOFTWARE</small></button><button data-system-menu="players"><span>◉</span><small>PLAYERS</small></button><button data-system-menu="scan"><span>＋</span><small>ADD SOFTWARE</small></button><button data-system-menu="settings"><span>⚙</span><small>SYSTEM SETTINGS</small></button></div>'+shelf+'</div>';
+ }
+ if(isPlayStation){
+  return '<div class="world-shell world-playstation-home"><div class="world-console-top"><div><p class="eyebrow">PLAYSTATION · WHAT’S NEW</p><h2>WELCOME BACK.</h2></div><span class="world-console-clock">PLAYER 01 · ONLINE</span></div><section class="world-ps-feature">'+hero+'</section><div class="world-quick-actions"><button data-system-menu="games">▤<span>GAME LIBRARY</span></button><button data-system-menu="players">◈<span>GAME BASE</span></button><button data-system-menu="scan">＋<span>ADD CONTENT</span></button><button data-system-menu="settings">⚙<span>SETTINGS</span></button></div>'+shelf+'</div>';
+ }
+ if(isXbox){
+  return '<div class="world-shell world-xbox-home"><div class="world-xbox-heading"><div><p class="eyebrow">XBOX HOME · DASHBOARD</p><h2>JUMP BACK IN.</h2></div><span>'+count+' GAMES</span></div><section class="world-xbox-spotlight">'+hero+'</section><div class="world-xbox-shortcuts"><button data-system-menu="games">MY GAMES & APPS</button><button data-system-menu="players">PEOPLE</button><button data-system-menu="scan">ADD GAME</button><button data-system-menu="settings">SETTINGS</button></div>'+shelf+'</div>';
+ }
+ if(isSega||isArcade){
+  return '<div class="world-shell world-arcade-home"><div class="world-arcade-heading"><p class="eyebrow">'+escapeHTML(family.toUpperCase())+' SYSTEM · INSERT COIN</p><h2>SELECT YOUR GAME.</h2><span>'+count+' TITLES LOADED</span></div><div class="world-arcade-feature">'+hero+'</div><div class="world-arcade-actions"><button data-system-menu="games">▶ GAME SELECT</button><button data-system-menu="players">◈ PLAYER SETUP</button><button data-system-menu="scan">＋ ADD TITLE</button><button data-system-menu="settings">⚙ CABINET SETUP</button></div>'+shelf+'</div>';
+ }
+ return '<div class="world-shell world-desktop-home"><div class="world-desktop-heading"><div><p class="eyebrow">'+escapeHTML(family.toUpperCase())+' · LIBRARY DESKTOP</p><h2>'+escapeHTML(name.toUpperCase())+'</h2></div><span>'+count+' ITEMS</span></div><div class="world-desktop-layout"><aside class="world-desktop-sidebar"><button data-system-menu="games">▤ LIBRARY</button><button data-system-menu="players">◈ PLAYERS</button><button data-system-menu="scan">＋ IMPORT</button><button data-system-menu="settings">⚙ SETTINGS</button></aside><div class="world-desktop-main">'+hero+'</div></div>'+shelf+'</div>';
+}
 function renderConsoleHome(system){
  const name=system.name;activeConsoleName=name;window.EclipseExperienceApplySystemTheme?.(name);
  const familyAccents={Nintendo:'#ff5368',PlayStation:'#6b9dff',Xbox:'#65d979',Sega:'#5b9dff',Atari:'#ffbd65',Arcade:'#ff73dc',PC:'#b59aff','PC Gaming':'#b59aff',Android:'#82e5a3',Mobile:'#82e5a3'};
@@ -579,11 +612,7 @@ $('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
  const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+escapeHTML(g.title)+'</b><small>'+escapeHTML(g.tag)+' · '+escapeHTML(g.fileName)+'</small></div></button>';
  const featured=titles[0];
  const folderNames=['ALL GAMES'];
- $('#systemHome').innerHTML=
-  '<div class="system-home-head"><div><p class="eyebrow">WELCOME TO YOUR SYSTEM</p><h2>'+name.toUpperCase()+' HOME</h2></div><span class="collection-count">'+titles.length+' TITLES</span></div>'+
-  '<div class="system-folder-row"><div class="system-row-label"><p class="eyebrow">YOUR COLLECTION</p><span>'+titles.length+' VERIFIED FILES</span></div><div class="system-folders">'+folderNames.map(folder=>'<button class="system-folder" data-system-folder="'+folder+'"><span>▣</span><b>'+folder+'</b><small>'+titles.length+' GAMES FOUND</small></button>').join('')+'</div></div>'+
-  (featured?'<section class="system-featured"><div class="system-featured-art">'+artFor(featured)+'</div><div class="system-featured-copy"><p class="eyebrow">FEATURED GAME</p><h2>'+featured.title+'</h2><p>'+name+' · '+featured.year+' · '+featured.tag+'</p><button class="primary-btn" data-system-game="'+games.indexOf(featured)+'">OPEN GAME ↗</button></div></section>':'<div class="system-empty-hero"><p class="eyebrow">NOTHING IMPORTED</p><h2>NO GAMES FOUND.</h2><p>Only games found in a folder scan appear here. Nothing is added automatically.</p><button class="primary-btn" data-go-scan>CHOOSE GAME FOLDER ↗</button></div>')+
-  '<section class="system-shelf"><div class="system-row-label"><div><p class="eyebrow">YOUR COLLECTION</p><h3>ALL GAMES</h3></div><span>'+titles.length+' ITEMS · '+systemShelfRows+' ROW'+(systemShelfRows===1?'':'S')+'</span></div><div class="system-game-row" style="--system-shelf-rows:'+systemShelfRows+'">'+(titles.length?titles.map(cardFor).join(''):'<p class="settings-note">No supported game files were found for this system.</p>')+'</div></section>';
+ $('#systemHome').innerHTML=buildConsoleWorldHome({system,titles,featured,artFor,cardFor,name});
  const featuredHeroUrl=sgdbSafeUrl(featured?.artwork?.hero);const featuredPanel=$('#systemHome').querySelector('.system-featured');if(featuredHeroUrl&&featuredPanel){featuredPanel.style.backgroundImage='linear-gradient(90deg,#10111df0 0%,#10111dcc 48%,#10111d88 100%),url("'+featuredHeroUrl+'")';featuredPanel.style.backgroundSize='cover';featuredPanel.style.backgroundPosition='center';}
  $('#systemHome').querySelectorAll('[data-system-art]').forEach(cover=>{const url=games[Number(cover.dataset.systemArt)]?.artwork?.grid;if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='lazy';img.className='sgdb-cover-image';cover.prepend(img);}});
  $('#systemHome').querySelectorAll('[data-system-game]').forEach(button=>button.addEventListener('click',()=>{const game=games[Number(button.dataset.systemGame)];if(game)showGameDetails(game);}));
