@@ -37,7 +37,7 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             ECLIPSE_VERSION="${GITHUB_REF_NAME#v}"
           else
-            ECLIPSE_VERSION="11.3.0"
+            ECLIPSE_VERSION="11.4.0"
           fi
           echo "ECLIPSE_VERSION=$ECLIPSE_VERSION" >> "$GITHUB_ENV"
       - name: Validate stable version
@@ -199,7 +199,7 @@ jobs:
           body: |
             # ECLIPSE v${{ env.ECLIPSE_VERSION }} — Your Gaming Universe
 
-            An Android-first gaming frontend update focused on the ECLIPSE console experience, game-library organization, and reliable Android integration.
+            An Android-first gaming frontend update focused on the ECLIPSE console experience and Pegasus-inspired navigation, game-library organization, and reliable Android integration.
 
             **Highlights**
             - Eclipse mascot and first-run onboarding for storage and display setup
@@ -208,6 +208,7 @@ jobs:
             - Game library organization and folder scanning foundation
             - Single/dual display layout support with Android fold-feature detection
             - Experience Studio themes, profiles, wallpaper, and backup/restore
+            - Pegasus-inspired slide-in navigation adapted for ECLIPSE
             - Control Center shortcuts, app-window brightness, and battery status
 
             **Known limitations**
