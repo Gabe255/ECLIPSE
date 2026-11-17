@@ -7,7 +7,7 @@ const UpdateDownload = registerPlugin('UpdateDownload');
 const LauncherSetup = registerPlugin('LauncherSetup');
 const DisplayInfo = registerPlugin('DisplayInfo');
 
-const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '4.0.2';
+const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '4.11.0';
 const REPO = 'Gabe255/ECLIPSE';
 const systems = [
   { name: 'Nintendo', icon: '◈', family: 'Nintendo' },
@@ -76,6 +76,30 @@ const supportedGameTypes = [
   {system:'NINTENDO 3DS',ext:['3ds','cci','cxi'],dirs:['3ds','nintendo 3ds']},
   {system:'GAMECUBE',ext:['gcm','rvz','gcz','iso'],dirs:['gamecube','game cube','gc']},
   {system:'WII',ext:['wbfs','wia','iso'],dirs:['wii']},
+  {system:'WII U',ext:['wud','wux','rpx','rpl'],dirs:['wii u','wiiu']},
+  {system:'NINTENDO SWITCH',ext:['xci','nsp','nro','nso'],dirs:['switch','nintendo switch']},
+  {system:'NINTENDO SWITCH 2',ext:['xci','nsp'],dirs:['switch 2','switch2','nintendo switch 2']},
+  {system:'XBOX',ext:['iso','xiso'],dirs:['xbox','original xbox']},
+  {system:'XBOX 360',ext:['iso','xex','god'],dirs:['xbox 360','xbox360','x360']},
+  {system:'ATARI 5200',ext:['a52'],dirs:['atari 5200','atari5200']},
+  {system:'ATARI 7800',ext:['a78'],dirs:['atari 7800','atari7800']},
+  {system:'ATARI LYNX',ext:['lnx'],dirs:['lynx','atari lynx']},
+  {system:'NEO GEO',ext:['zip','7z'],dirs:['neogeo','neo geo']},
+  {system:'DOS',ext:['zip','7z','dos'],dirs:['dos','ms dos']},
+  {system:'3DO',ext:['iso','cue'],dirs:['3do']},
+  {system:'CD-I',ext:['chd','cue','iso'],dirs:['cdi','cd-i']},
+  {system:'AMIGA',ext:['adf','adz','hdf','lha'],dirs:['amiga']},
+  {system:'COMMODORE 64',ext:['d64','t64','tap'],dirs:['commodore 64','c64']},
+  {system:'ZX SPECTRUM',ext:['tzx','tap','z80','sna'],dirs:['zx spectrum','spectrum']},
+  {system:'PC ENGINE',ext:['pce','chd'],dirs:['pc engine','turbografx']},
+  {system:'WONDERSWAN',ext:['ws','wsc'],dirs:['wonderswan']},
+  {system:'VIRTUAL BOY',ext:['vb'],dirs:['virtual boy']},
+  {system:'INTELLIVISION',ext:['int','bin'],dirs:['intellivision']},
+  {system:'COLECOVISION',ext:['col'],dirs:['colecovision']},
+  {system:'VECTREX',ext:['vec'],dirs:['vectrex']},
+  {system:'SCUMMVM',ext:['scummvm'],dirs:['scummvm']},
+  {system:'MAME',ext:['zip','7z'],dirs:['mame']},
+  {system:'FBNEO',ext:['zip','7z'],dirs:['fbneo','finalburn neo']},
   {system:'PLAYSTATION',ext:['pbp','chd','bin','cue','iso'],dirs:['psx','ps1','ps one','playstation','playstation 1']},
   {system:'PLAYSTATION 2',ext:['iso','cso','chd','bin','cue'],dirs:['ps2','playstation 2']},
   {system:'PSP',ext:['cso','pbp','iso'],dirs:['psp','playstation portable']},
@@ -107,8 +131,8 @@ let currentPage = 0;
 let playCount = load('eclipse-play-count', 0);
 let folderPaths = load('eclipse-folders', []);
 let systemShelfRows = Math.max(1, Math.min(4, Number(load('eclipse-system-shelf-rows', 2)) || 2));
-let interfaceMode = load('eclipse-interface-mode', 'cocoon');
-if(!['console','konsoru','cocoon','hybrid'].includes(interfaceMode)) interfaceMode='hybrid';
+let interfaceMode = load('eclipse-interface-mode', 'konsoru');
+if(!['console','konsoru','cocoon','hybrid'].includes(interfaceMode)) interfaceMode='konsoru';
 let systemFolders = load('eclipse-system-folders', {});
 let preferences = load('eclipse-preferences', {showHero:true,compactRows:false,systemCounts:true,startPage:'home'});
 let installedApps = load('eclipse-installed-apps', []);
@@ -783,17 +807,19 @@ async function scanInstalledApps(systemName){
   const result=await FolderAccess.getInstalledApps();
   installedApps=result.apps||[];
   const playerAliases={
-   'NES':['retroarch','fceux','nes.emu'],'SNES':['retroarch','snes9x','snes.emu'],
-   'Nintendo 64':['retroarch','m64plus','mupen'],'Game Boy':['retroarch','my oldboy','gbc.emu'],
-   'Game Boy Advance':['retroarch','my boy','pizza boy','gba.emu'],
-   'Nintendo DS':['drastic','melonds','retroarch'],'Nintendo 3DS':['azahar','lime3ds','citra'],
-   'GameCube':['dolphin'],'Wii':['dolphin'],'PlayStation':['duckstation','retroarch','epsxe'],
-   'PlayStation 2':['nethersx2','aethersx2','retroarch'],'PSP':['ppsspp'],'PS Vita':['vita3k'],
-   'Master System':['retroarch','md.emu'],'Genesis / Mega Drive':['retroarch','md.emu'],
+   'NES':['retroarch','fceux','nes.emu','lemuroid'],'SNES':['retroarch','snes9x','snes.emu','lemuroid'],
+   'Nintendo 64':['retroarch','m64plus','mupen','lemuroid'],'Game Boy':['retroarch','my oldboy','gbc.emu','lemuroid'],
+   'Game Boy Advance':['retroarch','my boy','pizza boy','gba.emu','lemuroid'],
+   'Nintendo DS':['drastic','melonds','retroarch','lemuroid'],'Nintendo 3DS':['azahar','lime3ds','citra'],
+   'GameCube':['dolphin','dolphin mmjr'],'Wii':['dolphin','dolphin mmjr'],'Wii U':['cemu'],
+   'PlayStation':['duckstation','retroarch','epsxe','lemuroid'],'PlayStation 2':['nethersx2','aethersx2','retroarch'],
+   'PSP':['ppsspp','retroarch'],'PS Vita':['vita3k'],
+   'Master System':['retroarch','md.emu','lemuroid'],'Genesis / Mega Drive':['retroarch','md.emu','lemuroid'],
    'Saturn':['retroarch','yaba sanshiro'],'Dreamcast':['redream','flycast','retroarch'],
-   'Atari 2600':['retroarch','atari 2600'],'Arcade':['retroarch','mame'],
-   'Nintendo Switch':['eden','sudachi','suyu','yuzu'],
-   'PC Games (x86)':['gamehub','gamenative']
+   'Atari 2600':['retroarch','atari 2600','lemuroid'],'Arcade':['retroarch','mame','fbneo','mame4droid'],
+   'Nintendo Switch':['eden','sudachi','suyu','yuzu'],'Nintendo Switch 2':['eden','sudachi'],
+   'Xbox':['xemu'],'Xbox 360':['xendroid','xenia'],
+   'PC Games (x86)':['gamehub','gamenative','winlator','mobox','termux-box']
   };
   systems.forEach(system=>{
    if(emulatorAssignments[system.name])return;
