@@ -1,6 +1,6 @@
 # ECLIPSE — Biggest Update Roadmap
 
-**Project version:** 11.3.0 — Your Gaming Universe  
+**Project version:** 11.4.0 — Your Gaming Universe  
 **Release policy:** Publish a stable tag only after the release checks below pass.  
 **Status language:** “Implemented” means the code exists. “Build verified” means CI passed. “Device verified” means it was tested on real Android hardware. These are separate checks.
 
@@ -8,8 +8,8 @@
 
 | Area | Current status | Notes |
 |---|---|---|
-| Web dashboard and system picker | Implemented; verify CI on the exact release commit | 37 system categories and system landing-page UI |
-| Experience Studio | Implemented | Themes, wallpaper, profiles, motion settings, JSON backup/restore |
+| Web dashboard and system picker | Implemented; verify CI on the exact release commit | 37 system categories, system landing pages, and horizontal collection shelves |
+| Experience Studio | Implemented | Themes, wallpaper, profiles, motion settings, JSON backup/restore |\n| Pegasus-inspired navigation | Implemented; verify CI | ECLIPSE-native slide-in menu, focus management, keyboard/controller-compatible controls; no Qt/QML runtime copied |
 | Apps Library | Implemented foundation | Android app discovery, Treat as Game labels, manual playtime |
 | Folder scanning and backup folder | Native implementation present; scanning runs off the UI thread with bounded traversal | Requires real-device testing with large folders, slow providers, revoked permissions, and duplicate rescans |
 | Mascot and first-run setup | Implemented | Eclipse orb mascot; display, default Home, and storage setup |
@@ -22,7 +22,7 @@
 | Achievements and online theme marketplace | Not implemented | Future work |
 | Cloud sync and automatic foreground playtime | Not implemented | Requires additional services/permissions and privacy design |
 
-## 1. Home and system worlds
+## 1. Home and system worlds\n\n- Pegasus-inspired right-side navigation drawer ported to native ECLIPSE web components.\n- Existing ECLIPSE horizontal game shelves and system browsing remain the collection UI; Pegasus' Qt/QML runtime is not embedded.
 
 - Console-inspired ECLIPSE home with system picker and 37 platform categories.
 - System landing pages generated from the selected platform and real library data.
@@ -141,7 +141,7 @@ A release is ready only when:
 6. Known limitations are documented.
 7. A stable signing/update path is verified before publishing a stable release.
 
-**Current decision:** The repository baseline is 11.3.0. The main branch contains the current ECLIPSE feature set, but implemented, build-verified, and device-verified are separate statuses. Run web CI and the Android APK workflow on the exact release commit, complete device checks, and confirm persistent signing before publishing a stable tag.
+**Current decision:** The repository baseline is 11.4.0. The main branch contains the current ECLIPSE feature set, but implemented, build-verified, and device-verified are separate statuses. Run web CI and the Android APK workflow on the exact release commit, complete device checks, and confirm persistent signing before publishing a stable tag.
 
 
 ## Current main-branch implementation notes
