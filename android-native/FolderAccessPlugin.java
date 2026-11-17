@@ -239,13 +239,9 @@ public class FolderAccessPlugin extends Plugin {
                 generic.setDataAndType(gameUri, mime);
                 generic.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
                 generic.setClipData(android.content.ClipData.newRawUri("ECLIPSE game", gameUri));
-                if (generic.resolveActivity(manager) == null) {
-                    generic.setType("*/*");
-                    generic.setData(gameUri);
-                }
-                if (generic.resolveActivity(manager) == null) {
-                    throw new IllegalStateException("No installed emulator advertises support for this game file. Try another player or import a supported format.");
-                }
+                generic.setDataAndType(gameUri, "*/*");
+                // Android's resolver is the compatibility fallback: emulator apps may
+                // advertise wildcard or vendor-specific MIME handlers not visible here.
                 resolved = Intent.createChooser(generic, "Choose an emulator for this game");
                 resolved.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
             } else {
