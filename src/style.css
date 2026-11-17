@@ -953,3 +953,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
  .world-console-top,.world-desktop-heading,.world-xbox-heading,.world-switch-head{align-items:flex-start}
 }
 @media(prefers-reduced-motion:reduce){.world-app-icons button,.world-channel,.world-switch-dock button{transition:none}}
+
+/* Skippable console startup controls. */
+.boot-skip{position:absolute;z-index:3;right:clamp(18px,4vw,38px);bottom:clamp(18px,4vw,32px);padding:11px 15px;border:1px solid color-mix(in srgb,var(--boot-accent,var(--accent)) 55%,#ffffff30);border-radius:8px;background:#ffffff0b;color:#e9e7f2;font:700 9px 'DM Mono',monospace;letter-spacing:1.2px;cursor:pointer}
+.boot-skip:hover,.boot-skip:focus-visible{outline:none;border-color:var(--boot-accent,var(--accent));background:color-mix(in srgb,var(--boot-accent,var(--accent)) 16%,#0b0c17)}
+.boot-skip span{margin-left:8px;color:var(--boot-secondary,var(--accent))}
+@media(prefers-reduced-motion:reduce){.system-boot:before,.system-boot:after,.boot-orbit,.boot-orbit span{animation:none!important}}
