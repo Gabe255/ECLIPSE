@@ -815,3 +815,29 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
  .system-boot:before,.system-boot:after{inset:20% 5%}
  .home-row-icon{width:24px;height:24px}
 }
+
+
+/* FINAL COCOON DEFAULT OVERRIDE
+   Keep the Cocoon library home visible after the legacy console stylesheet.
+   The old global console rules above were hiding the Cocoon shelves and widgets. */
+:root[data-interface-mode="cocoon"] #homeView {
+  display: block !important;
+}
+:root[data-interface-mode="cocoon"] #homeView > .welcome-row,
+:root[data-interface-mode="cocoon"] #homeView > .system-stage,
+:root[data-interface-mode="cocoon"] #homeView > .konsoru-home {
+  display: none !important;
+}
+:root[data-interface-mode="cocoon"] #homeView > .page-toolbar {
+  display: flex !important;
+}
+:root[data-interface-mode="cocoon"] #homeView > .dashboard-grid {
+  display: flex !important;
+}
+:root[data-interface-mode="cocoon"] #homeView > .home-games-shelf:not(.hidden),
+:root[data-interface-mode="cocoon"] #homeView > .home-apps-shelf:not(.hidden) {
+  display: flex !important;
+}
+:root[data-interface-mode="cocoon"] #homeView > .feature-hero:not(.hidden) {
+  display: flex !important;
+}
