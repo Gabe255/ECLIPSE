@@ -1,8 +1,17 @@
-# ECLIPSE 11.1.0 — The Eclipse Experience
+# ECLIPSE 11.2.0 — Your Gaming Universe
 
-**ECLIPSE 11.1.0 — The Eclipse Experience** is an Android-first gaming home and library experience built with Vite and Capacitor. It organizes the games and apps you already have; it is not an emulator and does not distribute game files.
+**ECLIPSE is an Android-first gaming frontend evolving into one unified gaming home.** The goal is to bring together the strongest parts of NeoStation, Pegasus, and iiSU in a single ECLIPSE experience—not three separate apps.
 
-## Current experience
+## Integration direction
+
+- **NeoStation — candidate foundation:** evaluate its Android/game-library architecture as the core for the unified frontend.
+- **Pegasus — customization and navigation:** port or rebuild compatible layout, theme, and navigation capabilities.
+- **iiSU — visual system:** adapt its icon and theme direction, and reuse assets only where their licenses and permissions allow.
+- **ECLIPSE — the finished product:** one identity, one home screen, one settings system, one APK, and a consistent console-first experience.
+
+This is the target architecture, not a claim that those projects have already been merged. The current 11.2.0 repository is still built with Vite and Capacitor. Before migration, each upstream codebase and asset set must be checked for technical compatibility and license requirements. Features that do not fit the chosen foundation will be ported or rebuilt rather than blindly combining entire repositories.
+
+## Current ECLIPSE experience
 
 - Console-inspired home with 37 system categories and dedicated system landing pages.
 - Game library with folder scanning, system assignment, search, favorites, and user-managed entries.
@@ -16,6 +25,7 @@
 
 ## Important limitations
 
+- The NeoStation/Pegasus/iiSU integration is planned and is not yet present in this codebase.
 - Android controls the final confirmation when ECLIPSE is selected as the default Home app.
 - Wi-Fi, Bluetooth, rotation, and Do Not Disturb shortcuts open Android settings or system panels. ECLIPSE does not bypass Android restrictions to silently toggle them.
 - Brightness adjusts the ECLIPSE app window, not global device brightness.
@@ -23,7 +33,7 @@
 - Emulator/player assignment and system pages are organizational UI. End-to-end game launching into third-party emulators is not yet implemented.
 - Automatic metadata and artwork scraping, online theme marketplace, achievement-service integrations, and cloud sync are not included yet.
 - Foldable auto-detection requires Android to report a separating fold feature. Browser preview may not expose the same hardware information; the layout can be selected manually in that case.
-- Version 11.1.0 uses the Cocoon-style library-first home by default. A successful build does not replace testing on a real phone or foldable.
+- A successful build does not replace testing on a real phone or foldable.
 
 ECLIPSE does not include ROMs, BIOS files, emulator cores, or copyrighted game artwork. Only add game files and apps you have the right to use.
 
