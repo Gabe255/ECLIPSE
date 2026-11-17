@@ -2,9 +2,9 @@
 
 ## Versioning and build behavior
 
-The Android workflow uses the version in `package.json` for ordinary branch builds. The current repository version is **11.2.0**.
+The Android workflow uses the version in `package.json` for ordinary branch builds. The current repository version is **11.3.0**.
 
-- Main and feature-branch builds create an APK artifact named `ECLIPSE-v11.2.0-apk`.
+- Main and feature-branch builds create an APK artifact named `ECLIPSE-v11.3.0-apk`.
 - A pushed tag such as `v11.2.1` builds that tagged version and publishes a GitHub Release.
 - Android `versionCode` is set from the monotonically increasing GitHub Actions run number.
 - A manual workflow run can replace the APK asset on an existing release when its `release_tag` input is supplied.
