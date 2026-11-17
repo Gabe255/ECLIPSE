@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Existing release tag to replace its APK (for example v11.2.0)'
+        description: 'Existing release tag to replace its APK (for example v11.3.0)'
         required: false
         type: string
         default: ''
@@ -37,7 +37,7 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             ECLIPSE_VERSION="${GITHUB_REF_NAME#v}"
           else
-            ECLIPSE_VERSION="11.2.0"
+            ECLIPSE_VERSION="11.3.0"
           fi
           echo "ECLIPSE_VERSION=$ECLIPSE_VERSION" >> "$GITHUB_ENV"
       - name: Validate stable version
