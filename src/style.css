@@ -902,3 +902,83 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .system-game-card{border-radius:15px;transition:transform .22s,border-color .22s,box-shadow .22s}
 .system-game-card:hover,.system-game-card:focus-visible{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 55%,transparent);box-shadow:0 15px 32px #0006;outline:none}
 @media(max-width:560px){.system-menu{margin-bottom:16px;padding:5px}.system-menu-item{min-height:40px;padding:0 12px;font-size:8px}.emulator-panel{padding:15px}}
+
+
+/* Console-native home worlds */
+.world-shell{--world-accent:var(--console-accent,var(--accent));display:grid;gap:23px;padding:5px 0 12px}
+.world-console-top,.world-desktop-heading,.world-xbox-heading,.world-switch-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.world-console-top h2,.world-desktop-heading h2,.world-xbox-heading h2,.world-switch-head h2,.world-arcade-heading h2{margin:5px 0;font-size:clamp(22px,3vw,34px);letter-spacing:-1.2px}
+.world-console-top .eyebrow,.world-arcade-heading .eyebrow{color:var(--world-accent)}
+.world-console-clock,.world-console-top>span,.world-xbox-heading>span,.world-desktop-heading>span{color:#8889a1;font:700 9px 'DM Mono',monospace;letter-spacing:1.2px}
+.world-dual-panels{display:grid;grid-template-columns:1.3fr .85fr;gap:12px;align-items:stretch}
+.world-upper-screen,.world-lower-screen{min-width:0;min-height:250px;padding:14px;border:1px solid color-mix(in srgb,var(--world-accent) 35%,#ffffff18);border-radius:18px;background:linear-gradient(145deg,#ffffff0c,#ffffff03);box-shadow:inset 0 1px #ffffff12}
+.world-lower-screen{display:flex;flex-direction:column;background:radial-gradient(circle at 50% 55%,color-mix(in srgb,var(--world-accent) 14%,transparent),transparent 60%),#10111c}
+.world-screen-label{display:flex;justify-content:space-between;margin-bottom:12px;color:#85859b;font:700 8px 'DM Mono',monospace;letter-spacing:1.5px}
+.world-screen-label span{color:var(--world-accent)}
+.world-feature-art{height:150px;overflow:hidden;border-radius:13px}
+.world-feature-art .game-art{height:100%;min-height:0}
+.world-feature-copy{padding:15px 4px 3px}
+.world-feature-copy h2{margin:6px 0;font-size:clamp(20px,3vw,31px);letter-spacing:-.8px}
+.world-feature-copy>p:not(.eyebrow){color:#a6a5b8;font-size:11px}
+.world-feature-copy .eyebrow{color:var(--world-accent)}
+.world-dual-screen .world-feature-art{height:125px}
+.world-dual-screen .world-feature-copy{padding-top:10px}
+.world-app-icons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;flex:1}
+.world-app-icons button,.world-channel,.world-switch-dock button{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;border:1px solid #ffffff18;border-radius:13px;background:#ffffff08;color:#fff;font-size:24px;transition:transform .2s,border-color .2s,background .2s}
+.world-app-icons button:hover,.world-channel:hover,.world-switch-dock button:hover{transform:translateY(-3px);border-color:var(--world-accent);background:color-mix(in srgb,var(--world-accent) 13%,#141522)}
+.world-app-icons small,.world-switch-dock small{font:700 8px 'DM Mono',monospace;letter-spacing:1px;color:#aaa9bc}
+.world-wii-channels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:15px;border:1px solid #ffffff16;border-radius:19px;background:linear-gradient(145deg,#ffffff0c,#ffffff03)}
+.world-channel{min-height:142px;padding:13px;background:linear-gradient(145deg,#f8fdff,#cbdce6);color:#24313c;border:4px solid #9fb5c5;box-shadow:0 7px 20px #0004,inset 0 1px #fff}
+.world-channel span{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#ffffffaa;color:#54788f;font-size:27px}
+.world-channel b{font-size:9px;letter-spacing:.6px}
+.world-channel small{font:700 7px 'DM Mono',monospace;color:#5e7482}
+.world-channel-feature{border-color:color-mix(in srgb,var(--world-accent) 65%,#fff)}
+.world-switch-head{padding:22px;border:1px solid #ffffff17;border-radius:20px;background:radial-gradient(circle at 86% 30%,color-mix(in srgb,var(--world-accent) 24%,transparent),transparent 34%),linear-gradient(110deg,#191b29,#0d101a)}
+.world-switch-head span{font:700 9px 'DM Mono',monospace;color:#aaa9bc}
+.world-switch-user{display:grid;place-items:center;width:52px;height:52px;border:2px solid var(--world-accent);border-radius:50%;color:var(--world-accent);font-size:23px}
+.world-switch-user small{font:700 7px 'DM Mono',monospace;color:#aaa9bc}
+.world-switch>.world-feature-copy,.world-switch>.world-empty{padding:22px;border-radius:19px;background:linear-gradient(110deg,#191b29,#10121e)}
+.world-switch>.world-feature-art{display:none}
+.world-switch-dock{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.world-switch-dock button{min-height:84px;flex-direction:row;font-size:19px}
+.world-playstation-home{gap:18px}
+.world-ps-feature{min-height:235px;padding:22px;border:1px solid #ffffff20;border-radius:20px;background:radial-gradient(circle at 80% 40%,color-mix(in srgb,var(--world-accent) 28%,transparent),transparent 40%),linear-gradient(110deg,#171a2b,#0b0d17)}
+.world-ps-feature .world-feature-art{float:right;width:36%;height:180px}
+.world-ps-feature .world-feature-copy{max-width:58%;padding-top:20px}
+.world-quick-actions,.world-xbox-shortcuts,.world-arcade-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.world-quick-actions button{display:flex;align-items:center;gap:9px;min-height:54px;padding:12px;border:1px solid #ffffff18;border-radius:12px;background:#ffffff08;color:var(--world-accent);font-size:19px}
+.world-quick-actions span{color:#d7d6e4;font:700 8px 'DM Mono',monospace}
+.world-xbox-home{gap:18px}
+.world-xbox-heading{padding-bottom:5px;border-bottom:2px solid color-mix(in srgb,var(--world-accent) 65%,transparent)}
+.world-xbox-spotlight{padding:20px;border-radius:18px;background:linear-gradient(110deg,#132219,#0d1513);border:1px solid color-mix(in srgb,var(--world-accent) 40%,transparent)}
+.world-xbox-spotlight .world-feature-art{float:right;width:35%;height:160px}
+.world-xbox-spotlight .world-feature-copy{max-width:60%}
+.world-xbox-shortcuts button,.world-arcade-actions button,.world-desktop-sidebar button{min-height:47px;padding:10px;border:1px solid #ffffff18;border-radius:10px;background:#ffffff08;color:#ddd;font:700 8px 'DM Mono',monospace;letter-spacing:.6px}
+.world-xbox-shortcuts button:hover,.world-arcade-actions button:hover,.world-desktop-sidebar button:hover{border-color:var(--world-accent);color:var(--world-accent)}
+.world-arcade-home{padding:19px;border:1px solid color-mix(in srgb,var(--world-accent) 45%,#ffffff20);border-radius:20px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--world-accent) 18%,transparent),transparent 55%),#0b0b13;box-shadow:inset 0 0 50px #0008}
+.world-arcade-heading{text-align:center;padding:8px 0 13px}
+.world-arcade-heading h2{color:var(--world-accent);text-shadow:0 0 25px color-mix(in srgb,var(--world-accent) 35%,transparent)}
+.world-arcade-heading>span{font:700 8px 'DM Mono',monospace;letter-spacing:2px;color:#8d8ba0}
+.world-arcade-feature{padding:15px;border:1px solid #ffffff18;border-radius:14px;background:#ffffff08}
+.world-desktop-layout{display:grid;grid-template-columns:175px minmax(0,1fr);gap:14px}
+.world-desktop-sidebar{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid #ffffff15;border-radius:15px;background:#ffffff05}
+.world-desktop-main{min-width:0;padding:18px;border:1px solid #ffffff18;border-radius:17px;background:linear-gradient(145deg,#ffffff0a,#ffffff02)}
+.world-empty{padding:28px 8px}
+.world-empty h2{font-size:26px}
+.world-empty p:not(.eyebrow){max-width:420px;color:#aaa9bc;font-size:12px}
+.world-library{padding-top:5px}
+@media(max-width:680px){
+ .world-dual-panels{grid-template-columns:1fr}
+ .world-upper-screen,.world-lower-screen{min-height:0}
+ .world-lower-screen{min-height:190px}
+ .world-wii-channels{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:9px}
+ .world-channel{min-height:116px}
+ .world-ps-feature .world-feature-art,.world-xbox-spotlight .world-feature-art{float:none;width:100%;height:140px}
+ .world-ps-feature .world-feature-copy,.world-xbox-spotlight .world-feature-copy{max-width:none}
+ .world-quick-actions,.world-xbox-shortcuts,.world-arcade-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .world-switch-dock{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .world-desktop-layout{grid-template-columns:1fr}
+ .world-desktop-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .world-console-top,.world-desktop-heading,.world-xbox-heading,.world-switch-head{align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){.world-app-icons button,.world-channel,.world-switch-dock button{transition:none}}
