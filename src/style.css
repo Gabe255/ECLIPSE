@@ -820,7 +820,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 /* FINAL COCOON DEFAULT OVERRIDE
    The legacy console stylesheet at the end of this file hid the Cocoon shelves.
    Restore the Cocoon library-first home as the actual default app experience. */
-:root[data-interface-mode="cocoon"] #homeView {
+:root[data-interface-mode="cocoon"] #homeView:not(.hidden) {
   display: block !important;
 }
 :root[data-interface-mode="cocoon"] #homeView > .welcome-row,
