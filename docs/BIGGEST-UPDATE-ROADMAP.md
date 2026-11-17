@@ -1,6 +1,6 @@
 # ECLIPSE — Biggest Update Roadmap
 
-**Project version:** 11.2.0 — Your Gaming Universe  
+**Project version:** 11.3.0 — Your Gaming Universe  
 **Release policy:** Publish a stable tag only after the release checks below pass.  
 **Status language:** “Implemented” means the code exists. “Build verified” means CI passed. “Device verified” means it was tested on real Android hardware. These are separate checks.
 
@@ -141,7 +141,7 @@ A release is ready only when:
 6. Known limitations are documented.
 7. A stable signing/update path is verified before publishing a stable release.
 
-**Current decision:** The repository baseline is 11.2.0. The main branch contains the current ECLIPSE feature set, but implemented, build-verified, and device-verified are separate statuses. Run web CI and the Android APK workflow on the exact release commit, complete device checks, and confirm persistent signing before publishing a stable tag.
+**Current decision:** The repository baseline is 11.3.0. The main branch contains the current ECLIPSE feature set, but implemented, build-verified, and device-verified are separate statuses. Run web CI and the Android APK workflow on the exact release commit, complete device checks, and confirm persistent signing before publishing a stable tag.
 
 
 ## Current main-branch implementation notes
