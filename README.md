@@ -1,4 +1,4 @@
-# ECLIPSE 11.3.0 — Your Gaming Universe
+# ECLIPSE 11.4.0 — Your Gaming Universe
 
 **ECLIPSE is an Android-first gaming frontend evolving into one unified gaming home.** The goal is to bring together the strongest parts of NeoStation, Pegasus, and iiSU in a single ECLIPSE experience—not three separate apps.
 
@@ -9,7 +9,7 @@
 - **iiSU — visual system:** adapt its icon and theme direction, and reuse assets only where their licenses and permissions allow.
 - **ECLIPSE — the finished product:** one identity, one home screen, one settings system, one APK, and a consistent console-first experience.
 
-This is the target architecture, not a claim that those projects have already been merged. The current 11.3.0 repository is still built with Vite and Capacitor. Before migration, each upstream codebase and asset set must be checked for technical compatibility and license requirements. Features that do not fit the chosen foundation will be ported or rebuilt rather than blindly combining entire repositories.
+ECLIPSE remains a Vite + Capacitor Android app. Pegasus is a Qt/QML application, so its QML runtime cannot be dropped into this frontend. ECLIPSE now includes an independently implemented Pegasus-inspired slide-in navigation layer and retains its own horizontal collection shelves, theme customization, and controller navigation. This is a compatible UI port, not a merge of Pegasus' C++/QML runtime or assets. The upstream fork is [Gabe255/pegasus-frontend](https://github.com/Gabe255/pegasus-frontend); Pegasus is GPLv3, and no upstream QML source or theme assets are copied into this UI layer.
 
 ## Current ECLIPSE experience
 
@@ -25,7 +25,7 @@ This is the target architecture, not a claim that those projects have already be
 
 ## Important limitations
 
-- The NeoStation/Pegasus/iiSU integration is planned and is not yet present in this codebase.
+- The Pegasus-inspired navigation pattern is implemented in `src/pegasus-ui.js` and `src/pegasus-ui.css`. Full Pegasus Qt/QML runtime integration is not part of this Vite/Capacitor app. NeoStation and iiSU code/assets are not merged.
 - Android controls the final confirmation when ECLIPSE is selected as the default Home app.
 - Wi-Fi, Bluetooth, rotation, and Do Not Disturb shortcuts open Android settings or system panels. ECLIPSE does not bypass Android restrictions to silently toggle them.
 - Brightness adjusts the ECLIPSE app window, not global device brightness.
