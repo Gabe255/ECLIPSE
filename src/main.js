@@ -219,11 +219,11 @@ document.querySelector('#app').innerHTML = `
       <div class="game-grid" id="gameGrid"></div>
     </section>
     <section id="consoleView" class="view hidden">
-      <div class="console-detail-top"><button class="subtle-btn" id="backToLibrary">← ALL SYSTEMS</button><span class="collection-count" id="consoleGeneration">PLATFORM</span></div>
+      <div class="console-detail-top"><button class="subtle-btn" id="backToLibrary">← HOME</button><span class="collection-count" id="consoleGeneration">PLATFORM</span></div>
       <section class="console-banner" id="consoleBanner"></section>
       <nav class="system-menu" id="systemMenu" aria-label="System menu"></nav>
-      <section class="emulator-panel" id="emulatorPanel"></section>
       <section class="system-home" id="systemHome"></section>
+      <section class="emulator-panel" id="emulatorPanel"></section>
     </section>
     <section id="androidView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">YOUR DEVICE</p><h2>APPS LIBRARY</h2><p class="settings-note">Apps Android exposes to ECLIPSE. Mark games and track your sessions.</p></div><button class="primary-btn" id="scanAppsPage">SCAN DEVICE</button></div>
@@ -1049,7 +1049,7 @@ document.querySelectorAll('.text-link[data-view]').forEach(button=>button.addEve
 $('#themeSelect').addEventListener('change',e=>setTheme(e.target.value));
 $('#settingsTheme').addEventListener('change',e=>setTheme(e.target.value));
 document.querySelectorAll('.rail-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
-$('#backToLibrary').addEventListener('click',()=>showView('library'));
+$('#backToLibrary').addEventListener('click',()=>showView('home'));
 $('#scanGamesBtn').addEventListener('click',chooseGameFolder);
 $('#librarySearch').addEventListener('input',renderGames);
 $('#homeScanBtn').addEventListener('click',()=>{showView('library');chooseGameFolder();});
