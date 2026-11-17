@@ -321,7 +321,7 @@ function notify(message){toast.textContent=message;toast.classList.add('show');c
 function saveLayout(){localStorage.setItem('eclipse-widgets',JSON.stringify(widgets));localStorage.setItem('eclipse-pages',JSON.stringify(pageNames));}
 function setTheme(id){activeTheme=id;document.documentElement.dataset.theme=id;localStorage.setItem('eclipse-theme',id);$('#themeSelect').value=id;$('#settingsTheme').value=id;notify('Theme changed: '+themes.find(t=>t[0]===id)[1]);}
 function applyInterfaceMode(){document.documentElement.dataset.interfaceMode=interfaceMode;}
-function showView(name){activePage=name;document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));$('#'+name+'View').classList.remove('hidden');document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));window.scrollTo({top:0,behavior:'smooth'});if(name==='library')renderLibrary();if(name==='settings')renderSettings();if(name==='android')renderAndroidApps();renderHomeHero();}
+function showView(name){activePage=name;document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));$('#'+name+'View').classList.remove('hidden');document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));window.scrollTo({top:0,behavior:'smooth'});if(name==='library')renderLibrary();if(name==='settings')renderSettings();if(name==='android')renderAndroidApps();if(name==='home')renderHomeHero();}
 function renderPages(){$('#pageTabs').innerHTML=pageNames.map((p,i)=>`<button class="page-tab ${i===currentPage?'selected':''}" data-page="${i}">${p}</button>`).join('');$('#pageTabs').querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{currentPage=Number(b.dataset.page);renderPages();renderWidgets();}));}
 function escapeHTML(value){
  const entities={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
@@ -811,7 +811,8 @@ function scanSelectedFolder(fileList,folderUri='browser'){
   const system=inferGameSystem(file);if(!system)continue;
   matched++;
   const relative=file.webkitRelativePath||file.relativePath||file.name;
-  const id=(folderUri||'browser')+'|'+relative+'|'+(Number(file.size)||0);
+  const sourceFolder=file.folderUri||folderUri||'browser';
+  const id=sourceFolder+'|'+relative+'|'+(Number(file.size)||0);
   if(knownIds.has(id))continue;
   knownIds.add(id);
   found.push({id,title:titleFromFile(file.name),system,year:'',art:'generic',tag:file.name.split('.').pop().toUpperCase(),fileName:file.name,relativePath:relative,size:Number(file.size)||0,lastModified:Number(file.lastModified)||0,uri:file.uri||null});
@@ -860,9 +861,19 @@ async function rescanGameFolder(){
  const savedUris=folderPaths.map(item=>typeof item==='string'?(item.startsWith('content://')?item:null):item?.uri).filter(Boolean);
  const legacyUri=localStorage.getItem('eclipse-folder-uri');if(legacyUri&&!savedUris.includes(legacyUri))savedUris.push(legacyUri);
  if(Capacitor.isNativePlatform()&&savedUris.length){
-  const status=$('#scanStatus');status.textContent='Rescanning '+savedUris.length+' saved game folder(s)…';let scanned=0,failed=0;
-  for(const uri of savedUris){try{const result=await FolderAccess.scanFolder({uri});scanSelectedFolder(result.files||[],uri);scanned++;if(result.truncated)status.textContent+=' A folder reached the 900-file safety limit.';}catch(error){failed++;console.warn('ECLIPSE folder rescan failed',error);}}
-  status.textContent='Finished scanning '+scanned+' folder(s).'+(failed?' '+failed+' folder permission(s) need to be renewed.':'');if(failed)notify(failed+' folder(s) could not be opened. Re-select them in Settings.');
+  const status=$('#scanStatus');status.textContent='Rescanning '+savedUris.length+' saved game folder(s)…';
+  let scanned=0,failed=0,truncated=0;const allFiles=[];
+  for(const uri of savedUris){
+   try{
+    const result=await FolderAccess.scanFolder({uri});
+    for(const file of (result.files||[]))allFiles.push({...file,folderUri:uri});
+    scanned++;if(result.truncated)truncated++;
+    status.textContent='Scanned '+scanned+' of '+savedUris.length+' folders…';
+   }catch(error){failed++;console.warn('ECLIPSE folder rescan failed',error);}
+  }
+  if(allFiles.length)scanSelectedFolder(allFiles,'rescan');
+  status.textContent='Finished scanning '+scanned+' folder(s); checked '+allFiles.length+' files.'+(truncated?' '+truncated+' folder(s) hit the scan safety limit.':'')+(failed?' '+failed+' folder permission(s) need to be renewed.':'');
+  if(failed)notify(failed+' folder(s) could not be opened. Re-select them in Settings.');
  }else chooseGameFolder();
 }
 function savePlayerAssignment(system,packageName){
