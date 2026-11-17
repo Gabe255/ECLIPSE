@@ -162,6 +162,12 @@ jobs:
           PY
             echo "ECLIPSE_SIGNED=true" >> "$GITHUB_ENV"
           fi
+      - name: Restore stable debug signing key (branch builds)
+        if: env.ECLIPSE_SIGNED != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: eclipse-debug-signing-key-v1
       - name: Build APK
         working-directory: android
         run: |
