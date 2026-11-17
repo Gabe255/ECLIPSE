@@ -197,7 +197,7 @@ document.querySelector('#app').innerHTML = `
           <div class="konsoru-hero-stats"><div><b id="konsoruGameCount">0</b><small>GAMES</small></div><div><b id="konsoruSystemCount">0</b><small>SYSTEMS</small></div></div>
         </div>
         
-        <section class="konsoru-section"><div class="konsoru-section-head"><div><p class="eyebrow">CHOOSE YOUR UNIVERSE</p><h2>GAMING WORLDS</h2></div><span>01 / SYSTEMS</span></div><div class="konsoru-world-grid" id="konsoruWorldGrid"></div></section>
+        <section class="konsoru-section"><div class="konsoru-section-head"><div><p class="eyebrow">CHOOSE YOUR UNIVERSE</p><h2>YOUR SYSTEMS</h2></div><span id="systemPickerCount">10 FEATURED / 56 TOTAL</span></div><div id="worldBrowseToolbar" class="world-browse-toolbar"></div><div class="konsoru-world-grid" id="konsoruWorldGrid"></div></section>
         <section class="konsoru-section"><div class="konsoru-section-head"><div><p class="eyebrow">BACK IN THE GAME</p><h2>RECENTLY ADDED</h2></div><button class="konsoru-text-button" id="konsoruAllGames">VIEW ALL ↗</button></div><div class="konsoru-recent-row" id="konsoruRecentRow"></div></section>
         <section class="konsoru-bottom-grid"><article><p class="eyebrow">YOUR SPACE</p><h3>MAKE IT YOURS.</h3><p>Organize your collection, choose your players, and shape your ECLIPSE setup.</p><button class="konsoru-secondary" id="konsoruCustomize">CUSTOMIZE ECLIPSE ↗</button></article><article><p class="eyebrow">QUICK STATUS</p><div class="konsoru-status-line"><span>LIBRARY STATUS</span><b id="konsoruLibraryStatus">READY</b></div><div class="konsoru-status-line"><span>ACTIVE INTERFACE</span><b>KONSORU</b></div><div class="konsoru-status-line"><span>DEVICE MODE</span><b>HANDHELD</b></div></article></section>
       </section>
@@ -475,17 +475,40 @@ function openOnboarding(){
  refreshDisplayLayout();
 }
 function finishOnboarding(){localStorage.setItem('eclipse-onboarding-complete','true');$('#onboardingModal')?.classList.add('hidden');}
+let activeWorldFilter='featured';
+let worldSearchQuery='';
 function renderKonsoruHome(){
  const root=$('#konsoruHome');if(!root)return;
  const count=$('#konsoruGameCount'),systemsCount=$('#konsoruSystemCount');if(count)count.textContent=games.length;
  const activeSystems=[...new Set(games.map(game=>game.system))];if(systemsCount)systemsCount.textContent=activeSystems.length;
  const latest=games.length?games[games.length-1]:null;const resume=$('#konsoruResume');
- if(resume){resume.textContent=latest?'▶  OPEN · '+latest.title:'＋  ADD YOUR FIRST GAME';resume.onclick=()=>latest?showGameDetails(latest):(showView('library'),chooseGameFolder());}
- const status=$('#konsoruLibraryStatus');if(status)status.textContent=games.length?'COLLECTION READY':'AWAITING GAMES';
+ if(resume){resume.textContent=latest?'▶  CONTINUE · '+latest.title:'＋  ADD YOUR FIRST GAME';resume.onclick=()=>latest?showGameDetails(latest):(showView('library'),chooseGameFolder());}
+ const status=$('#konsoruLibraryStatus');if(status)status.textContent=games.length?'COLLECTION READY':'ADD YOUR FIRST GAME';
  const marks={Nintendo:'◈',PlayStation:'△',Xbox:'✕',Sega:'◉',Atari:'▥',Arcade:'✦',PC:'⌘','PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
  const worldGrid=$('#konsoruWorldGrid');
- if(worldGrid)worldGrid.innerHTML=systems.map((system,index)=>{const total=gamesForSystem(system.name).length;const familyClass=String(system.family).toLowerCase().replace(/[^a-z]+/g,'-');return '<button class="konsoru-world-card world-'+familyClass+'" data-konsoru-system="'+escapeHTML(system.name)+'" style="--world-index:'+index+'"><span class="konsoru-world-symbol">'+(marks[system.family]||system.icon||'✦')+'</span><span class="konsoru-world-copy"><small>'+escapeHTML(system.family.toUpperCase())+'</small><b>'+escapeHTML(system.name.toUpperCase())+'</b><small>'+total+' '+(total===1?'GAME':'GAMES')+'</small></span><span class="konsoru-world-arrow">↗</span></button>';}).join('');
- worldGrid?.querySelectorAll('[data-konsoru-system]').forEach(button=>button.addEventListener('click',()=>openConsolePage(button.dataset.konsoruSystem)));
+ const featuredNames=['Nintendo Switch','Nintendo 3DS','Wii','Nintendo DS','PlayStation 5 / Pro','PlayStation 2','PSP','Xbox 360','Nintendo Switch 2','Windows PC'];
+ const matchesFilter=system=>{
+  if(worldSearchQuery)return (system.name+' '+system.family).toLowerCase().includes(worldSearchQuery);
+  if(activeWorldFilter==='featured')return featuredNames.includes(system.name);
+  if(activeWorldFilter==='all')return true;
+  if(activeWorldFilter==='retro')return ['Atari','Arcade','Other','Computer'].includes(system.family);
+  if(activeWorldFilter==='pc')return ['PC','PC Gaming','Computer','Mobile','Android'].includes(system.family);
+  return system.family===activeWorldFilter;
+ };
+ const renderWorldCards=()=>{
+  if(!worldGrid)return;
+  const visible=systems.filter(matchesFilter);
+  worldGrid.innerHTML=visible.map((system,index)=>{const total=gamesForSystem(system.name).length;const familyClass=String(system.family).toLowerCase().replace(/[^a-z]+/g,'-');return '<button class="konsoru-world-card world-'+familyClass+'" data-konsoru-system="'+escapeHTML(system.name)+'" style="--world-index:'+index+'"><span class="konsoru-world-symbol">'+(marks[system.family]||system.icon||'✦')+'</span><span class="konsoru-world-copy"><small>'+escapeHTML(system.family.toUpperCase())+'</small><b>'+escapeHTML(system.name.toUpperCase())+'</b><small>'+total+' '+(total===1?'GAME':'GAMES')+'</small></span><span class="konsoru-world-arrow">↗</span></button>';}).join('')||'<div class="konsoru-empty"><b>NO SYSTEMS FOUND</b><p>Try a different name or category.</p></div>';
+  worldGrid.querySelectorAll('[data-konsoru-system]').forEach(button=>button.addEventListener('click',()=>openConsolePage(button.dataset.konsoruSystem)));
+  const hint=$('#worldBrowseHint');if(hint)hint.textContent=worldSearchQuery?visible.length+' matching systems':activeWorldFilter==='featured'?'Showing 10 popular systems · Choose All Systems to browse everything':visible.length+' systems shown';
+ };
+ const toolbar=$('#worldBrowseToolbar');
+ if(toolbar){
+  toolbar.innerHTML='<label class="world-search-wrap"><span>⌕</span><input id="worldSearchInput" type="search" placeholder="Find a console or system…" value="'+escapeHTML(worldSearchQuery)+'" aria-label="Search systems"></label><div class="world-filter-row" id="worldFilterRow">'+[['featured','FEATURED'],['all','ALL SYSTEMS'],['Nintendo','NINTENDO'],['PlayStation','PLAYSTATION'],['Xbox','XBOX'],['Sega','SEGA'],['retro','RETRO'],['pc','PC & OTHER']].map(([id,label])=>'<button type="button" data-world-filter="'+id+'" class="'+(activeWorldFilter===id?'selected':'')+'">'+label+'</button>').join('')+'</div><p class="world-browse-hint" id="worldBrowseHint"></p>';
+  $('#worldSearchInput').addEventListener('input',event=>{worldSearchQuery=event.target.value.trim().toLowerCase();renderWorldCards();});
+  $('#worldFilterRow').querySelectorAll('[data-world-filter]').forEach(button=>button.addEventListener('click',()=>{activeWorldFilter=button.dataset.worldFilter;worldSearchQuery='';$('#worldSearchInput').value='';$('#worldFilterRow').querySelectorAll('button').forEach(item=>item.classList.toggle('selected',item===button));renderWorldCards();}));
+ }
+ renderWorldCards();
  const recent=$('#konsoruRecentRow');
  if(recent)recent.innerHTML=games.length?games.slice().reverse().slice(0,10).map(game=>'<button class="konsoru-recent-card" data-konsoru-game="'+games.indexOf(game)+'"><span class="konsoru-cover"><i>✦</i><small>'+escapeHTML(game.system)+'</small></span><b>'+escapeHTML(game.title)+'</b><small>'+escapeHTML(game.system)+'</small></button>').join(''):'<div class="konsoru-empty"><span>✦</span><b>YOUR COLLECTION STARTS HERE</b><p>Add a game folder to build your library.</p><button class="konsoru-secondary" id="konsoruEmptyScan">ADD GAMES ↗</button></div>';
  recent?.querySelectorAll('[data-konsoru-game]').forEach(card=>{const game=games[Number(card.dataset.konsoruGame)],url=game?.artwork?.grid;if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='lazy';img.className='sgdb-cover-image';card.querySelector('.konsoru-cover')?.prepend(img);}});
