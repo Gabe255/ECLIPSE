@@ -1,13 +1,15 @@
 import './style.css';
 import { mountExperience } from './experience.js';
 import { mountControlCenter } from './controls.js';
+import { getSystemConfig } from './systems/system-config.js';
+import { startSystemBoot } from './systems/boot-engine.js';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 const FolderAccess = registerPlugin('FolderAccess');
 const UpdateDownload = registerPlugin('UpdateDownload');
 const LauncherSetup = registerPlugin('LauncherSetup');
 const DisplayInfo = registerPlugin('DisplayInfo');
 
-const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '11.1.0';
+const VERSION = import.meta.env.VITE_ECLIPSE_VERSION || '11.2.0';
 const REPO = 'Gabe255/ECLIPSE';
 const systems = [
   { name: 'Nintendo', icon: '◈', family: 'Nintendo' },
@@ -165,13 +167,16 @@ document.documentElement.dataset.theme = activeTheme;
 
 document.querySelector('#app').innerHTML = `
 <div class="shell">
-  <aside class="rail">
-    <div class="brand-mark">E<span>.</span></div>
-    <button class="rail-btn active" data-view="home" aria-label="Home">⌂</button>
-    <button class="rail-btn" data-view="library" aria-label="Library">▤</button>
-    <button class="rail-btn" data-view="android" aria-label="Android games">▣</button>
-    <button class="rail-btn" data-view="settings" aria-label="Settings">⚙</button>
-    <div class="rail-bottom">v${VERSION}</div>
+  <aside class="rail" aria-label="Main navigation">
+    <div class="rail-brand"><span class="brand-mark">E<span>.</span></span><small>GAMING OS</small></div>
+    <div class="rail-group-label">WORKSPACE</div>
+    <button class="rail-btn active" data-view="home" aria-label="Home"><span class="rail-icon">⌂</span><span class="rail-label">Home</span></button>
+    <button class="rail-btn" data-view="library" aria-label="Game library"><span class="rail-icon">▤</span><span class="rail-label">Library</span></button>
+    <button class="rail-btn" data-view="android" aria-label="Apps library"><span class="rail-icon">▣</span><span class="rail-label">Apps</span></button>
+    <div class="rail-spacer"></div>
+    <div class="rail-group-label">PREFERENCES</div>
+    <button class="rail-btn" data-view="settings" aria-label="Settings"><span class="rail-icon">⚙</span><span class="rail-label">Settings</span></button>
+    <div class="rail-bottom">ECLIPSE <span>v${VERSION}</span></div>
   </aside>
   <main class="main">
     <header class="topbar">
@@ -191,25 +196,12 @@ document.querySelector('#app').innerHTML = `
           <div class="konsoru-core-art" aria-hidden="true"><span class="konsoru-core-orbit orbit-one"></span><span class="konsoru-core-orbit orbit-two"></span><span class="konsoru-core">E</span><small>INFINITE PLAY</small></div>
           <div class="konsoru-hero-stats"><div><b id="konsoruGameCount">0</b><small>GAMES</small></div><div><b id="konsoruSystemCount">0</b><small>SYSTEMS</small></div></div>
         </div>
-        <nav class="konsoru-nav" aria-label="Konsoru shortcuts"><button class="selected" data-konsoru-jump="home">⌂ <span>HOME</span></button><button data-konsoru-jump="library">▤ <span>LIBRARY</span></button><button data-konsoru-jump="android">▣ <span>APPS</span></button><button data-konsoru-jump="settings">⚙ <span>SETTINGS</span></button></nav>
-        <section class="konsoru-section"><div class="konsoru-section-head"><div><p class="eyebrow">CHOOSE YOUR UNIVERSE</p><h2>GAMING WORLDS</h2></div><span>01 / SYSTEMS</span></div><div class="konsoru-world-grid" id="konsoruWorldGrid"></div></section>
+        
+        <section class="konsoru-section"><div class="konsoru-section-head"><div><p class="eyebrow">CHOOSE YOUR UNIVERSE</p><h2>YOUR SYSTEMS</h2></div><span id="systemPickerCount">10 FEATURED / 56 TOTAL</span></div><div id="worldBrowseToolbar" class="world-browse-toolbar"></div><div class="konsoru-world-grid" id="konsoruWorldGrid"></div></section>
         <section class="konsoru-section"><div class="konsoru-section-head"><div><p class="eyebrow">BACK IN THE GAME</p><h2>RECENTLY ADDED</h2></div><button class="konsoru-text-button" id="konsoruAllGames">VIEW ALL ↗</button></div><div class="konsoru-recent-row" id="konsoruRecentRow"></div></section>
         <section class="konsoru-bottom-grid"><article><p class="eyebrow">YOUR SPACE</p><h3>MAKE IT YOURS.</h3><p>Organize your collection, choose your players, and shape your ECLIPSE setup.</p><button class="konsoru-secondary" id="konsoruCustomize">CUSTOMIZE ECLIPSE ↗</button></article><article><p class="eyebrow">QUICK STATUS</p><div class="konsoru-status-line"><span>LIBRARY STATUS</span><b id="konsoruLibraryStatus">READY</b></div><div class="konsoru-status-line"><span>ACTIVE INTERFACE</span><b>KONSORU</b></div><div class="konsoru-status-line"><span>DEVICE MODE</span><b>HANDHELD</b></div></article></section>
       </section>
-      <section class="system-stage" aria-label="Choose a gaming system">
-        <div class="stage-heading"><div><p class="eyebrow">THE MULTIVERSE</p><h2>CHOOSE YOUR <em>WORLD.</em></h2><p>One tap takes you into that system's own space.</p></div><span class="stage-index">01 <i>/</i> SYSTEMS</span></div>
-        <section class="system-feature" id="systemFeature" aria-live="polite">
-          <div class="system-feature-art"><span class="system-feature-orbit"></span><strong id="systemFeatureMark">✦</strong><small id="systemFeatureFamily">PLATFORM</small></div>
-          <div class="system-feature-copy"><p class="eyebrow">SELECTED SYSTEM</p><h2 id="systemFeatureName">NINTENDO</h2><p id="systemFeatureMeta">Your platform library</p><button class="primary-btn" id="enterFeaturedSystem">ENTER SYSTEM ↗</button></div>
-          <div class="system-feature-count"><b id="systemFeatureCount">0</b><small>GAMES IN LIBRARY</small></div>
-        </section>
-        <div class="system-carousel-shell">
-          <button class="carousel-arrow" id="systemPrev" aria-label="Previous systems">‹</button>
-          <div class="system-picker" id="systemPicker" tabindex="0" aria-label="Available systems"></div>
-          <button class="carousel-arrow" id="systemNext" aria-label="Next systems">›</button>
-        </div>
-        <div class="stage-footer"><span id="systemPickerCount">37 WORLDS AVAILABLE</span><button class="text-link" data-view="library">EXPLORE FULL LIBRARY <b>↗</b></button></div>
-      </section>
+      <section class="system-stage legacy-system-stage" aria-label="Legacy system selector" hidden></section>
       <div class="page-toolbar"><div class="page-tabs" id="pageTabs"></div><div class="page-actions"><button class="subtle-btn" id="addPage">+ PAGE</button><button class="subtle-btn" id="editWidgets">EDIT HOME</button></div></div>
       <section class="dashboard-grid" id="widgetGrid"></section>
       <section class="home-games-shelf hidden" id="homeGamesShelf"></section>
@@ -227,11 +219,11 @@ document.querySelector('#app').innerHTML = `
       <div class="game-grid" id="gameGrid"></div>
     </section>
     <section id="consoleView" class="view hidden">
-      <div class="console-detail-top"><button class="subtle-btn" id="backToLibrary">← ALL SYSTEMS</button><span class="collection-count" id="consoleGeneration">PLATFORM</span></div>
+      <div class="console-detail-top"><button class="subtle-btn" id="backToLibrary">← HOME</button><span class="collection-count" id="consoleGeneration">PLATFORM</span></div>
       <section class="console-banner" id="consoleBanner"></section>
       <nav class="system-menu" id="systemMenu" aria-label="System menu"></nav>
-      <section class="emulator-panel" id="emulatorPanel"></section>
       <section class="system-home" id="systemHome"></section>
+      <section class="emulator-panel" id="emulatorPanel"></section>
     </section>
     <section id="androidView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">YOUR DEVICE</p><h2>APPS LIBRARY</h2><p class="settings-note">Apps Android exposes to ECLIPSE. Mark games and track your sessions.</p></div><button class="primary-btn" id="scanAppsPage">SCAN DEVICE</button></div>
@@ -298,7 +290,7 @@ document.querySelector('#app').innerHTML = `
   </div>
 </div>
 <div class="modal-backdrop hidden" id="widgetModal"><div class="widget-modal"><div class="modal-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>HOME WIDGETS</h2></div><button class="close-modal" id="closeWidgetModal">×</button></div><p class="settings-note">Add widgets, change their order, or remove the ones you don't use.</p><div id="widgetChoices" class="widget-choices"></div><button class="primary-btn" id="doneWidgets">DONE</button></div></div>
-<div class="system-boot hidden" id="systemBoot" aria-live="polite"><div class="boot-orbit"><span id="bootSystemMark">✦</span></div><p class="eyebrow" id="bootSystemLine">ECLIPSE SYSTEM STARTUP</p><h2 id="bootSystemName">STARTING SYSTEM</h2><div class="boot-progress"><span></span></div><small id="bootSystemTag">PREPARING YOUR GAME SPACE</small><div class="boot-brand">ECLIPSE <i>OS</i></div></div>
+<div class="system-boot hidden" id="systemBoot" aria-live="polite" aria-label="System startup"><div class="boot-orbit"><span id="bootSystemMark">✦</span></div><p class="eyebrow" id="bootSystemLine">ECLIPSE SYSTEM STARTUP</p><h2 id="bootSystemName">STARTING SYSTEM</h2><div class="boot-progress"><span></span></div><small id="bootSystemTag">PREPARING YOUR GAME SPACE</small><div class="boot-brand">ECLIPSE <i>OS</i></div><button class="boot-skip" id="skipSystemBoot" type="button">SKIP INTRO <span aria-hidden="true">↗</span></button></div>
 <div class="mascot-welcome hidden" id="mascotWelcome" role="dialog" aria-modal="true" aria-labelledby="mascotTitle"><div class="mascot-card"><div class="mascot-art" aria-hidden="true"><div class="eclipse-mascot"><div class="eclipse-mascot-hat"></div><div class="eclipse-mascot-orb"><i></i><i></i><span></span></div><div class="eclipse-mascot-ring"></div></div></div><p class="eyebrow">YOUR NEW GAME SPACE</p><h2 id="mascotTitle">WELCOME TO <em>ECLIPSE.</em></h2><p class="mascot-message">I’ll show you around. Your systems, game shelves and collections all live here. Set things up your way and make this space yours.</p><div class="mascot-tips"><span><b>01</b> Pick a system</span><span><b>02</b> Build your library</span><span><b>03</b> Make it yours</span></div><div class="mascot-actions"><button class="primary-btn" id="mascotStart">SHOW ME AROUND ↗</button><button class="subtle-btn" id="mascotSkip">SKIP FOR NOW</button></div></div></div>
 <div class="modal-backdrop hidden" id="gameDetailModal"><div class="widget-modal game-detail-modal"><div class="modal-head"><div><p class="eyebrow">GAME DETAILS</p><h2 id="gameDetailTitle">GAME</h2><div id="gameDetailLogo" class="game-detail-logo"></div></div><button class="close-modal" id="closeGameDetail" aria-label="Close game details">×</button></div><p class="game-detail-meta" id="gameDetailMeta"></p><div class="game-detail-file"><small>FILE LOCATION</small><p id="gameDetailPath"></p><small>PLAYER</small><p id="gameDetailPlayer"></p></div><div class="game-detail-actions"><button class="primary-btn" id="gameDetailLaunch">▶ PLAY GAME</button><button class="subtle-btn" id="gameDetailFavorite">☆ ADD TO FAVORITES</button><button class="subtle-btn" id="gameDetailRemove">REMOVE FROM LIBRARY</button></div><div class="sgdb-launch-row"><div><p class="eyebrow">STEAMGRIDDB ARTWORK</p><h3>MAKE THIS GAME LOOK RIGHT.</h3></div><button class="primary-btn" id="autoFetchArtwork">AUTO FETCH ART</button><button class="subtle-btn" id="openArtworkBrowser">BROWSE ARTWORK ↗</button></div><div class="sgdb-browser hidden" id="sgdbBrowser"><div class="sgdb-search-row"><input id="sgdbSearchInput" type="search" placeholder="Search SteamGridDB for this game…"><button class="primary-btn" id="sgdbSearchButton">SEARCH</button></div><p class="settings-note" id="sgdbStatus">Search for the matching game, then choose its artwork.</p><div class="sgdb-matches" id="sgdbMatches"></div><div class="sgdb-category-tabs" id="sgdbCategoryTabs"><button class="active" data-sgdb-type="grids">COVERS</button><button data-sgdb-type="heroes">BANNERS</button><button data-sgdb-type="logos">LOGOS</button><button data-sgdb-type="icons">ICONS</button></div><div class="sgdb-results" id="sgdbResults"></div></div><p class="settings-note">Choose a player for this system, then launch the original game file directly through that app.</p></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>`;
@@ -483,17 +475,41 @@ function openOnboarding(){
  refreshDisplayLayout();
 }
 function finishOnboarding(){localStorage.setItem('eclipse-onboarding-complete','true');$('#onboardingModal')?.classList.add('hidden');}
+let activeWorldFilter='featured';
+let worldSearchQuery='';
 function renderKonsoruHome(){
  const root=$('#konsoruHome');if(!root)return;
  const count=$('#konsoruGameCount'),systemsCount=$('#konsoruSystemCount');if(count)count.textContent=games.length;
  const activeSystems=[...new Set(games.map(game=>game.system))];if(systemsCount)systemsCount.textContent=activeSystems.length;
  const latest=games.length?games[games.length-1]:null;const resume=$('#konsoruResume');
- if(resume){resume.textContent=latest?'▶  OPEN · '+latest.title:'＋  ADD YOUR FIRST GAME';resume.onclick=()=>latest?showGameDetails(latest):(showView('library'),chooseGameFolder());}
- const status=$('#konsoruLibraryStatus');if(status)status.textContent=games.length?'COLLECTION READY':'AWAITING GAMES';
- const families=[...new Set(systems.map(item=>item.family))];const marks={Nintendo:'◈',PlayStation:'△',Xbox:'✕',Sega:'◉',Atari:'▥',Arcade:'✦',PC:'⌘','PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
+ if(resume){resume.textContent=latest?'▶  CONTINUE · '+latest.title:'＋  ADD YOUR FIRST GAME';resume.onclick=()=>latest?showGameDetails(latest):(showView('library'),chooseGameFolder());}
+ const status=$('#konsoruLibraryStatus');if(status)status.textContent=games.length?'COLLECTION READY':'ADD YOUR FIRST GAME';
+ const marks={Nintendo:'◈',PlayStation:'△',Xbox:'✕',Sega:'◉',Atari:'▥',Arcade:'✦',PC:'⌘','PC Gaming':'⌘',Mobile:'▣',Android:'▣'};
  const worldGrid=$('#konsoruWorldGrid');
- if(worldGrid)worldGrid.innerHTML=families.map((family,index)=>{const members=systems.filter(item=>item.family===family);const total=members.reduce((sum,item)=>sum+gamesForSystem(item.name).length,0);return '<button class="konsoru-world-card world-'+family.toLowerCase().replace(/[^a-z]+/g,'-')+'" data-konsoru-family="'+escapeHTML(family)+'" style="--world-index:'+index+'"><span class="konsoru-world-symbol">'+(marks[family]||'✦')+'</span><span class="konsoru-world-copy"><b>'+escapeHTML(family.toUpperCase())+'</b><small>'+members.length+' SYSTEMS · '+total+' GAMES</small></span><span class="konsoru-world-arrow">↗</span></button>';}).join('');
- worldGrid?.querySelectorAll('[data-konsoru-family]').forEach(button=>button.addEventListener('click',()=>{const first=systems.find(item=>item.family===button.dataset.konsoruFamily);if(first)openConsolePage(first.name);}));
+ const featuredNames=['Nintendo Switch','Nintendo 3DS','Wii','Nintendo DS','PlayStation 5 / Pro','PlayStation 2','PSP','Xbox 360','Nintendo Switch 2','Windows PC'];
+ const pickerCount=$('#systemPickerCount');if(pickerCount)pickerCount.textContent=featuredNames.length+' FEATURED / '+systems.length+' TOTAL';
+ const matchesFilter=system=>{
+  if(worldSearchQuery)return (system.name+' '+system.family).toLowerCase().includes(worldSearchQuery);
+  if(activeWorldFilter==='featured')return featuredNames.includes(system.name);
+  if(activeWorldFilter==='all')return true;
+  if(activeWorldFilter==='retro')return ['Atari','Arcade','Other','Computer'].includes(system.family);
+  if(activeWorldFilter==='pc')return ['PC','PC Gaming','Computer','Mobile','Android'].includes(system.family);
+  return system.family===activeWorldFilter;
+ };
+ const renderWorldCards=()=>{
+  if(!worldGrid)return;
+  const visible=systems.filter(matchesFilter);
+  worldGrid.innerHTML=visible.map((system,index)=>{const total=gamesForSystem(system.name).length;const familyClass=String(system.family).toLowerCase().replace(/[^a-z]+/g,'-');return '<button class="konsoru-world-card world-'+familyClass+'" data-konsoru-system="'+escapeHTML(system.name)+'" style="--world-index:'+index+'"><span class="konsoru-world-symbol">'+(marks[system.family]||system.icon||'✦')+'</span><span class="konsoru-world-copy"><small>'+escapeHTML(system.family.toUpperCase())+'</small><b>'+escapeHTML(system.name.toUpperCase())+'</b><small>'+total+' '+(total===1?'GAME':'GAMES')+'</small></span><span class="konsoru-world-arrow">↗</span></button>';}).join('')||'<div class="konsoru-empty"><b>NO SYSTEMS FOUND</b><p>Try a different name or category.</p></div>';
+  worldGrid.querySelectorAll('[data-konsoru-system]').forEach(button=>button.addEventListener('click',()=>openConsolePage(button.dataset.konsoruSystem)));
+  const hint=$('#worldBrowseHint');if(hint)hint.textContent=worldSearchQuery?visible.length+' matching systems':activeWorldFilter==='featured'?'Showing 10 popular systems · Choose All Systems to browse everything':visible.length+' systems shown';
+ };
+ const toolbar=$('#worldBrowseToolbar');
+ if(toolbar){
+  toolbar.innerHTML='<label class="world-search-wrap"><span>⌕</span><input id="worldSearchInput" type="search" placeholder="Find a console or system…" value="'+escapeHTML(worldSearchQuery)+'" aria-label="Search systems"></label><div class="world-filter-row" id="worldFilterRow">'+[['featured','FEATURED'],['all','ALL SYSTEMS'],['Nintendo','NINTENDO'],['PlayStation','PLAYSTATION'],['Xbox','XBOX'],['Sega','SEGA'],['retro','RETRO'],['pc','PC & OTHER']].map(([id,label])=>'<button type="button" data-world-filter="'+id+'" class="'+(activeWorldFilter===id?'selected':'')+'">'+label+'</button>').join('')+'</div><p class="world-browse-hint" id="worldBrowseHint"></p>';
+  $('#worldSearchInput').addEventListener('input',event=>{worldSearchQuery=event.target.value.trim().toLowerCase();renderWorldCards();});
+  $('#worldFilterRow').querySelectorAll('[data-world-filter]').forEach(button=>button.addEventListener('click',()=>{activeWorldFilter=button.dataset.worldFilter;worldSearchQuery='';$('#worldSearchInput').value='';$('#worldFilterRow').querySelectorAll('button').forEach(item=>item.classList.toggle('selected',item===button));renderWorldCards();}));
+ }
+ renderWorldCards();
  const recent=$('#konsoruRecentRow');
  if(recent)recent.innerHTML=games.length?games.slice().reverse().slice(0,10).map(game=>'<button class="konsoru-recent-card" data-konsoru-game="'+games.indexOf(game)+'"><span class="konsoru-cover"><i>✦</i><small>'+escapeHTML(game.system)+'</small></span><b>'+escapeHTML(game.title)+'</b><small>'+escapeHTML(game.system)+'</small></button>').join(''):'<div class="konsoru-empty"><span>✦</span><b>YOUR COLLECTION STARTS HERE</b><p>Add a game folder to build your library.</p><button class="konsoru-secondary" id="konsoruEmptyScan">ADD GAMES ↗</button></div>';
  recent?.querySelectorAll('[data-konsoru-game]').forEach(card=>{const game=games[Number(card.dataset.konsoruGame)],url=game?.artwork?.grid;if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='lazy';img.className='sgdb-cover-image';card.querySelector('.konsoru-cover')?.prepend(img);}});
@@ -561,62 +577,44 @@ function renderLibrary(){
  $('#consoleStrip').querySelectorAll('[data-console]').forEach(b=>b.addEventListener('click',()=>openConsolePage(b.dataset.console)));
  renderFilters();renderGames();
 }
-let systemBootTimer=null;
 function openConsolePage(name){
- const system=systems.find(s=>s.name===name)||{name,icon:'✦',family:'Platform'};
- const boot=$('#systemBoot');if(systemBootTimer)window.clearTimeout(systemBootTimer);
- const styles={
-  Nintendo:{accent:'#ff4b62',secondary:'#ff9aa7',line:'POWERING UP YOUR PLAY WORLD',tag:'READY WHEN YOU ARE'},
-  PlayStation:{accent:'#6b9dff',secondary:'#b7d1ff',line:'WELCOME BACK, PLAYER',tag:'YOUR NEXT ADVENTURE AWAITS'},
-  Xbox:{accent:'#70e68a',secondary:'#c2ffd0',line:'PREPARING YOUR GAME SPACE',tag:'LET’S PLAY'},
-  Sega:{accent:'#5b9dff',secondary:'#c5dcff',line:'INSERT COIN. ENTER WORLD.',tag:'SEGA FOREVER'},
-  Atari:{accent:'#ffbd65',secondary:'#ffe0ad',line:'A CLASSIC WORLD IS LOADING',tag:'PRESS START'},
-  Arcade:{accent:'#ff73dc',secondary:'#ffd0f4',line:'LOADING THE ARCADE',tag:'PLAYER ONE READY'},
-  PC:{accent:'#b59aff',secondary:'#e0d4ff',line:'INITIALIZING YOUR LIBRARY',tag:'SYSTEM ONLINE'},
-  'PC Gaming':{accent:'#b59aff',secondary:'#e0d4ff',line:'INITIALIZING YOUR LIBRARY',tag:'SYSTEM ONLINE'},
-  Android:{accent:'#82e5a3',secondary:'#d0ffe0',line:'CONNECTING YOUR APPS',tag:'DEVICE READY'},
-  Mobile:{accent:'#82e5a3',secondary:'#d0ffe0',line:'CONNECTING YOUR APPS',tag:'DEVICE READY'}
- };
- const consoleStyles={
-  'NES':{accent:'#e84b45',secondary:'#ffd0ca',line:'8-BIT POWER ON',tag:'THE CLASSICS ARE CALLING'},
-  'SNES':{accent:'#b7a4e8',secondary:'#e8ddff',line:'16-BIT WORLD INITIALIZING',tag:'PRESS START TO CONTINUE'},
-  'Nintendo 64':{accent:'#6c8cff',secondary:'#d0d9ff',line:'ENTER THE 3D ERA',tag:'FOUR PLAYER ENERGY'},
-  'Game Boy':{accent:'#a8c66c',secondary:'#e1f0b5',line:'POCKET POWER ACTIVATED',tag:'TAKE YOUR GAMES ANYWHERE'},
-  'Game Boy Advance':{accent:'#a58cff',secondary:'#e1d8ff',line:'ADVANCE SYSTEM ONLINE',tag:'YOUR ADVENTURE STARTS HERE'},
-  'Nintendo DS':{accent:'#8ac9ed',secondary:'#d8f2ff',line:'DUAL SCREEN SYSTEM READY',tag:'TOUCH TO CONTINUE'},
-  'Nintendo 3DS':{accent:'#ef6b75',secondary:'#ffd6da',line:'3D WORLD COMING INTO VIEW',tag:'WELCOME BACK'},
-  'GameCube':{accent:'#9c82ff',secondary:'#ddd2ff',line:'CUBE CORE ONLINE',tag:'LET THE GAME BEGIN'},
-  'Wii':{accent:'#8ed9ef',secondary:'#d9f8ff',line:'WII WOULD LIKE TO PLAY',tag:'YOUR LIVING ROOM IS READY'},
-  'Wii U':{accent:'#54b8e8',secondary:'#ccefff',line:'GAMEPAD LINK ESTABLISHED',tag:'TWO SCREENS. ONE WORLD.'},
-  'Nintendo Switch':{accent:'#ff5368',secondary:'#ffd0d6',line:'CONSOLE MODE: READY',tag:'PLAY ANYWHERE'},
-  'Nintendo Switch 2':{accent:'#ff596e',secondary:'#ffd7dd',line:'NEXT GENERATION READY',tag:'WELCOME TO YOUR NEXT WORLD'},
-  'PlayStation 2':{accent:'#6c83ff',secondary:'#d1d8ff',line:'THE NEXT LEVEL IS LOADING',tag:'WELCOME TO YOUR PLAYSTATION 2'},
-  'PlayStation 3':{accent:'#d8d8e6',secondary:'#ffffff',line:'CELL SYSTEM INITIALIZING',tag:'WELCOME BACK'},
-  'PlayStation 4 / Pro':{accent:'#4b9bff',secondary:'#c8e2ff',line:'LIVE FROM YOUR PLAYSTATION',tag:'READY TO PLAY'},
-  'PlayStation 5 / Pro':{accent:'#b5a2ff',secondary:'#e3d9ff',line:'WELCOME TO THE NEW GENERATION',tag:'YOUR NEXT GREAT ADVENTURE'},
-  'PSP':{accent:'#6eafff',secondary:'#d4e8ff',line:'PORTABLE PLAY READY',tag:'TAKE THE GAME WITH YOU'},
-  'PS Vita':{accent:'#61c5d9',secondary:'#d0f8ff',line:'VITA SYSTEM ONLINE',tag:'PLAY IS IN YOUR HANDS'},
-  'Xbox':{accent:'#65d979',secondary:'#d3ffda',line:'POWERING UP YOUR XBOX',tag:'JUMP BACK IN'},
-  'Xbox 360':{accent:'#8bdc75',secondary:'#e0ffd7',line:'XBOX LIVE SESSION READY',tag:'IT’S GAME TIME'},
-  'Xbox One':{accent:'#3bc66c',secondary:'#c8ffda',line:'ALL SYSTEMS GO',tag:'WELCOME HOME'},
-  'Xbox Series X|S':{accent:'#50d77d',secondary:'#d0ffe0',line:'VELOCITY ARCHITECTURE ONLINE',tag:'POWER YOUR DREAMS'},
-  'Master System':{accent:'#6d9dff',secondary:'#d6e3ff',line:'SEGA 8-BIT SYSTEM READY',tag:'WELCOME TO THE ARCADE'},
-  'Genesis / Mega Drive':{accent:'#7b91ff',secondary:'#d8deff',line:'16-BIT SEGA POWER',tag:'GENESIS DOES'},
-  'Saturn':{accent:'#ffb45c',secondary:'#ffe1b8',line:'SATURN SYSTEM ONLINE',tag:'A NEW DIMENSION'},
-  'Dreamcast':{accent:'#ff805d',secondary:'#ffd8ca',line:'DREAMCAST CONNECTION READY',tag:'WELCOME TO THE FUTURE'}
- };
- const nameSeed=Array.from(system.name).reduce((sum,char)=>sum+char.charCodeAt(0),0);
- const uniqueHue=(nameSeed*47)%360;
- const familyStyle=styles[system.family]||{accent:'hsl('+uniqueHue+' 82% 70%)',secondary:'hsl('+uniqueHue+' 100% 88%)'};
- const style=consoleStyles[system.name]||{accent:'hsl('+uniqueHue+' 82% 70%)',secondary:'hsl('+uniqueHue+' 100% 88%)',line:'BOOTING '+system.name.toUpperCase(),tag:system.family.toUpperCase()+' SYSTEM READY'};
- boot.dataset.family=system.family.toLowerCase().replace(/[^a-z]+/g,'-');
- boot.style.setProperty('--boot-accent',style.accent);boot.style.setProperty('--boot-secondary',style.secondary);
- $('#bootSystemName').textContent=system.name.toUpperCase();
- $('#bootSystemMark').textContent=system.icon||systemIconFor(system.name);
- $('#bootSystemLine').textContent=style.line;
- $('#bootSystemTag').textContent=style.tag;
- renderConsoleHome(system);showView('console');boot.classList.remove('hidden');
- systemBootTimer=window.setTimeout(()=>{boot.classList.add('hidden');systemBootTimer=null;},1450);
+ const system=systems.find(item=>item.name===name)||{name,icon:'✦',family:'Platform'};
+ renderConsoleHome(system);
+ showView('console');
+ startSystemBoot({root:$('#systemBoot'),system,config:getSystemConfig(system)});
+}
+function buildConsoleWorldHome({system,titles,featured,artFor,cardFor,name}){
+ const family=system.family;
+ const is3DS=name==='Nintendo 3DS';
+ const isWii=name==='Wii';
+ const isWiiU=name==='Wii U';
+ const isSwitch=name==='Nintendo Switch'||name==='Nintendo Switch 2';
+ const isPlayStation=family==='PlayStation';
+ const isXbox=family==='Xbox';
+ const isSega=family==='Sega';
+ const isArcade=family==='Arcade'||family==='Atari';
+ const count=titles.length;
+ const hero=featured?'<div class="world-feature-art">'+artFor(featured)+'</div><div class="world-feature-copy"><p class="eyebrow">NOW IN YOUR LIBRARY</p><h2>'+escapeHTML(featured.title)+'</h2><p>'+escapeHTML(featured.tag||name)+' · '+escapeHTML(featured.year||'')+'</p><button class="primary-btn" data-system-game="'+games.indexOf(featured)+'">OPEN GAME ↗</button></div>':'<div class="world-empty"><p class="eyebrow">YOUR NEXT ADVENTURE</p><h2>READY WHEN YOU ARE.</h2><p>Add games to this system to build your collection.</p><button class="primary-btn" data-go-scan>ADD GAMES ↗</button></div>';
+ const shelf='<section class="system-shelf world-library"><div class="system-row-label"><div><p class="eyebrow">YOUR COLLECTION</p><h3>ALL GAMES</h3></div><span>'+count+' TITLES</span></div><div class="system-game-row" style="--system-shelf-rows:'+systemShelfRows+'">'+(count?titles.map(cardFor).join(''):'<p class="settings-note">No supported game files were found for this system.</p>')+'</div></section>';
+ if(is3DS||isWiiU){
+  return '<div class="world-shell world-dual-screen '+(isWiiU?'world-wiiu':'world-3ds')+'"><div class="world-console-top"><div><p class="eyebrow">'+(isWiiU?'WII U · GAMEPAD VIEW':'NINTENDO 3DS · DUAL SCREEN')+'</p><h2>'+(isWiiU?'GAMEPAD HOME':'HOME MENU')+'</h2><span>'+count+' GAMES READY</span></div><span class="world-console-clock">ECLIPSE OS</span></div><div class="world-dual-panels"><section class="world-upper-screen"><div class="world-screen-label">TOP SCREEN <span>01</span></div>'+hero+'</section><section class="world-lower-screen"><div class="world-screen-label">BOTTOM SCREEN <span>02</span></div><div class="world-app-icons"><button data-system-menu="games">▦<small>GAMES</small></button><button data-system-menu="players">◈<small>PLAYERS</small></button><button data-system-menu="scan">＋<small>ADD</small></button><button data-system-menu="settings">⚙<small>SETTINGS</small></button></div></section></div>'+shelf+'</div>';
+ }
+ if(isWii){
+  return '<div class="world-shell world-wii"><div class="world-console-top"><div><p class="eyebrow">WII MENU · CHANNEL SELECT</p><h2>WHAT’S ON TODAY?</h2></div><span class="world-console-clock">ECLIPSE CHANNELS</span></div><div class="world-wii-channels"><button class="world-channel world-channel-feature" data-system-menu="games"><span>▶</span><b>GAME CHANNEL</b><small>'+count+' TITLES</small></button><button class="world-channel" data-system-menu="players"><span>◉</span><b>PLAYER CHANNEL</b><small>CHOOSE PLAYER</small></button><button class="world-channel" data-system-menu="scan"><span>＋</span><b>ADD CHANNEL</b><small>IMPORT GAMES</small></button><button class="world-channel" data-system-menu="settings"><span>⚙</span><b>WII SETTINGS</b><small>PERSONALIZE</small></button></div>'+shelf+'</div>';
+ }
+ if(isSwitch){
+  return '<div class="world-shell world-switch"><div class="world-switch-head"><div><p class="eyebrow">NINTENDO SWITCH · HOME</p><h2>GOOD TO SEE YOU.</h2><span>'+count+' GAMES IN YOUR LIBRARY</span></div><div class="world-switch-user">●<small>PLAYER 1</small></div></div>'+hero+'<div class="world-switch-dock"><button data-system-menu="games"><span>▦</span><small>ALL SOFTWARE</small></button><button data-system-menu="players"><span>◉</span><small>PLAYERS</small></button><button data-system-menu="scan"><span>＋</span><small>ADD SOFTWARE</small></button><button data-system-menu="settings"><span>⚙</span><small>SYSTEM SETTINGS</small></button></div>'+shelf+'</div>';
+ }
+ if(isPlayStation){
+  return '<div class="world-shell world-playstation-home"><div class="world-console-top"><div><p class="eyebrow">PLAYSTATION · WHAT’S NEW</p><h2>WELCOME BACK.</h2></div><span class="world-console-clock">PLAYER 01 · ONLINE</span></div><section class="world-ps-feature">'+hero+'</section><div class="world-quick-actions"><button data-system-menu="games">▤<span>GAME LIBRARY</span></button><button data-system-menu="players">◈<span>GAME BASE</span></button><button data-system-menu="scan">＋<span>ADD CONTENT</span></button><button data-system-menu="settings">⚙<span>SETTINGS</span></button></div>'+shelf+'</div>';
+ }
+ if(isXbox){
+  return '<div class="world-shell world-xbox-home"><div class="world-xbox-heading"><div><p class="eyebrow">XBOX HOME · DASHBOARD</p><h2>JUMP BACK IN.</h2></div><span>'+count+' GAMES</span></div><section class="world-xbox-spotlight">'+hero+'</section><div class="world-xbox-shortcuts"><button data-system-menu="games">MY GAMES & APPS</button><button data-system-menu="players">PEOPLE</button><button data-system-menu="scan">ADD GAME</button><button data-system-menu="settings">SETTINGS</button></div>'+shelf+'</div>';
+ }
+ if(isSega||isArcade){
+  return '<div class="world-shell world-arcade-home"><div class="world-arcade-heading"><p class="eyebrow">'+escapeHTML(family.toUpperCase())+' SYSTEM · INSERT COIN</p><h2>SELECT YOUR GAME.</h2><span>'+count+' TITLES LOADED</span></div><div class="world-arcade-feature">'+hero+'</div><div class="world-arcade-actions"><button data-system-menu="games">▶ GAME SELECT</button><button data-system-menu="players">◈ PLAYER SETUP</button><button data-system-menu="scan">＋ ADD TITLE</button><button data-system-menu="settings">⚙ CABINET SETUP</button></div>'+shelf+'</div>';
+ }
+ return '<div class="world-shell world-desktop-home"><div class="world-desktop-heading"><div><p class="eyebrow">'+escapeHTML(family.toUpperCase())+' · LIBRARY DESKTOP</p><h2>'+escapeHTML(name.toUpperCase())+'</h2></div><span>'+count+' ITEMS</span></div><div class="world-desktop-layout"><aside class="world-desktop-sidebar"><button data-system-menu="games">▤ LIBRARY</button><button data-system-menu="players">◈ PLAYERS</button><button data-system-menu="scan">＋ IMPORT</button><button data-system-menu="settings">⚙ SETTINGS</button></aside><div class="world-desktop-main">'+hero+'</div></div>'+shelf+'</div>';
 }
 function renderConsoleHome(system){
  const name=system.name;activeConsoleName=name;window.EclipseExperienceApplySystemTheme?.(name);
@@ -638,16 +636,16 @@ $('#autoSystemPlayer').addEventListener('click',()=>autoSelectPlayer(name));
  const cardFor=g=>'<button class="system-game-card" data-system-game="'+games.indexOf(g)+'">'+artFor(g)+'<div class="system-game-meta"><b>'+escapeHTML(g.title)+'</b><small>'+escapeHTML(g.tag)+' · '+escapeHTML(g.fileName)+'</small></div></button>';
  const featured=titles[0];
  const folderNames=['ALL GAMES'];
- $('#systemHome').innerHTML=
-  '<div class="system-home-head"><div><p class="eyebrow">WELCOME TO YOUR SYSTEM</p><h2>'+name.toUpperCase()+' HOME</h2></div><span class="collection-count">'+titles.length+' TITLES</span></div>'+
-  '<div class="system-folder-row"><div class="system-row-label"><p class="eyebrow">YOUR COLLECTION</p><span>'+titles.length+' VERIFIED FILES</span></div><div class="system-folders">'+folderNames.map(folder=>'<button class="system-folder" data-system-folder="'+folder+'"><span>▣</span><b>'+folder+'</b><small>'+titles.length+' GAMES FOUND</small></button>').join('')+'</div></div>'+
-  (featured?'<section class="system-featured"><div class="system-featured-art">'+artFor(featured)+'</div><div class="system-featured-copy"><p class="eyebrow">FEATURED GAME</p><h2>'+featured.title+'</h2><p>'+name+' · '+featured.year+' · '+featured.tag+'</p><button class="primary-btn" data-system-game="'+games.indexOf(featured)+'">OPEN GAME ↗</button></div></section>':'<div class="system-empty-hero"><p class="eyebrow">NOTHING IMPORTED</p><h2>NO GAMES FOUND.</h2><p>Only games found in a folder scan appear here. Nothing is added automatically.</p><button class="primary-btn" data-go-scan>CHOOSE GAME FOLDER ↗</button></div>')+
-  '<section class="system-shelf"><div class="system-row-label"><div><p class="eyebrow">YOUR COLLECTION</p><h3>ALL GAMES</h3></div><span>'+titles.length+' ITEMS · '+systemShelfRows+' ROW'+(systemShelfRows===1?'':'S')+'</span></div><div class="system-game-row" style="--system-shelf-rows:'+systemShelfRows+'">'+(titles.length?titles.map(cardFor).join(''):'<p class="settings-note">No supported game files were found for this system.</p>')+'</div></section>';
+ $('#systemHome').innerHTML=buildConsoleWorldHome({system,titles,featured,artFor,cardFor,name});
  const featuredHeroUrl=sgdbSafeUrl(featured?.artwork?.hero);const featuredPanel=$('#systemHome').querySelector('.system-featured');if(featuredHeroUrl&&featuredPanel){featuredPanel.style.backgroundImage='linear-gradient(90deg,#10111df0 0%,#10111dcc 48%,#10111d88 100%),url("'+featuredHeroUrl+'")';featuredPanel.style.backgroundSize='cover';featuredPanel.style.backgroundPosition='center';}
  $('#systemHome').querySelectorAll('[data-system-art]').forEach(cover=>{const url=games[Number(cover.dataset.systemArt)]?.artwork?.grid;if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='lazy';img.className='sgdb-cover-image';cover.prepend(img);}});
  $('#systemHome').querySelectorAll('[data-system-game]').forEach(button=>button.addEventListener('click',()=>{const game=games[Number(button.dataset.systemGame)];if(game)showGameDetails(game);}));
  $('#systemHome').querySelectorAll('[data-system-folder]').forEach(button=>button.addEventListener('click',()=>$('#systemHome').querySelector('.system-shelf')?.scrollIntoView({behavior:'smooth'})));
  $('#systemHome').querySelector('[data-go-scan]')?.addEventListener('click',()=>{showView('library');chooseGameFolder();});
+ $('#systemHome').querySelectorAll('[data-system-menu]').forEach(button=>button.addEventListener('click',()=>{
+  const action=button.dataset.systemMenu;
+  $('#systemMenu').querySelector('[data-system-menu="'+action+'"]')?.click();
+ }));
  const menu=$('#systemMenu');
  menu.innerHTML=[['overview','⌂ HOME'],['games','▤ GAMES'],['players','◈ PLAYERS'],['scan','＋ SCAN GAMES'],['settings','⚙ SYSTEM SETTINGS']].map(([key,label],index)=>'<button class="system-menu-item '+(index===0?'active':'')+'" data-system-menu="'+key+'">'+label+'</button>').join('');
  menu.querySelectorAll('[data-system-menu]').forEach(button=>button.addEventListener('click',()=>{
@@ -1002,7 +1000,7 @@ async function checkUpdates(){
   if(comparison>0){
    const note=document.createElement('p');note.textContent=latest.body?.replace(/\s+/g,' ').slice(0,260)||'A newer ECLIPSE build is ready.';
    result.append(note);addSafeLink(result,asset.browser_download_url,'DOWNLOAD '+latest.tag_name+' APK ↗');
-   const caution=document.createElement('p');caution.textContent='Install compatibility depends on the same app ID, a newer Android version code, and the same signing certificate. Back up important app data before updating.';result.append(caution);
+   const caution=document.createElement('p');caution.textContent='Android should show Update when the app ID, signing certificate, and version code match. If it says App not installed, the APK may use a different signing key or an older version code. Do not uninstall ECLIPSE until you have backed up your data.';result.append(caution);
   }else{
    const note=document.createElement('p');note.textContent='Latest release: '+latest.tag_name+'. Check the release history below for older builds.';result.append(note);
   }
@@ -1052,7 +1050,7 @@ document.querySelectorAll('.text-link[data-view]').forEach(button=>button.addEve
 $('#themeSelect').addEventListener('change',e=>setTheme(e.target.value));
 $('#settingsTheme').addEventListener('change',e=>setTheme(e.target.value));
 document.querySelectorAll('.rail-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
-$('#backToLibrary').addEventListener('click',()=>showView('library'));
+$('#backToLibrary').addEventListener('click',()=>showView('home'));
 $('#scanGamesBtn').addEventListener('click',chooseGameFolder);
 $('#librarySearch').addEventListener('input',renderGames);
 $('#homeScanBtn').addEventListener('click',()=>{showView('library');chooseGameFolder();});

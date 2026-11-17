@@ -36,8 +36,11 @@ jobs:
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             ECLIPSE_VERSION="${GITHUB_REF_NAME#v}"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.release_tag }}" ]]; then
+            ECLIPSE_VERSION="${{ github.event.inputs.release_tag }}"
+            ECLIPSE_VERSION="${ECLIPSE_VERSION#v}"
           else
-            ECLIPSE_VERSION="11.2.0"
+            ECLIPSE_VERSION="$(node -p "require('./package.json').version")"
           fi
           echo "ECLIPSE_VERSION=$ECLIPSE_VERSION" >> "$GITHUB_ENV"
       - name: Validate stable version
@@ -180,6 +183,16 @@ jobs:
           fi
       - name: Name versioned APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk "android/app/build/outputs/apk/debug/ECLIPSE-v${ECLIPSE_VERSION}.apk"
+      - name: Verify APK package and version
+        run: |
+          APK="android/app/build/outputs/apk/debug/ECLIPSE-v${ECLIPSE_VERSION}.apk"
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT}}"
+          AAPT="$(find "$SDK_ROOT/build-tools" -type f -name aapt | sort -V | tail -n 1)"
+          APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -n "$AAPT" && test -n "$APKSIGNER"
+          "$AAPT" dump badging "$APK" | grep -E "^(package:|sdkVersion:)"
+          "$APKSIGNER" verify --verbose "$APK"
+          echo "Built ECLIPSE v${ECLIPSE_VERSION}; Android versionCode is ${GITHUB_RUN_NUMBER}."
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:

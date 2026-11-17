@@ -56,6 +56,8 @@ export function mountExperience({ $, themes, setTheme, notify, systems, games, f
           <h3>Motion & performance</h3><p class="studio-hint">Tune visual effects for your device. This adjusts ECLIPSE animations, not Android's system performance settings.</p>
           <label class="studio-field">Animation speed <output id="motionValue">${motionSpeed.toFixed(1)}×</output><input id="motionSpeed" type="range" min="0" max="1.5" step="0.1" value="${motionSpeed}"></label>
           <div class="studio-controls"><button class="studio-secondary" id="motionReduced" type="button">REDUCED MOTION</button><button class="studio-secondary" id="motionDefault" type="button">DEFAULT MOTION</button></div>
+          <label class="studio-check"><input type="checkbox" id="systemStartupEnabled" ${localStorage.getItem("eclipse-system-startup-enabled") !== "false" ? "checked" : ""}> Play a startup sequence when entering a system</label>
+          <label class="studio-check"><input type="checkbox" id="systemBootSound" ${localStorage.getItem("eclipse-system-boot-sound") === "true" ? "checked" : ""}> Play a subtle startup sound</label>
           <label class="studio-check"><input type="checkbox" id="performanceLite" ${localStorage.getItem('eclipse-performance-lite')==='true'?'checked':''}> Lightweight mode (reduce decorative effects)</label>
           <p class="studio-hint">Your device's Reduce Motion accessibility setting is always respected.</p>
         </section>
@@ -140,6 +142,8 @@ export function mountExperience({ $, themes, setTheme, notify, systems, games, f
   $('#motionSpeed').addEventListener('input',e=>{motionSpeed=Number(e.target.value);$('#motionValue').textContent=motionSpeed.toFixed(1)+'×';localStorage.setItem('eclipse-motion-speed',String(motionSpeed));applyMotion();});
   $('#motionReduced').addEventListener('click',()=>{motionSpeed=0;$('#motionSpeed').value='0';$('#motionValue').textContent='0×';localStorage.setItem('eclipse-motion-speed','0');applyMotion();});
   $('#motionDefault').addEventListener('click',()=>{motionSpeed=1;$('#motionSpeed').value='1';$('#motionValue').textContent='1.0×';localStorage.setItem('eclipse-motion-speed','1');applyMotion();});
+  $('#systemStartupEnabled').addEventListener('change',event=>localStorage.setItem('eclipse-system-startup-enabled',String(event.target.checked)));
+  $('#systemBootSound').addEventListener('change',event=>localStorage.setItem('eclipse-system-boot-sound',String(event.target.checked)));
   $('#performanceLite').addEventListener('change',e=>{localStorage.setItem('eclipse-performance-lite',String(e.target.checked));applyMotion();});
   $('#createProfile').addEventListener('click',()=>{const name=$('#newProfileName').value.trim();if(!name){notify('Enter a profile name first.');return;}if(profiles.some(p=>p.name.toLowerCase()===name.toLowerCase())){notify('That profile already exists.');return;}profiles.push({name,values:{}});activeProfile=name;save('eclipse-profiles',profiles);localStorage.setItem('eclipse-active-profile',name);renderProfiles();$('#newProfileName').value='';$('#profileStatus').textContent='Profile created. Save your current setup to it.';});
   $('#saveProfile').addEventListener('click',()=>{const profile=profiles.find(p=>p.name===activeProfile);if(!profile)return;profile.values=snapshot();save('eclipse-profiles',profiles);$('#profileStatus').textContent='Saved the current ECLIPSE setup to '+activeProfile+'.';notify('Profile saved.');});
