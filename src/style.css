@@ -959,3 +959,27 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .boot-skip:hover,.boot-skip:focus-visible{outline:none;border-color:var(--boot-accent,var(--accent));background:color-mix(in srgb,var(--boot-accent,var(--accent)) 16%,#0b0c17)}
 .boot-skip span{margin-left:8px;color:var(--boot-secondary,var(--accent))}
 @media(prefers-reduced-motion:reduce){.system-boot:before,.system-boot:after,.boot-orbit,.boot-orbit span{animation:none!important}}
+
+/* ECLIPSE platform spotlight: gameplay backdrop + console hardware foreground */
+.console-banner{isolation:isolate;min-height:290px;display:flex;align-items:center;gap:clamp(16px,3vw,34px);padding:clamp(20px,3vw,38px);background:#080b18}
+.console-banner-backdrop{position:absolute;inset:0;z-index:0;overflow:hidden}.console-banner-shade{position:absolute;inset:0;z-index:1;pointer-events:none}.console-banner:after{display:none}
+.console-banner-gameplay,.console-banner-still{position:absolute;width:100%;height:100%;inset:0;object-fit:cover;opacity:.76}
+.console-banner-still{opacity:.5}
+.console-banner-shade{z-index:-1;background:linear-gradient(90deg,#080a16ed 0%,#080a16b8 38%,#080a1640 72%,#080a168c 100%),linear-gradient(0deg,#080a16a8,transparent 55%)}
+.console-hardware{position:relative;z-index:2;flex:0 0 clamp(130px,22%,220px);min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;filter:drop-shadow(0 18px 25px #0009)}
+.console-hardware-screen{width:76%;height:105px;display:grid;place-items:center;border:7px solid #c5c8d4;border-bottom-width:12px;border-radius:10px 10px 5px 5px;background:linear-gradient(145deg,#e8eaf0,#858b9b 45%,#303546);box-shadow:inset 0 0 0 3px #33394a,0 8px 18px #0008}
+.console-hardware-screen span{width:88%;height:76%;display:grid;place-items:center;border:3px solid #151a28;border-radius:3px;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--console-accent,#9b8cff) 60%,#20243a),#111525);color:#fff;font-size:clamp(28px,4vw,48px);text-shadow:0 0 22px var(--console-accent,#9b8cff)}
+.console-hardware-base{width:94%;height:16px;margin-top:-2px;border-radius:3px 3px 13px 13px;background:linear-gradient(#e1e3ea,#747b8c 55%,#303647);box-shadow:0 10px 20px #0008}
+.console-hardware-controller{position:absolute;right:0;bottom:18px;width:62px;height:34px;border-radius:10px 10px 18px 18px;background:linear-gradient(145deg,#f2f3f7,#9ca3b2 60%,#555d6d);box-shadow:0 6px 12px #0008;transform:rotate(-13deg)}
+.console-hardware-controller i{position:absolute;left:13px;top:12px;width:13px;height:4px;border-radius:3px;background:#41495a}
+.console-hardware-controller b{position:absolute;right:12px;top:8px;color:#596176;font-size:12px}
+.console-hardware>small{margin-top:9px;color:#ffffffb8;font:8px 'DM Mono';letter-spacing:2px}
+.console-banner-copy{z-index:2;max-width:540px;text-shadow:0 2px 15px #000}
+.console-banner-copy .console-banner-game-title{margin:0 0 7px;color:#fff;font-size:clamp(16px,2.4vw,23px);font-weight:700;letter-spacing:.2px}
+.console-banner-copy>p:last-child{max-width:440px;color:#d0d1dc}
+.console-banner-index{z-index:2;color:#ffffffb5}
+.gameplay-clip-editor{display:flex;flex-direction:column;gap:8px;margin:14px 0;padding:14px;border:1px solid #ffffff18;border-radius:8px;background:#ffffff06}
+.gameplay-clip-editor label{color:#d8d7e5;font:9px 'DM Mono';letter-spacing:1px}
+.gameplay-clip-editor input{width:100%;min-width:0;padding:11px;border:1px solid #ffffff24;border-radius:6px;background:#080a14;color:#fff;font:11px 'DM Mono'}
+.gameplay-clip-editor small{color:#88899e;font:9px 'DM Mono';line-height:1.5}
+@media(max-width:600px){.console-banner{min-height:230px;gap:12px;padding:16px}.console-hardware{flex-basis:104px;min-height:135px}.console-hardware-screen{height:74px;border-width:5px;border-bottom-width:9px}.console-hardware-base{height:11px}.console-hardware-controller{width:44px;height:25px;bottom:14px}.console-hardware-controller i{left:9px;top:9px}.console-hardware-controller b{right:8px;top:5px}.console-hardware>small{font-size:6px}.console-banner-copy h1{font-size:clamp(24px,7vw,36px)}.console-banner-copy>p:last-child{font-size:10px}}

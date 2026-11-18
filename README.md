@@ -1,4 +1,4 @@
-# ECLIPSE 11.4.0 — Your Gaming Universe
+# ECLIPSE 11.5.0 — The Eclipse Experience
 
 **ECLIPSE is an Android-first gaming frontend evolving into one unified gaming home.** The goal is to bring together the strongest parts of NeoStation, Pegasus, and iiSU in a single ECLIPSE experience—not three separate apps.
 
@@ -13,7 +13,8 @@ ECLIPSE remains a Vite + Capacitor Android app. Pegasus is a Qt/QML application,
 
 ## Current ECLIPSE experience
 
-- Console-inspired home with 37 system categories and dedicated system landing pages.
+- Console-inspired home with 56 system categories and dedicated system landing pages.
+- Platform spotlight banners layer a console-inspired hardware render over a game-art backdrop; optional user-supplied HTTPS gameplay clips can loop behind the system identity.
 - Game library with folder scanning, system assignment, search, favorites, and user-managed entries.
 - Android Apps Library with installed-app discovery and launching, pin-to-Home shortcuts, Treat as Game labels, and manual session/playtime tracking.
 - ECLIPSE orb mascot and first-run setup for storage, display layout, and Android's default Home-app chooser.
@@ -36,6 +37,10 @@ ECLIPSE remains a Vite + Capacitor Android app. Pegasus is a Qt/QML application,
 - A successful build does not replace testing on a real phone or foldable.
 
 ECLIPSE does not include ROMs, BIOS files, emulator cores, or copyrighted game artwork. Only add game files and apps you have the right to use.
+
+## Platform banner gameplay clips
+
+Open a game’s details and add a direct HTTPS MP4, WebM, or M4V URL under **Gameplay Background Video URL**. ECLIPSE uses that clip behind the platform hardware banner for the game’s system. Only use clips you have permission to use. If no clip is configured, the banner falls back to the game’s saved hero or grid artwork.
 
 ## Run locally
 
