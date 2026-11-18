@@ -617,7 +617,7 @@ function renderConsoleHome(system){
  const showcaseTitle=featured?.title||showcaseTitles[name]||'YOUR NEXT GAME';
  const rawGameplayUrl=featured?.gameplayVideo||featured?.artwork?.gameplayVideo||featured?.artwork?.video||'';
  let gameplayUrl='';
- try{const candidate=new URL(rawGameplayUrl,window.location.href);if(candidate.protocol==='https:'&&/\\.(mp4|webm|m4v)(?:$|\\?)/i.test(candidate.pathname+candidate.search))gameplayUrl=candidate.href;}catch{}
+ try{const candidate=new URL(rawGameplayUrl,window.location.href);if(candidate.protocol==='https:'&&['.mp4','.webm','.m4v'].some(ext=>candidate.pathname.toLowerCase().endsWith(ext)))gameplayUrl=candidate.href;}catch{}
  const heroUrl=sgdbSafeUrl(featured?.artwork?.hero)||sgdbSafeUrl(featured?.artwork?.grid)||'';
  $('#consoleBanner').innerHTML='<div class="console-banner-backdrop">'+(gameplayUrl?'<video class="console-banner-gameplay" autoplay muted loop playsinline preload="metadata" aria-hidden="true"><source src="'+escapeHTML(gameplayUrl)+'"></video>':'')+(heroUrl?'<img class="console-banner-still" src="'+escapeHTML(heroUrl)+'" alt="" loading="lazy">':'')+'</div><div class="console-banner-shade"></div><div class="console-hardware" aria-hidden="true"><div class="console-hardware-screen"><span>'+systemIconFor(system.name)+'</span></div><div class="console-hardware-base"></div><div class="console-hardware-controller"><i></i><b>+</b></div><small>'+escapeHTML(name.toUpperCase())+'</small></div><div class="console-banner-copy"><p class="eyebrow">'+escapeHTML(system.family.toUpperCase())+' · PLATFORM SPOTLIGHT</p><h1>'+escapeHTML(name.toUpperCase())+'</h1><p class="console-banner-game-title">'+escapeHTML(showcaseTitle)+'</p><p>'+(featured?'Your featured game · '+escapeHTML(featured.tag||name):'Your '+escapeHTML(name)+' universe, ready to explore.')+'</p></div><div class="console-banner-index">SYSTEM / '+String(systems.indexOf(system)+1).padStart(2,'0')+'</div>';
  const profile=emulatorOptions[name];
@@ -1094,7 +1094,7 @@ $('#saveGameplayClip')?.addEventListener('click',()=>{
  const value=$('#gameplayClipUrl').value.trim();
  if(value){
   let parsed;try{parsed=new URL(value);}catch{notify('Enter a valid HTTPS video URL.');return;}
-  if(parsed.protocol!=='https:'||!(/\\.(mp4|webm|m4v)(?:$|\\?)/i.test(parsed.pathname+parsed.search))){notify('Use a direct HTTPS MP4, WebM or M4V URL.');return;}
+  if(parsed.protocol!=='https:'||!['.mp4','.webm','.m4v'].some(ext=>parsed.pathname.toLowerCase().endsWith(ext))){notify('Use a direct HTTPS MP4, WebM or M4V URL.');return;}
   game.gameplayVideo=parsed.href;
  }else delete game.gameplayVideo;
  try{localStorage.setItem('eclipse-games',JSON.stringify(games));}
