@@ -962,11 +962,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 
 /* ECLIPSE platform spotlight: gameplay backdrop + console hardware foreground */
 .console-banner{isolation:isolate;min-height:290px;display:flex;align-items:center;gap:clamp(16px,3vw,34px);padding:clamp(20px,3vw,38px);background:#080b18}
-.console-banner-backdrop,.console-banner-shade{position:absolute;inset:0;z-index:-2;overflow:hidden}
+.console-banner-backdrop{position:absolute;inset:0;z-index:0;overflow:hidden}.console-banner-shade{position:absolute;inset:0;z-index:1;pointer-events:none}.console-banner:after{display:none}
 .console-banner-gameplay,.console-banner-still{position:absolute;width:100%;height:100%;inset:0;object-fit:cover;opacity:.76}
 .console-banner-still{opacity:.5}
 .console-banner-shade{z-index:-1;background:linear-gradient(90deg,#080a16ed 0%,#080a16b8 38%,#080a1640 72%,#080a168c 100%),linear-gradient(0deg,#080a16a8,transparent 55%)}
-.console-hardware{position:relative;z-index:1;flex:0 0 clamp(130px,22%,220px);min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;filter:drop-shadow(0 18px 25px #0009)}
+.console-hardware{position:relative;z-index:2;flex:0 0 clamp(130px,22%,220px);min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;filter:drop-shadow(0 18px 25px #0009)}
 .console-hardware-screen{width:76%;height:105px;display:grid;place-items:center;border:7px solid #c5c8d4;border-bottom-width:12px;border-radius:10px 10px 5px 5px;background:linear-gradient(145deg,#e8eaf0,#858b9b 45%,#303546);box-shadow:inset 0 0 0 3px #33394a,0 8px 18px #0008}
 .console-hardware-screen span{width:88%;height:76%;display:grid;place-items:center;border:3px solid #151a28;border-radius:3px;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--console-accent,#9b8cff) 60%,#20243a),#111525);color:#fff;font-size:clamp(28px,4vw,48px);text-shadow:0 0 22px var(--console-accent,#9b8cff)}
 .console-hardware-base{width:94%;height:16px;margin-top:-2px;border-radius:3px 3px 13px 13px;background:linear-gradient(#e1e3ea,#747b8c 55%,#303647);box-shadow:0 10px 20px #0008}
