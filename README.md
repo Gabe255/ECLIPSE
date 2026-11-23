@@ -29,7 +29,7 @@ These are product directions, not a claim that every interface is already implem
 
 The current codebase includes:
 
-- A console-inspired home and system browsing for a broad set of platforms.
+- A Cocoon-style home and a separate Konsoru console-home experience, with system browsing for a broad set of platforms.
 - A game library with folder scanning, system assignment, search, favorites, and user-managed entries.
 - An Android Apps Library with installed-app discovery and launch handoff, pin-to-Home shortcuts, Treat as Game labels, and manual session/playtime tracking.
 - ECLIPSE's orb mascot and first-run setup for storage, display layout, and Android's default Home-app chooser.
@@ -46,7 +46,7 @@ Feature presence in code does not automatically mean every device path has been 
 
 The current roadmap prioritizes reliable core behavior before adding more decorative features:
 
-1. Audit and improve ROM discovery, scraping, metadata, and artwork handling.
+1. Audit and improve ROM discovery, metadata scraping, and artwork handling, building on the existing per-game SteamGridDB workflow.
 2. Restore clear, accurate system identities and game artwork throughout browsing.
 3. Build the original ECLIPSE home and selectable interface experiences on the existing application.
 4. Improve real game detail pages and verified launch handoff.
@@ -55,7 +55,7 @@ The current roadmap prioritizes reliable core behavior before adding more decora
 
 Important current limitations:
 
-- Automatic online metadata and artwork scraping is not implemented yet.
+- SteamGridDB artwork search, manual selection, and per-game artwork fetching are present in the current game-details flow when the user supplies an API key. This is not yet a complete automatic full-library metadata scraper or resilient bulk artwork-matching pipeline.
 - Achievement-service integrations are not implemented yet.
 - Emulator/player assignment and system pages are organizational UI; launch handoff must be verified per emulator, file type, and Android device.
 - Treat as Game labels and playtime are local. Session timing is manual; ECLIPSE does not yet observe other apps' foreground/background state.
