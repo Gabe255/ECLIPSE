@@ -70,9 +70,9 @@ export async function enrichLibraryArtwork({ games, apiKey, save, onProgress = (
         }
       }
 
-      if (!found && !ART_TYPES.some(([, field]) => nextArtwork[field])) {
+      if (!found) {
         result.skipped++;
-        result.errors.push({ title: game.title, reason: 'No artwork was available.' });
+        result.errors.push({ title: game.title, reason: 'No new artwork was available.' });
       } else {
         game.artwork = nextArtwork;
         try { save(); result.updated++; }
