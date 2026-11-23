@@ -1028,3 +1028,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .achievement-game{display:flex;flex-direction:column;gap:5px;padding:13px;border:1px solid var(--line);border-radius:12px;background:#ffffff07}
 .achievement-game b{font-size:11px}.achievement-game small{font:8px ui-monospace,monospace;color:#91a49b}.achievement-game span{font-size:9px;color:var(--accent)}
 @media(max-width:650px){.achievement-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.achievement-profile-grid b{font-size:17px}}
+
+/* Per-ROM RetroAchievements linking and progress */
+.game-detail-achievements{display:grid;gap:10px;margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#a78bfa10,#ffffff04)}
+.game-achievements-heading{display:grid;gap:4px}.game-achievements-heading b{font:10px ui-monospace,monospace;letter-spacing:1.2px;color:#c7b6ff}.game-achievements-heading small{font-size:10px;color:#96a99e;line-height:1.5}
+.game-achievements-form{display:flex;gap:8px;flex-wrap:wrap}.game-achievements-form input{flex:1 1 170px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#080b13;color:#fff;font:10px ui-monospace,monospace}.game-achievements-form button{font-size:8px;padding:10px 12px}
+.game-achievement-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.game-achievement-metrics article{display:grid;gap:6px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#ffffff08}.game-achievement-metrics small{font:8px ui-monospace,monospace;color:#94a69b}.game-achievement-metrics b{font-size:15px;color:var(--accent)}
+.game-detail-achievements>a{width:max-content;color:#c7b6ff;font:8px ui-monospace,monospace;text-decoration:none}.game-achievement-unlocks{display:grid;gap:5px}.game-achievement-unlocks p{margin:0;color:#b5c7bc;font-size:9px}
+@media(max-width:500px){.game-achievement-metrics b{font-size:12px}.game-achievements-form button{width:100%}}
