@@ -188,6 +188,15 @@ export function mountPlatformSuite({ $, notify, games, getInstalledApps, launchA
 
   renderContinuePlaying();
   renderEntertainment();
+  window.setInterval(() => {
+    if (document.hidden) return;
+    const card = document.querySelector('.widget-clock');
+    if (!card) return;
+    const now = new Date();
+    const large = card.querySelector('.widget-large'), caption = card.querySelector('.widget-caption');
+    if (large) large.textContent = now.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+    if (caption) caption.textContent = now.toLocaleDateString([], { weekday:'long', month:'short', day:'numeric' });
+  }, 30000);
   return { recordGameLaunch, renderContinuePlaying, renderEntertainment, renderPerformance };
 }
 
