@@ -4,6 +4,7 @@ import { getSystemConfig } from './systems/system-config.js';
 import { startSystemBoot } from './systems/boot-engine.js';
 import { mountExperience } from './experience.js';
 import { mountControlCenter } from './controls.js';
+import { enrichLibraryArtwork } from './library-artwork.js';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 const FolderAccess = registerPlugin('FolderAccess');
 const UpdateDownload = registerPlugin('UpdateDownload');
@@ -261,6 +262,7 @@ document.querySelector('#app').innerHTML = `
           <div class="settings-panel-head"><div><p class="eyebrow">YOUR GAME LOCATIONS</p><h3>LIBRARY FOLDERS</h3></div><span class="feature-tag">LOCAL SETUP</span></div>
           <article class="settings-card folder-card data-folder-card"><p class="eyebrow">PERSISTENT STORAGE</p><h3>ECLIPSE DATA FOLDER</h3><p class="settings-note">Choose a folder for a portable backup of your ECLIPSE library, settings, favorites, and player assignments. Android keeps access to this folder between app updates. Your original game files stay where they are.</p><div class="folder-add-row"><button class="primary-btn" id="chooseDataFolder">CHOOSE DATA FOLDER</button><button class="subtle-btn" id="saveDataBackup">SAVE BACKUP</button><button class="subtle-btn" id="restoreDataBackup">RESTORE BACKUP</button></div><div id="dataFolderStatus" class="update-result">No external data folder selected. ECLIPSE still keeps its normal local app data.</div></article>
           <article class="settings-card folder-card"><h3>GAME FOLDERS</h3><p class="settings-note">Choose the parent folder that contains your platform folders. On Android, ECLIPSE uses the system folder picker, keeps your folder permission, and scans nested files. Only recognized game files enter your library.</p><div class="folder-add-row"><button class="primary-btn" id="addFolderPath">CHOOSE GAME FOLDER</button></div><div id="folderList" class="folder-list"></div><button class="primary-btn" id="rescanFolders">↻ RESCAN FOLDERS</button><div id="scanResult" class="update-result">Choose a folder to scan your game files. Unsupported files are ignored.</div></article>
+          <article class="settings-card"><p class="eyebrow">LIBRARY ARTWORK</p><h3>FETCH MISSING ARTWORK</h3><p class="settings-note">Scan up to eight games at a time using exact SteamGridDB title matches. Existing artwork stays untouched; unclear matches are left for manual selection. Requires your saved SteamGridDB API key.</p><button class="primary-btn" id="bulkFetchArtwork">FETCH MISSING ARTWORK</button><div id="bulkArtworkStatus" class="update-result" role="status" aria-live="polite">Ready when you are. This only adds artwork; it does not download game files.</div></article>
           <article class="settings-card"><p class="eyebrow">IMPORT STATUS</p><h3>SCAN RESULTS</h3><p class="settings-note">Android folder selection and recursive scanning are connected. ECLIPSE stores game details and file references, not copies of your game files. Artwork scraping, per-game player assignment and emulator launching are still being built.</p></article>
         </div>
         <div class="settings-panel hidden" id="settingsControls">
@@ -1063,6 +1065,31 @@ $('#systemCountsSetting').addEventListener('change',e=>{preferences.systemCounts
 $('#startPageSetting').addEventListener('change',e=>{preferences.startPage=e.target.value;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));notify('Startup page saved.');});
 $('#interfaceModeSetting')?.addEventListener('change',e=>{interfaceMode=['console','konsoru','cocoon','hybrid'].includes(e.target.value)?e.target.value:'hybrid';localStorage.setItem('eclipse-interface-mode',JSON.stringify(interfaceMode));applyInterfaceMode();notify(interfaceMode==='hybrid'?'Hybrid interface enabled.':interfaceMode==='cocoon'?'Cocoon-style home enabled.':interfaceMode==='konsoru'?'Konsoru console enabled.':'Console interface enabled.');});
  $('#systemShelfRowsSetting')?.addEventListener('change',e=>{systemShelfRows=Math.max(1,Math.min(4,Number(e.target.value)||2));localStorage.setItem('eclipse-system-shelf-rows',JSON.stringify(systemShelfRows));if(activePage==='console'&&activeConsoleName)renderConsoleHome(systems.find(item=>item.name===activeConsoleName)||{name:activeConsoleName,icon:'✦',family:'Platform'});notify('Game shelf layout saved.');});
+$('#bulkFetchArtwork')?.addEventListener('click',async()=>{
+ const button=$('#bulkFetchArtwork'),status=$('#bulkArtworkStatus');
+ if(!button||!status)return;
+ button.disabled=true;button.textContent='SCANNING…';
+ status.textContent='Preparing your library artwork scan…';
+ try{
+  const result=await enrichLibraryArtwork({
+   games,apiKey:sgdbKey(),limit:8,
+   save:()=>localStorage.setItem('eclipse-games',JSON.stringify(games)),
+   onProgress:progress=>{
+    status.textContent='Checking '+progress.processed+' of '+progress.total+': '+(progress.currentTitle||'Preparing…')+' · '+progress.updated+' updated · '+progress.skipped+' skipped · '+progress.failed+' failed';
+   }
+  });
+  renderKonsoruHome();renderHomeHero();renderLibrary();
+  if(activePage==='console'&&activeConsoleName)renderConsoleHome(systems.find(item=>item.name===activeConsoleName)||{name:activeConsoleName,icon:'✦',family:'Platform'});
+  const summary='Finished: '+result.updated+' games updated, '+result.skipped+' skipped, '+result.failed+' failed.'+(result.paused?' Scan paused because the provider needs attention.':'');
+  status.textContent=summary+(result.errors.length?' '+result.errors.slice(0,2).map(item=>item.title+': '+item.reason).join(' · '):'');
+  notify(summary);
+ }catch(error){
+  status.textContent=error.message||'Artwork scan could not start.';
+  notify(status.textContent);
+ }finally{
+  button.disabled=false;button.textContent='FETCH MISSING ARTWORK';
+ }
+});
 $('#addFolderPath').addEventListener('click',chooseGameFolder);
 
 $('#rescanFolders').addEventListener('click',rescanGameFolder);
