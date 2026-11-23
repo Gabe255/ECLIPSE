@@ -11,9 +11,9 @@ async function requestJSON(url, signal) {
   return response.json();
 }
 
-export async function enrichLibraryMetadata({ games, apiKey, limit = 8, save = () => {}, onProgress = () => {} }) {
+export async function enrichLibraryMetadata({ games, apiKey, limit = 8, gameId = null, save = () => {}, onProgress = () => {} }) {
   if (!apiKey) throw new Error('Add a RAWG API key in Settings before starting metadata scraping.');
-  const pending = games.filter(game => !game.metadata?.providerId).slice(0, Math.max(1, Math.min(8, limit)));
+  const pending = games.filter(game => (!gameId || game.id === gameId) && !game.metadata?.providerId).slice(0, Math.max(1, Math.min(8, limit)));
   const result = { updated: 0, skipped: 0, failed: 0, paused: false, errors: [] };
   for (let index = 0; index < pending.length; index++) {
     const game = pending[index];
