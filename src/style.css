@@ -959,3 +959,80 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .boot-skip:hover,.boot-skip:focus-visible{outline:none;border-color:var(--boot-accent,var(--accent));background:color-mix(in srgb,var(--boot-accent,var(--accent)) 16%,#0b0c17)}
 .boot-skip span{margin-left:8px;color:var(--boot-secondary,var(--accent))}
 @media(prefers-reduced-motion:reduce){.system-boot:before,.system-boot:after,.boot-orbit,.boot-orbit span{animation:none!important}}
+
+
+/* ECLIPSE original platform artwork pack */
+.system-pick-card,.console-card,.konsoru-world-card{--system-art-accent:var(--accent);--system-art-secondary:#e4d9ff}
+.system-pick-card[data-eclipse-family],.console-card[data-eclipse-family],.konsoru-world-card[data-eclipse-family]{border-color:color-mix(in srgb,var(--system-art-accent) 30%,var(--line));}
+.system-pick-card .system-cube{filter:drop-shadow(0 12px 18px color-mix(in srgb,var(--system-art-accent) 24%,transparent))}
+.system-pick-card .cube-front{color:var(--system-art-secondary);background:radial-gradient(circle at 30% 20%,color-mix(in srgb,var(--system-art-secondary) 28%,transparent),transparent 58%),linear-gradient(145deg,color-mix(in srgb,var(--system-art-accent) 30%,#171329),#090d17)}
+.system-pick-card .cube-side{background:linear-gradient(145deg,color-mix(in srgb,var(--system-art-accent) 48%,#111827),#080b13)}
+.system-pick-card .cube-top{background:linear-gradient(145deg,color-mix(in srgb,var(--system-art-secondary) 34%,#111827),#141126)}
+.system-pick-card .system-card-top i{color:var(--system-art-accent)}
+.console-card{background:radial-gradient(circle at 85% 15%,color-mix(in srgb,var(--system-art-accent) 18%,transparent),transparent 52%),#ffffff08}
+.console-card>span{color:var(--system-art-accent)}
+.konsoru-world-card{background:radial-gradient(circle at 90% 12%,color-mix(in srgb,var(--system-art-accent) 20%,transparent),transparent 55%),linear-gradient(130deg,#ffffff0d,#ffffff03)}
+.konsoru-world-symbol{color:var(--system-art-accent)!important;text-shadow:0 0 22px color-mix(in srgb,var(--system-art-accent) 50%,transparent)}
+/* Continue Playing and home dashboard editing */
+.continue-playing-shelf{margin:22px 0}
+.continue-playing-row{display:flex;gap:13px;overflow-x:auto;padding:5px 2px 14px;scrollbar-width:thin}
+.continue-game-card{flex:0 0 132px;display:flex;flex-direction:column;gap:6px;text-align:left;border:1px solid var(--line);border-radius:14px;padding:9px;background:#ffffff08;color:inherit;min-width:0}
+.continue-game-art{height:88px;display:grid;place-items:center;position:relative;overflow:hidden;border-radius:9px;background:radial-gradient(circle at 30% 20%,color-mix(in srgb,var(--accent) 35%,transparent),transparent 60%),#111522}
+.continue-game-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.continue-game-art i{font-style:normal;color:var(--accent);font-size:22px;z-index:1}
+.continue-game-card b,.continue-game-card small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.continue-game-card b{font-size:11px}.continue-game-card small{font:8px ui-monospace,monospace;color:#91a49b}
+.dashboard-widget[draggable="true"]{cursor:grab}.dashboard-widget.is-dragging{opacity:.45;outline:1px dashed var(--accent)}
+.dashboard-widget[draggable="true"]:active{cursor:grabbing}
+.widget-entertainment button[data-jump]{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:#ffffff0a;color:var(--accent);font:8px ui-monospace,monospace}
+/* Entertainment Hub */
+.entertainment-feature{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px;margin:18px 0;border:1px solid var(--line);border-radius:20px;background:radial-gradient(circle at 85% 40%,#8b68ff2a,transparent 40%),linear-gradient(125deg,#17152a,#0c101b)}
+.entertainment-feature h3{font-size:clamp(22px,4vw,38px);margin:5px 0}.entertainment-feature p:not(.eyebrow){max-width:540px;color:#a0b1aa;font-size:12px;line-height:1.6}
+.entertainment-orbit{width:90px;height:90px;flex:0 0 90px;display:grid;place-items:center;border:1px solid #a98dff88;border-radius:50%;font-size:34px;color:#d3c3ff;box-shadow:0 0 35px #8c6cff55,inset 0 0 25px #8c6cff33}
+.entertainment-app-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:20px 0}
+.entertainment-app-card{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:15px;background:#ffffff08}
+.entertainment-app-mark{width:46px;height:46px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#a78bfa,#30234f);color:white;font-size:17px;font-weight:900}
+.entertainment-app-card>div{min-width:0}.entertainment-app-card b,.entertainment-app-card small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.entertainment-app-card b{font-size:12px}.entertainment-app-card small{margin-top:4px;font:8px ui-monospace,monospace;color:#90a39a}
+.entertainment-app-card button{padding:9px 11px;border:1px solid var(--line);border-radius:999px;background:#ffffff0a;color:var(--accent);font:8px ui-monospace,monospace}
+.entertainment-app-card button:disabled{color:#718078;opacity:.7}.entertainment-app-card.is-missing{opacity:.66}
+.rail-btn[data-view="entertainment"]{color:#d3c3ff}
+/* Performance dashboard */
+.performance-launcher{padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:#ffffff08;color:var(--accent);font:8px ui-monospace,monospace;letter-spacing:.8px}
+.performance-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:#05070ddd;backdrop-filter:blur(18px)}
+.performance-backdrop.hidden{display:none}
+.performance-panel{width:min(680px,100%);max-height:88dvh;overflow:auto;padding:22px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,#17172a,#0a0d16);box-shadow:0 25px 90px #000a}
+.performance-close{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:#ffffff0a;color:#fff;font-size:22px}
+.performance-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0}
+.performance-metrics article{display:flex;flex-direction:column;gap:7px;padding:15px;border:1px solid var(--line);border-radius:13px;background:#ffffff08}
+.performance-metrics small{font:8px ui-monospace,monospace;letter-spacing:1px;color:#92a69a}
+.performance-metrics b{font-size:16px;color:#eaf5ee;overflow-wrap:anywhere}
+.game-detail-metadata{display:grid;gap:7px;margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:#ffffff06}
+.game-detail-metadata p{margin:0;color:#a9bbb1;font-size:10px;line-height:1.55}
+@media(max-width:600px){.performance-metrics{grid-template-columns:1fr 1fr}.performance-panel{padding:16px}.entertainment-feature{padding:17px}.entertainment-orbit{width:62px;height:62px;flex-basis:62px;font-size:25px}.entertainment-app-card{grid-template-columns:40px minmax(0,1fr);gap:9px}.entertainment-app-mark{width:38px;height:38px}.entertainment-app-card button{grid-column:1/-1}.performance-launcher{font-size:7px;padding:7px 8px}}
+
+/* RetroAchievements Center */
+.achievement-profile-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0 26px}
+.achievement-profile-grid article{display:flex;flex-direction:column;gap:7px;padding:16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#ffffff0b,#ffffff03)}
+.achievement-profile-grid small{font:8px ui-monospace,monospace;letter-spacing:1px;color:#91a49b}
+.achievement-profile-grid b{font-size:20px;color:var(--accent);overflow-wrap:anywhere}
+.achievement-section{margin:24px 0}
+.achievement-section h3{font-size:17px;margin:4px 0}
+.achievement-list{display:grid;gap:9px}
+.achievement-row{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;align-items:start;padding:13px;border:1px solid var(--line);border-radius:13px;background:#ffffff07}
+.achievement-mark{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#b49aff20;color:#c7b6ff;font-size:19px}
+.achievement-row b,.achievement-row small{display:block}
+.achievement-row b{font-size:12px}.achievement-row small{margin-top:4px;color:#a3b5aa;font:8px ui-monospace,monospace}
+.achievement-row p{margin:6px 0 0;color:#91a49b;font-size:10px;line-height:1.5}
+.achievement-games{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px}
+.achievement-game{display:flex;flex-direction:column;gap:5px;padding:13px;border:1px solid var(--line);border-radius:12px;background:#ffffff07}
+.achievement-game b{font-size:11px}.achievement-game small{font:8px ui-monospace,monospace;color:#91a49b}.achievement-game span{font-size:9px;color:var(--accent)}
+@media(max-width:650px){.achievement-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.achievement-profile-grid b{font-size:17px}}
+
+/* Per-ROM RetroAchievements linking and progress */
+.game-detail-achievements{display:grid;gap:10px;margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#a78bfa10,#ffffff04)}
+.game-achievements-heading{display:grid;gap:4px}.game-achievements-heading b{font:10px ui-monospace,monospace;letter-spacing:1.2px;color:#c7b6ff}.game-achievements-heading small{font-size:10px;color:#96a99e;line-height:1.5}
+.game-achievements-form{display:flex;gap:8px;flex-wrap:wrap}.game-achievements-form input{flex:1 1 170px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#080b13;color:#fff;font:10px ui-monospace,monospace}.game-achievements-form button{font-size:8px;padding:10px 12px}
+.game-achievement-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.game-achievement-metrics article{display:grid;gap:6px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#ffffff08}.game-achievement-metrics small{font:8px ui-monospace,monospace;color:#94a69b}.game-achievement-metrics b{font-size:15px;color:var(--accent)}
+.game-detail-achievements>a{width:max-content;color:#c7b6ff;font:8px ui-monospace,monospace;text-decoration:none}.game-achievement-unlocks{display:grid;gap:5px}.game-achievement-unlocks p{margin:0;color:#b5c7bc;font-size:9px}
+@media(max-width:500px){.game-achievement-metrics b{font-size:12px}.game-achievements-form button{width:100%}}

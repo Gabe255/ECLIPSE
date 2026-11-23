@@ -4,6 +4,11 @@ import { getSystemConfig } from './systems/system-config.js';
 import { startSystemBoot } from './systems/boot-engine.js';
 import { mountExperience } from './experience.js';
 import { mountControlCenter } from './controls.js';
+import { enrichLibraryArtwork } from './library-artwork.js';
+import { enrichLibraryMetadata } from './library-metadata.js';
+import { mountPlatformSuite } from './systems/platform-suite.js';
+import { decorateSystemArtwork } from './systems/artwork-pack.js';
+import { mountAchievements } from './systems/achievements.js';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 const FolderAccess = registerPlugin('FolderAccess');
 const UpdateDownload = registerPlugin('UpdateDownload');
@@ -138,8 +143,9 @@ const themes = [
   ['ember','Ember'],['ice','Arctic'],['sakura','Sakura'],['matrix','Matrix'],['gold','Solar Gold']
 ];
 const widgetCatalog = [
-  ['recent','Last added','Your most recently scanned game'],['systems','My systems','Jump into a platform'],
+  ['continue','Continue Playing','Return to a recently launched game'],['recent','Last added','Your most recently scanned game'],['systems','My systems','Jump into a platform'],
   ['favorites','Favorites','Your pinned games'],['playtime','Play activity','Your playtime overview'],
+  ['entertainment','Entertainment Hub','Open your installed media apps'],['clock','Clock & date','A live date and time widget'],['performance','Device snapshot','Available device diagnostics'],
   ['achievements','Achievements','Achievement progress'],['quicklaunch','Quick launch','Your favorite shortcuts']
 ];
 const load = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
@@ -147,14 +153,15 @@ let activeTheme = localStorage.getItem('eclipse-theme') || 'violet';
 let activePage = 'home';
 let activeSystem = 'All Games';
 let selectedGame = 0;
-let widgets = load('eclipse-widgets', ['recent','systems','favorites']);
+let widgets = load('eclipse-widgets', ['continue','systems','favorites','entertainment']);
 let pageNames = load('eclipse-pages', ['Home','Discover','Collections']);
 let currentPage = 0;
 let playCount = load('eclipse-play-count', 0);
 let folderPaths = load('eclipse-folders', []);
 let systemShelfRows = Math.max(1, Math.min(4, Number(load('eclipse-system-shelf-rows', 2)) || 2));
-let interfaceMode = 'cocoon';
-localStorage.setItem('eclipse-interface-mode', JSON.stringify(interfaceMode));
+let interfaceMode = load('eclipse-interface-mode', 'cocoon');
+if (!['console', 'konsoru', 'cocoon', 'hybrid'].includes(interfaceMode)) interfaceMode = 'cocoon';
+document.documentElement.dataset.interfaceMode = interfaceMode;
 let systemFolders = load('eclipse-system-folders', {});
 let preferences = load('eclipse-preferences', {showHero:true,compactRows:false,systemCounts:true,startPage:'home'});
 let installedApps = load('eclipse-installed-apps', []);
@@ -241,7 +248,7 @@ document.querySelector('#app').innerHTML = `
       <div class="app-library-summary"><div><b id="appCount">0</b><small>DISCOVERED APPS</small></div><div><b id="gameAppCount">0</b><small>TREATED AS GAMES</small></div><div><b id="trackedTime">0m</b><small>TRACKED PLAYTIME</small></div></div>
       <div class="app-library-toolbar"><input id="appLibrarySearch" type="search" placeholder="Search apps…" aria-label="Search installed apps"><span id="appLibraryStatus">Scan your Android device to populate this library.</span></div>
       <div class="app-library-list" id="appLibraryList"><div class="app-library-empty"><span>▣</span><b>YOUR APPS WILL APPEAR HERE</b><p>Run a device scan to find apps Android makes available to ECLIPSE.</p></div></div>
-      <p class="app-library-disclaimer">App discovery requires the Android APK. Treat as Game and session totals are saved locally. Session tracking is manual; ECLIPSE does not yet detect when another app is opened or closed, and app launching is not connected yet.</p>
+      <p class="app-library-disclaimer">App discovery and launching require the Android APK. Treat as Game and session totals are saved locally. Session tracking for external apps is manual; ECLIPSE does not yet automatically observe another app's foreground sessions.</p>
     </section>
     <section id="settingsView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>SETTINGS</h2></div></div>
@@ -251,7 +258,7 @@ document.querySelector('#app').innerHTML = `
           <div class="settings-panel-head"><div><p class="eyebrow">MAKE ECLIPSE YOURS</p><h3>PERSONALIZE</h3></div><button class="subtle-btn" id="resetAllDefaults">RESTORE DEFAULTS</button></div>
           <div class="settings-grid">
             <article class="settings-card"><p class="eyebrow">APPEARANCE</p><h3>THEME</h3><label>Built-in theme<select id="settingsTheme">${themes.map(([id,name])=>`<option value="${id}" ${id===activeTheme?'selected':''}>${name}</option>`).join('')}</select></label><p class="settings-note">Choose a visual preset. Your selection is saved on this device.</p></article>
-            <article class="settings-card"><p class="eyebrow">HOME SCREEN</p><h3>LAYOUT OPTIONS</h3><label class="setting-toggle"><input type="checkbox" id="showHeroSetting" checked><span>Show featured hero</span></label><label class="setting-toggle"><input type="checkbox" id="compactRowsSetting"><span>Compact home rows</span></label><label class="setting-toggle"><input type="checkbox" id="systemCountsSetting" checked><span>Show game counts on systems</span></label><label>Start page<select id="startPageSetting"><option value="home">Home</option><option value="library">Library</option><option value="android">Android games</option></select></label><p class="settings-note">Cocoon home is the ECLIPSE default: horizontal game shelves, featured artwork, custom pages, widgets, and controller-friendly navigation.</p><label>Games per shelf row<select id="systemShelfRowsSetting"><option value="1">1 row</option><option value="2">2 rows</option><option value="3">3 rows</option><option value="4">4 rows</option></select></label><label>Display layout<select id="settingsDisplayLayout"><option value="auto">Auto detect</option><option value="single">Single screen</option><option value="dual">Dual screen / foldable</option></select></label></article>
+            <article class="settings-card"><p class="eyebrow">HOME SCREEN</p><h3>LAYOUT OPTIONS</h3><label class="setting-toggle"><input type="checkbox" id="showHeroSetting" checked><span>Show featured hero</span></label><label class="setting-toggle"><input type="checkbox" id="compactRowsSetting"><span>Compact home rows</span></label><label class="setting-toggle"><input type="checkbox" id="systemCountsSetting" checked><span>Show game counts on systems</span></label><label>Start page<select id="startPageSetting"><option value="home">Home</option><option value="library">Library</option><option value="android">Android games</option></select></label><label>Interface experience<select id="interfaceModeSetting"><option value="cocoon">Cocoon — artwork-led shelves</option><option value="konsoru">Konsoru — console home</option><option value="console">Console — system-first layout</option><option value="hybrid">Hybrid — combined layout</option></select></label><p class="settings-note">Choose your home experience. Your selection is saved on this device and should remain active after restarting ECLIPSE.</p><label>Games per shelf row<select id="systemShelfRowsSetting"><option value="1">1 row</option><option value="2">2 rows</option><option value="3">3 rows</option><option value="4">4 rows</option></select></label><label>Display layout<select id="settingsDisplayLayout"><option value="auto">Auto detect</option><option value="single">Single screen</option><option value="dual">Dual screen / foldable</option></select></label></article>
             <article class="settings-card"><p class="eyebrow">ARTWORK PROVIDER</p><h3>STEAMGRIDDB</h3><label>API key<input id="sgdbApiKey" type="password" autocomplete="off" placeholder="Paste your SteamGridDB API key"></label><div class="sgdb-settings-actions"><button class="primary-btn" id="saveSgdbKey">SAVE API KEY</button><button class="subtle-btn" id="clearSgdbKey">CLEAR</button></div><p class="settings-note" id="sgdbKeyStatus">Your key is saved only in this browser's local app storage. Don't put it in the GitHub source code.</p><p class="settings-note">Get your own key from your SteamGridDB profile preferences. Artwork is optional; the rest of ECLIPSE works without it.</p></article><article class="settings-card"><p class="eyebrow">HOME PAGES</p><h3>YOUR PAGES</h3><p class="settings-note">Add up to five pages and arrange the widgets on each page.</p><button class="subtle-btn" id="settingsAddPage">+ ADD PAGE</button><div id="settingsPageList" class="settings-page-list"></div></article>
             <article class="settings-card"><p class="eyebrow">WIDGETS</p><h3>HOME CONTENT</h3><p class="settings-note">Choose which shelves appear and change their order.</p><button class="primary-btn" id="settingsEditWidgets">EDIT HOME WIDGETS</button><button class="subtle-btn" id="resetWidgets">RESET WIDGETS</button></article>
           </div>
@@ -260,11 +267,13 @@ document.querySelector('#app').innerHTML = `
           <div class="settings-panel-head"><div><p class="eyebrow">YOUR GAME LOCATIONS</p><h3>LIBRARY FOLDERS</h3></div><span class="feature-tag">LOCAL SETUP</span></div>
           <article class="settings-card folder-card data-folder-card"><p class="eyebrow">PERSISTENT STORAGE</p><h3>ECLIPSE DATA FOLDER</h3><p class="settings-note">Choose a folder for a portable backup of your ECLIPSE library, settings, favorites, and player assignments. Android keeps access to this folder between app updates. Your original game files stay where they are.</p><div class="folder-add-row"><button class="primary-btn" id="chooseDataFolder">CHOOSE DATA FOLDER</button><button class="subtle-btn" id="saveDataBackup">SAVE BACKUP</button><button class="subtle-btn" id="restoreDataBackup">RESTORE BACKUP</button></div><div id="dataFolderStatus" class="update-result">No external data folder selected. ECLIPSE still keeps its normal local app data.</div></article>
           <article class="settings-card folder-card"><h3>GAME FOLDERS</h3><p class="settings-note">Choose the parent folder that contains your platform folders. On Android, ECLIPSE uses the system folder picker, keeps your folder permission, and scans nested files. Only recognized game files enter your library.</p><div class="folder-add-row"><button class="primary-btn" id="addFolderPath">CHOOSE GAME FOLDER</button></div><div id="folderList" class="folder-list"></div><button class="primary-btn" id="rescanFolders">↻ RESCAN FOLDERS</button><div id="scanResult" class="update-result">Choose a folder to scan your game files. Unsupported files are ignored.</div></article>
-          <article class="settings-card"><p class="eyebrow">IMPORT STATUS</p><h3>SCAN RESULTS</h3><p class="settings-note">Android folder selection and recursive scanning are connected. ECLIPSE stores game details and file references, not copies of your game files. Artwork scraping, per-game player assignment and emulator launching are still being built.</p></article>
+          <article class="settings-card"><p class="eyebrow">LIBRARY ARTWORK</p><h3>FETCH MISSING ARTWORK</h3><p class="settings-note">Scan up to eight games at a time using exact SteamGridDB title matches. Existing artwork stays untouched; unclear matches are left for manual selection. Requires your saved SteamGridDB API key.</p><button class="primary-btn" id="bulkFetchArtwork">FETCH MISSING ARTWORK</button><div id="bulkArtworkStatus" class="update-result" role="status" aria-live="polite">Ready when you are. This only adds artwork; it does not download game files.</div></article>
+          <article class="settings-card"><p class="eyebrow">GAME METADATA</p><h3>ROM METADATA SCRAPER</h3><label>RAWG API key<input id="rawgApiKey" type="password" autocomplete="off" placeholder="Paste your RAWG API key"></label><div class="sgdb-settings-actions"><button class="primary-btn" id="saveRawgKey">SAVE KEY</button><button class="subtle-btn" id="clearRawgKey">CLEAR</button></div><p class="settings-note" id="rawgKeyStatus">The key stays in local app storage. Exact-title matching only; uncertain matches are skipped.</p><button class="primary-btn" id="bulkFetchMetadata">FETCH GAME METADATA</button><div id="bulkMetadataStatus" class="update-result" role="status" aria-live="polite">Adds descriptions, release dates, developers, genres, platforms and ratings where RAWG returns an exact match. Requires your own RAWG API key.</div></article>
+          <article class="settings-card"><p class="eyebrow">IMPORT STATUS</p><h3>SCAN RESULTS</h3><p class="settings-note">Android folder selection and recursive scanning are connected. ECLIPSE stores game details and file references, not copies of your game files. SteamGridDB artwork enrichment and RAWG metadata scraping are available when you provide your own API keys. Per-game player assignment and emulator handoff are available in supported Android setups.</p></article>
         </div>
         <div class="settings-panel hidden" id="settingsControls">
           <div class="settings-panel-head"><div><p class="eyebrow">NAVIGATION</p><h3>CONTROLS</h3></div></div>
-          <article class="settings-card"><h3>CONTROLLER & KEYBOARD</h3><p class="settings-note">Physical gamepads use the D-pad or left stick to move, A / Cross to select, and B / Circle to go back. Arrow keys, Enter and Escape work with keyboards. Android button layouts can vary by controller.</p><span class="feature-tag">GAMEPAD + KEYBOARD NAVIGATION</span><p class="settings-note" id="controllerStatus" aria-live="polite">Connect a controller to test navigation. ECLIPSE reads standard browser Gamepad input while this screen is open.</p></article>
+          <article class="settings-card"><h3>CONTROLLER & KEYBOARD</h3><p class="settings-note">Controller detection is automatic and stays in the background. Standard gamepads use the D-pad or left stick to move, A / Cross to select, and B / Circle to go back. Arrow keys, Enter and Escape also work. No separate controller setup screen is needed for basic navigation.</p><span class="feature-tag">GAMEPAD + KEYBOARD NAVIGATION</span><p class="settings-note" id="controllerStatus" aria-live="polite">Controller status updates automatically while ECLIPSE is running. Basic navigation is configured without opening a separate hub.</p></article>
         </div>
         <div class="settings-panel hidden" id="settingsPlayers">
           <div class="settings-panel-head"><div><p class="eyebrow">EMULATOR & APP ROUTING</p><h3>YOUR PLAYERS</h3></div><button class="primary-btn" id="scanInstalledPlayers">SCAN INSTALLED APPS</button></div>
@@ -279,6 +288,7 @@ document.querySelector('#app').innerHTML = `
             <article class="settings-card"><p class="eyebrow">DEVICE CHECK</p><h3>COMPATIBILITY</h3><p class="settings-note">Check whether this device can run the current ECLIPSE web frontend and review update requirements.</p><button class="subtle-btn" id="checkCompatibility">CHECK THIS DEVICE</button><div id="compatibilityResult" class="update-result">Compatibility has not been checked yet.</div></article>
             <article class="settings-card"><p class="eyebrow">ANDROID HOME</p><h3>DEFAULT LAUNCHER</h3><p class="settings-note">Ask Android to set ECLIPSE as your Home app. Android controls the final confirmation.</p><button class="primary-btn" id="defaultHomeSettings">SET DEFAULT HOME APP</button></article>
             <article class="settings-card"><p class="eyebrow">CONSOLE EXPERIENCE</p><h3>SYSTEM STARTUP</h3><p class="settings-note">Each platform gets its own startup identity before opening its home menu. Skip it any time.</p><label class="setting-toggle"><input type="checkbox" id="systemStartupEnabled" checked><span>Enable console startup screens</span></label><label class="setting-toggle"><input type="checkbox" id="systemBootSound"><span>Startup sound (opt-in)</span></label><label class="setting-toggle"><input type="checkbox" id="systemBootHaptics"><span>Startup haptics (opt-in)</span></label></article>
+            <article class="settings-card"><p class="eyebrow">CUSTOM STARTUP</p><h3>BOOT DESIGNER</h3><p class="settings-note">Create your own ECLIPSE startup identity. The skip button always stays available.</p><label>Animation style<select id="bootDesignerVariant"><option value="stereo">Cosmic stereo</option><option value="split">Split-screen</option><option value="ribbon">Ribbon</option><option value="scanline">Scanline</option><option value="glass">Glass</option></select></label><label>Accent color<input id="bootDesignerAccent" type="color" value="#a8f2c7"></label><label>Startup message<input id="bootDesignerLine" maxlength="48" placeholder="ECLIPSE SYSTEM STARTUP"></label><label>Subtitle<input id="bootDesignerTag" maxlength="48" placeholder="YOUR WORLD IS READY"></label><label>Custom heading<input id="bootDesignerTitle" maxlength="32" placeholder="Leave blank to show system name"></label><label>Duration <span id="bootDesignerDurationValue">2.3s</span><input id="bootDesignerDuration" type="range" min="1200" max="5000" step="100" value="2300"></label><div class="sgdb-settings-actions"><button class="primary-btn" id="saveBootDesigner">SAVE BOOT DESIGN</button><button class="subtle-btn" id="previewBootDesigner">PREVIEW</button><button class="subtle-btn" id="resetBootDesigner">RESET</button></div></article>
             <article class="settings-card"><p class="eyebrow">ABOUT</p><h3>ECLIPSE ${VERSION}</h3><p class="settings-note">Android app discovery and launching, Home pins, Treat as Game labels, manual playtime tracking, folder scanning, and settings backup are available. Third-party emulator game handoff and automatic metadata/artwork scraping are still in development.</p></article>
           </div>
         </div>
@@ -304,7 +314,7 @@ document.querySelector('#app').innerHTML = `
 <div class="modal-backdrop hidden" id="widgetModal"><div class="widget-modal"><div class="modal-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>HOME WIDGETS</h2></div><button class="close-modal" id="closeWidgetModal">×</button></div><p class="settings-note">Add widgets, change their order, or remove the ones you don't use.</p><div id="widgetChoices" class="widget-choices"></div><button class="primary-btn" id="doneWidgets">DONE</button></div></div>
 <div class="system-boot hidden" id="systemBoot" role="dialog" aria-modal="true" aria-live="polite" aria-label="System startup"><div class="boot-orbit"><span id="bootSystemMark">✦</span></div><p class="eyebrow" id="bootSystemLine">ECLIPSE SYSTEM STARTUP</p><h2 id="bootSystemName">STARTING SYSTEM</h2><div class="boot-progress"><span></span></div><small id="bootSystemTag">PREPARING YOUR GAME SPACE</small><div class="boot-brand">ECLIPSE <i>OS</i></div><button class="boot-skip" id="skipSystemBoot" type="button">SKIP INTRO <span aria-hidden="true">↗</span></button></div>
 <div class="mascot-welcome hidden" id="mascotWelcome" role="dialog" aria-modal="true" aria-labelledby="mascotTitle"><div class="mascot-card"><div class="mascot-art" aria-hidden="true"><div class="eclipse-mascot"><div class="eclipse-mascot-hat"></div><div class="eclipse-mascot-orb"><i></i><i></i><span></span></div><div class="eclipse-mascot-ring"></div></div></div><p class="eyebrow">YOUR NEW GAME SPACE</p><h2 id="mascotTitle">WELCOME TO <em>ECLIPSE.</em></h2><p class="mascot-message">I’ll show you around. Your systems, game shelves and collections all live here. Set things up your way and make this space yours.</p><div class="mascot-tips"><span><b>01</b> Pick a system</span><span><b>02</b> Build your library</span><span><b>03</b> Make it yours</span></div><div class="mascot-actions"><button class="primary-btn" id="mascotStart">SHOW ME AROUND ↗</button><button class="subtle-btn" id="mascotSkip">SKIP FOR NOW</button></div></div></div>
-<div class="modal-backdrop hidden" id="gameDetailModal"><div class="widget-modal game-detail-modal"><div class="modal-head"><div><p class="eyebrow">GAME DETAILS</p><h2 id="gameDetailTitle">GAME</h2><div id="gameDetailLogo" class="game-detail-logo"></div></div><button class="close-modal" id="closeGameDetail" aria-label="Close game details">×</button></div><p class="game-detail-meta" id="gameDetailMeta"></p><div class="game-detail-file"><small>FILE LOCATION</small><p id="gameDetailPath"></p><small>PLAYER</small><p id="gameDetailPlayer"></p></div><div class="game-detail-actions"><button class="primary-btn" id="gameDetailLaunch">▶ PLAY GAME</button><button class="subtle-btn" id="gameDetailFavorite">☆ ADD TO FAVORITES</button><button class="subtle-btn" id="gameDetailRemove">REMOVE FROM LIBRARY</button></div><div class="sgdb-launch-row"><div><p class="eyebrow">STEAMGRIDDB ARTWORK</p><h3>MAKE THIS GAME LOOK RIGHT.</h3></div><button class="primary-btn" id="autoFetchArtwork">AUTO FETCH ART</button><button class="subtle-btn" id="openArtworkBrowser">BROWSE ARTWORK ↗</button></div><div class="sgdb-browser hidden" id="sgdbBrowser"><div class="sgdb-search-row"><input id="sgdbSearchInput" type="search" placeholder="Search SteamGridDB for this game…"><button class="primary-btn" id="sgdbSearchButton">SEARCH</button></div><p class="settings-note" id="sgdbStatus">Search for the matching game, then choose its artwork.</p><div class="sgdb-matches" id="sgdbMatches"></div><div class="sgdb-category-tabs" id="sgdbCategoryTabs"><button class="active" data-sgdb-type="grids">COVERS</button><button data-sgdb-type="heroes">BANNERS</button><button data-sgdb-type="logos">LOGOS</button><button data-sgdb-type="icons">ICONS</button></div><div class="sgdb-results" id="sgdbResults"></div></div><p class="settings-note">Choose a player for this system, then launch the original game file directly through that app.</p></div></div>
+<div class="modal-backdrop hidden" id="gameDetailModal"><div class="widget-modal game-detail-modal"><div class="modal-head"><div><p class="eyebrow">GAME DETAILS</p><h2 id="gameDetailTitle">GAME</h2><div id="gameDetailLogo" class="game-detail-logo"></div></div><button class="close-modal" id="closeGameDetail" aria-label="Close game details">×</button></div><p class="game-detail-meta" id="gameDetailMeta"></p><div id="gameDetailMetadata" class="game-detail-metadata"></div><div id="gameDetailAchievements" class="game-detail-achievements"></div><button class="subtle-btn" id="fetchGameMetadata" type="button">FETCH / RETRY GAME METADATA</button><div class="game-detail-file"><small>FILE LOCATION</small><p id="gameDetailPath"></p><small>PLAYER</small><p id="gameDetailPlayer"></p></div><div class="game-detail-actions"><button class="primary-btn" id="gameDetailLaunch">▶ PLAY GAME</button><button class="subtle-btn" id="gameDetailFavorite">☆ ADD TO FAVORITES</button><button class="subtle-btn" id="gameDetailRemove">REMOVE FROM LIBRARY</button></div><div class="sgdb-launch-row"><div><p class="eyebrow">STEAMGRIDDB ARTWORK</p><h3>MAKE THIS GAME LOOK RIGHT.</h3></div><button class="primary-btn" id="autoFetchArtwork">AUTO FETCH ART</button><button class="subtle-btn" id="openArtworkBrowser">BROWSE ARTWORK ↗</button></div><div class="sgdb-browser hidden" id="sgdbBrowser"><div class="sgdb-search-row"><input id="sgdbSearchInput" type="search" placeholder="Search SteamGridDB for this game…"><button class="primary-btn" id="sgdbSearchButton">SEARCH</button></div><p class="settings-note" id="sgdbStatus">Search for the matching game, then choose its artwork.</p><div class="sgdb-matches" id="sgdbMatches"></div><div class="sgdb-category-tabs" id="sgdbCategoryTabs"><button class="active" data-sgdb-type="grids">COVERS</button><button data-sgdb-type="heroes">BANNERS</button><button data-sgdb-type="logos">LOGOS</button><button data-sgdb-type="icons">ICONS</button></div><div class="sgdb-results" id="sgdbResults"></div></div><p class="settings-note">Choose a player for this system, then launch the original game file directly through that app.</p></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>`;
 
 const $ = s => document.querySelector(s);
@@ -336,11 +346,15 @@ function playerSystemForGame(game){
 }
 function widgetContent(id){
  const recent=games.length?games[games.length-1]:null;
+ if(id==='continue'){const history=(()=>{try{return JSON.parse(localStorage.getItem('eclipse-continue-playing')||'[]');}catch{return [];}})();const last=history.map(item=>games.find(game=>game.id===item.id)).find(Boolean);return `<div class="widget-heading"><small>CONTINUE PLAYING</small><span>▶</span></div><div class="widget-large">${last?escapeHTML(last.title):'NO RECENT GAMES'}</div><p class="widget-caption">${last?escapeHTML(last.system)+' · Open the game to continue':'Launch a game to start your history'}</p>`;}
+ if(id==='entertainment')return `<div class="widget-heading"><small>ENTERTAINMENT</small><span>▶</span></div><div class="widget-large">MEDIA HUB</div><p class="widget-caption"><button data-jump="entertainment">OPEN ENTERTAINMENT HUB ↗</button></p>`;
+ if(id==='clock'){const now=new Date();return `<div class="widget-heading"><small>LOCAL TIME</small><span>◷</span></div><div class="widget-large">${now.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</div><p class="widget-caption">${now.toLocaleDateString([], {weekday:'long',month:'short',day:'numeric'})}</p>`;}
+ if(id==='performance')return `<div class="widget-heading"><small>DEVICE SNAPSHOT</small><span>◉</span></div><div class="widget-large">${navigator.hardwareConcurrency?escapeHTML(navigator.hardwareConcurrency+' CPU THREADS'):'DEVICE STATUS'}</div><p class="widget-caption">Open Performance Dashboard for available diagnostics</p>`;
  if(id==='recent')return `<div class="widget-heading"><small>LAST ADDED</small><span>↗</span></div><div class="widget-large">${recent?escapeHTML(recent.title):'NO GAMES YET'}</div><p class="widget-caption">${recent?escapeHTML(recent.system)+' · '+(recent.year||'YOUR LIBRARY'):'Scan a folder to start your collection'}</p>`;
  if(id==='systems')return `<div class="widget-heading"><small>MY SYSTEMS</small><span>↗</span></div><div class="system-mini-list">${systems.slice(0,3).map(s=>`<span>${s.icon} ${s.name}</span>`).join('')}</div>`;
  if(id==='favorites'){const favoriteGames=games.filter(game=>favorites.includes(game.id));return `<div class="widget-heading"><small>FAVORITES</small><span>✦</span></div><div class="widget-large">${favoriteGames.length?favoriteGames.length+' SAVED':'NO FAVORITES YET'}</div><p class="widget-caption">${escapeHTML(favoriteGames[0]?.title||'Save games from their details panel')}</p>`;}
  if(id==='playtime'){const total=Object.values(appPlaytime).reduce((sum,value)=>sum+Number(value||0),0)+(activeAppSession?Math.floor((Date.now()-activeAppSession.startedAt)/1000):0);const mins=Math.floor(total/60);const label=mins>=60?Math.floor(mins/60)+'h '+mins%60+'m':mins+'m';return `<div class="widget-heading"><small>PLAYTIME</small><span>◷</span></div><div class="widget-large">\${label}</div><p class="widget-caption">\${Object.keys(appPlaytime).length+(activeAppSession?1:0)} tracked app session(s) · manual tracking</p>`}
- if(id==='achievements')return `<div class="widget-heading"><small>ACHIEVEMENTS</small><span>✧</span></div><div class="widget-large">NOT CONNECTED</div><p class="widget-caption">Achievement services are not integrated yet</p>`;
+ if(id==='achievements')return `<div class="widget-heading"><small>ACHIEVEMENTS</small><span>✧</span></div><div class="widget-large">RETROACHIEVEMENTS</div><p class="widget-caption"><button data-jump="achievements">OPEN ACHIEVEMENT CENTER ↗</button></p>`;
  return `<div class="widget-heading"><small>QUICK LAUNCH</small><span>↗</span></div><div class="quick-links"><button data-jump="library">LIBRARY</button><button data-jump="android">ANDROID</button></div>`;
 }
 function renderWidgets(){
@@ -355,7 +369,7 @@ function renderWidgetChoices(){
  $('#widgetChoices').innerHTML=widgetCatalog.map(([id,name,desc])=>`<label class="widget-choice"><input type="checkbox" value="${id}" ${widgets.includes(id)?'checked':''}><span><b>${name}</b><small>${desc}</small></span></label>`).join('');
  $('#widgetChoices').querySelectorAll('input').forEach(input=>input.addEventListener('change',()=>{widgets=input.checked?[...widgets,input.value]:widgets.filter(x=>x!==input.value);saveLayout();}));
 }
-const ECLIPSE_BACKUP_KEYS=['eclipse-games','eclipse-widgets','eclipse-pages','eclipse-theme','eclipse-preferences','eclipse-installed-apps','eclipse-emulator-assignments','eclipse-favorites','eclipse-folders','eclipse-system-folders','eclipse-system-shelf-rows','eclipse-play-count','eclipse-onboarding-complete','eclipse-folder-uri','eclipse-mascot-muted'];
+const ECLIPSE_BACKUP_KEYS=['eclipse-games','eclipse-widgets','eclipse-pages','eclipse-theme','eclipse-preferences','eclipse-installed-apps','eclipse-emulator-assignments','eclipse-favorites','eclipse-folders','eclipse-system-folders','eclipse-system-shelf-rows','eclipse-play-count','eclipse-onboarding-complete','eclipse-folder-uri','eclipse-mascot-muted' ,'eclipse-continue-playing','eclipse-boot-designer'];
 function eclipseBackupSnapshot(){const values={};ECLIPSE_BACKUP_KEYS.forEach(key=>{const value=localStorage.getItem(key);if(value!==null)values[key]=value;});return JSON.stringify({format:'eclipse-backup',version:1,savedAt:new Date().toISOString(),values});}
 async function chooseEclipseDataFolder(){const status=$('#dataFolderStatus');if(!Capacitor.isNativePlatform()){status.textContent='External folder selection is available in the Android APK. Browser data remains stored locally.';return;}status.textContent='Choose where ECLIPSE should keep its backup…';try{const result=await FolderAccess.pickDataFolder();status.textContent='Backup folder: '+(result.name||'Selected folder')+'. Saving your current ECLIPSE data…';const saved=await FolderAccess.saveData({data:eclipseBackupSnapshot()});status.textContent='Backup folder: '+(result.name||saved.name||'Selected folder')+'. Your current library and settings are backed up.';notify('ECLIPSE data folder connected.');}catch(error){const message=String(error?.message||error||'');if(!message.toLowerCase().includes('cancel'))status.textContent='Could not select the data folder: '+message;}}
 async function saveEclipseDataBackup(){const status=$('#dataFolderStatus');if(!Capacitor.isNativePlatform()){status.textContent='Open the Android APK to save a backup to a chosen folder.';return;}status.textContent='Saving ECLIPSE backup…';try{const result=await FolderAccess.saveData({data:eclipseBackupSnapshot()});status.textContent='Backup saved as '+result.name+'.';notify('ECLIPSE backup saved.');}catch(error){status.textContent='Backup not saved: '+(error?.message||'Choose a data folder first.');}}
@@ -406,6 +420,7 @@ function renderSettings(){
  renderPlayerSettings();
  ['showHeroSetting','compactRowsSetting','systemCountsSetting','startPageSetting'].forEach((id)=>{const el=$('#'+id);if(el){const key={showHeroSetting:'showHero',compactRowsSetting:'compactRows',systemCountsSetting:'systemCounts',startPageSetting:'startPage'}[id];el.value=preferences[key];if(el.type==='checkbox')el.checked=!!preferences[key];}});const rowsSelect=$('#systemShelfRowsSetting');if(rowsSelect)rowsSelect.value=String(systemShelfRows);const modeSelect=$('#interfaceModeSetting');if(modeSelect)modeSelect.value=interfaceMode;applyInterfaceMode();
  renderFolderPaths();renderSettingsPages();
+ const rawgInput=$('#rawgApiKey');if(rawgInput)rawgInput.value=localStorage.getItem('eclipse-rawg-key')||'';const rawgStatus=$('#rawgKeyStatus');if(rawgStatus)rawgStatus.textContent=localStorage.getItem('eclipse-rawg-key')?'RAWG key saved on this device.':'No RAWG API key saved yet.';
  const sgdbInput=$('#sgdbApiKey');if(sgdbInput)sgdbInput.value=sgdbKey();const sgdbStatus=$('#sgdbKeyStatus');if(sgdbStatus)sgdbStatus.textContent=sgdbKey()?'API key saved on this device.':'No API key saved yet.';
  const dataStatus=$('#dataFolderStatus');if(dataStatus&&!Capacitor.isNativePlatform())dataStatus.textContent='External backup folders require the Android APK. Local app data is still saved automatically on this device.';
 }
@@ -509,6 +524,8 @@ function renderKonsoruHome(){
 }
 function renderHomeHero(){
  renderKonsoruHome();
+ decorateSystemArtwork(document,systems);
+ platformSuite?.renderContinuePlaying?.();
  const hero=$('#homeLibraryHero');if(!hero)return;
  const featured=games.slice().reverse().find(game=>game.artwork?.hero)||games[games.length-1];
  hero.classList.toggle('hidden',games.length===0||!preferences.showHero);
@@ -563,7 +580,7 @@ function renderLibrary(){
  $('#libraryCount').textContent=games.length+' GAMES';
  $('#consoleStrip').innerHTML=systems.map(s=>`<button class="console-card" data-console="${s.name}"><span>${s.icon}</span><b>${s.name}</b><small>${preferences.systemCounts?(gamesForSystem(s.name).length ? gamesForSystem(s.name)+' IN LIBRARY' : 'NO GAMES FOUND'):'OPEN SYSTEM'}</small></button>`).join('');
  $('#consoleStrip').querySelectorAll('[data-console]').forEach(b=>b.addEventListener('click',()=>openConsolePage(b.dataset.console)));
- renderFilters();renderGames();
+ renderFilters();renderGames();decorateSystemArtwork(document,systems);
 }
 function openConsolePage(name){
  const system=systems.find(item=>item.name===name)||{name,icon:'✦',family:'Platform'};
@@ -759,6 +776,8 @@ function showGameDetails(game){
  $('#gameDetailTitle').textContent=game.title;
  const logoBox=$('#gameDetailLogo');if(logoBox){logoBox.replaceChildren();const logoUrl=sgdbSafeUrl(game.artwork?.logo);if(logoUrl){const logo=document.createElement('img');logo.src=logoUrl;logo.alt=game.title+' logo';logo.loading='lazy';logoBox.append(logo);}}
  $('#gameDetailMeta').textContent=game.system+' · '+(game.tag||'GAME FILE')+' · '+(game.size?Math.round(game.size/1024/1024*10)/10+' MB':'SIZE UNKNOWN');
+ const achievementsPanel=$('#gameDetailAchievements');if(achievementsPanel)achievementsCenter?.renderGamePanel?.(game,achievementsPanel,()=>localStorage.setItem('eclipse-games',JSON.stringify(games)));
+ const metadataPanel=$('#gameDetailMetadata');if(metadataPanel){const metadata=game.metadata;if(metadata){metadataPanel.replaceChildren();const facts=[metadata.released?'RELEASED '+metadata.released:'',metadata.developers?.length?'BY '+metadata.developers.join(', '):'',metadata.genres?.length?metadata.genres.join(' · '):'',metadata.metacritic!=null?'METACRITIC '+metadata.metacritic:''].filter(Boolean);const factsLine=document.createElement('p');factsLine.textContent=facts.join('  /  ');const description=document.createElement('p');description.textContent=metadata.description||'No description supplied by the provider.';metadataPanel.append(factsLine,description);}else metadataPanel.textContent='No metadata fetched yet. Use Library Folders → ROM Metadata Scraper.';}
  $('#gameDetailPath').textContent=game.relativePath||game.fileName||'File path unavailable';
  const playerSystem=playerSystemForGame(game);
  const player=installedApps.find(app=>app.packageName===emulatorAssignments[playerSystem]);
@@ -774,7 +793,7 @@ async function launchSelectedGame(){
  if(!game.uri){notify('This entry has no Android file permission. Re-scan its game folder.');return;}
  const system=playerSystemForGame(game),packageName=emulatorAssignments[system];if(!packageName){notify('Choose an installed player for '+system+' first.');return;}
  const button=$('#gameDetailLaunch');button.disabled=true;button.textContent='OPENING…';
- try{await FolderAccess.launchGame({uri:game.uri,packageName});notify('Opening '+game.title+'…');}
+ try{await FolderAccess.launchGame({uri:game.uri,packageName});platformSuite?.recordGameLaunch?.(game);notify('Opening '+game.title+'…');}
  catch(error){notify(error?.message||'That player could not open this game file.');}
  finally{button.disabled=false;button.textContent='▶ PLAY GAME';}
 }
@@ -930,7 +949,7 @@ async function scanInstalledApps(systemName){
   renderPlayerSettings();
   if(systemName)populatePlayerSelect($('#systemPlayerSelect'),systemName);
   const message='Found '+installedApps.length+' launchable apps. Choose a player for each system below.';
-  renderAndroidApps();
+  renderAndroidApps();platformSuite?.renderEntertainment?.();
   if(status)status.textContent=message;if(localStatus)localStatus.textContent=message;
   notify('Installed app scan complete.');
  }catch(error){
@@ -1028,6 +1047,13 @@ $('#defaultHomeSettings')?.addEventListener('click',requestDefaultHome);
 $('#systemStartupEnabled')?.addEventListener('change',event=>localStorage.setItem('eclipse-system-startup-enabled',String(event.target.checked)));
 $('#systemBootSound')?.addEventListener('change',event=>localStorage.setItem('eclipse-system-boot-sound',String(event.target.checked)));
 $('#systemBootHaptics')?.addEventListener('change',event=>localStorage.setItem('eclipse-system-boot-haptics',String(event.target.checked)));
+const bootDesignerDefaults={variant:'stereo',accent:'#a8f2c7',line:'',tag:'',title:'',duration:2300};
+function readBootDesigner(){try{return {...bootDesignerDefaults,...JSON.parse(localStorage.getItem('eclipse-boot-designer')||'{}')};}catch{return {...bootDesignerDefaults};}}
+function syncBootDesigner(){const config=readBootDesigner();[['bootDesignerVariant','variant'],['bootDesignerAccent','accent'],['bootDesignerLine','line'],['bootDesignerTag','tag'],['bootDesignerTitle','title'],['bootDesignerDuration','duration']].forEach(([id,key])=>{const input=$('#'+id);if(input)input.value=config[key];});const value=$('#bootDesignerDurationValue');if(value)value.textContent=(config.duration/1000).toFixed(1)+'s';}
+syncBootDesigner();$('#bootDesignerDuration')?.addEventListener('input',event=>{const value=$('#bootDesignerDurationValue');if(value)value.textContent=(Number(event.target.value)/1000).toFixed(1)+'s';});
+$('#saveBootDesigner')?.addEventListener('click',()=>{const config={variant:$('#bootDesignerVariant').value,accent:$('#bootDesignerAccent').value,line:$('#bootDesignerLine').value.trim(),tag:$('#bootDesignerTag').value.trim(),title:$('#bootDesignerTitle').value.trim(),duration:Number($('#bootDesignerDuration').value)};localStorage.setItem('eclipse-boot-designer',JSON.stringify(config));notify('Custom boot design saved.');});
+$('#resetBootDesigner')?.addEventListener('click',()=>{localStorage.removeItem('eclipse-boot-designer');syncBootDesigner();notify('Boot design reset to system defaults.');});
+$('#previewBootDesigner')?.addEventListener('click',()=>{const config=readBootDesigner();const system={name:config.title||'ECLIPSE',family:'PC',icon:'✦'};startSystemBoot({root:$('#systemBoot'),system,config:{...config,secondary:'#e1ffef',line:config.line||'ECLIPSE SYSTEM STARTUP',tag:config.tag||'YOUR WORLD IS READY'}});});
 if($('#systemStartupEnabled'))$('#systemStartupEnabled').checked=localStorage.getItem('eclipse-system-startup-enabled')!=='false';
 if($('#systemBootSound'))$('#systemBootSound').checked=localStorage.getItem('eclipse-system-boot-sound')==='true';
 if($('#systemBootHaptics'))$('#systemBootHaptics').checked=localStorage.getItem('eclipse-system-boot-haptics')==='true';
@@ -1062,6 +1088,34 @@ $('#systemCountsSetting').addEventListener('change',e=>{preferences.systemCounts
 $('#startPageSetting').addEventListener('change',e=>{preferences.startPage=e.target.value;localStorage.setItem('eclipse-preferences',JSON.stringify(preferences));notify('Startup page saved.');});
 $('#interfaceModeSetting')?.addEventListener('change',e=>{interfaceMode=['console','konsoru','cocoon','hybrid'].includes(e.target.value)?e.target.value:'hybrid';localStorage.setItem('eclipse-interface-mode',JSON.stringify(interfaceMode));applyInterfaceMode();notify(interfaceMode==='hybrid'?'Hybrid interface enabled.':interfaceMode==='cocoon'?'Cocoon-style home enabled.':interfaceMode==='konsoru'?'Konsoru console enabled.':'Console interface enabled.');});
  $('#systemShelfRowsSetting')?.addEventListener('change',e=>{systemShelfRows=Math.max(1,Math.min(4,Number(e.target.value)||2));localStorage.setItem('eclipse-system-shelf-rows',JSON.stringify(systemShelfRows));if(activePage==='console'&&activeConsoleName)renderConsoleHome(systems.find(item=>item.name===activeConsoleName)||{name:activeConsoleName,icon:'✦',family:'Platform'});notify('Game shelf layout saved.');});
+$('#saveRawgKey')?.addEventListener('click',()=>{const value=$('#rawgApiKey')?.value.trim();if(!value){notify('Paste your RAWG API key first.');return;}localStorage.setItem('eclipse-rawg-key',value);$('#rawgKeyStatus').textContent='RAWG key saved locally on this device.';notify('RAWG key saved locally.');});
+$('#clearRawgKey')?.addEventListener('click',()=>{localStorage.removeItem('eclipse-rawg-key');if($('#rawgApiKey'))$('#rawgApiKey').value='';if($('#rawgKeyStatus'))$('#rawgKeyStatus').textContent='No RAWG API key saved yet.';notify('RAWG key cleared.');});
+$('#bulkFetchMetadata')?.addEventListener('click',async()=>{const button=$('#bulkFetchMetadata'),status=$('#bulkMetadataStatus');if(!button||!status)return;button.disabled=true;button.textContent='SCRAPING…';status.textContent='Preparing exact-title metadata matches…';try{const result=await enrichLibraryMetadata({games,apiKey:localStorage.getItem('eclipse-rawg-key')||'',limit:8,save:()=>localStorage.setItem('eclipse-games',JSON.stringify(games)),onProgress:progress=>{status.textContent='Checking '+progress.processed+' of '+progress.total+': '+(progress.currentTitle||'Finishing…')+' · '+progress.updated+' updated · '+progress.skipped+' skipped · '+progress.failed+' failed';}});renderLibrary();renderHomeHero();const summary='Finished: '+result.updated+' updated, '+result.skipped+' skipped, '+result.failed+' failed.'+(result.paused?' Scrape paused because the provider needs attention.':'');status.textContent=summary+(result.errors.length?' '+result.errors.slice(0,2).map(item=>item.title+': '+item.reason).join(' · '):'');notify(summary);}catch(error){status.textContent=error.message||'Metadata scrape could not start.';notify(status.textContent);}finally{button.disabled=false;button.textContent='FETCH GAME METADATA';}});
+$('#bulkFetchArtwork')?.addEventListener('click',async()=>{
+ const button=$('#bulkFetchArtwork'),status=$('#bulkArtworkStatus');
+ if(!button||!status)return;
+ button.disabled=true;button.textContent='SCANNING…';
+ status.textContent='Preparing your library artwork scan…';
+ try{
+  const result=await enrichLibraryArtwork({
+   games,apiKey:sgdbKey(),limit:8,
+   save:()=>localStorage.setItem('eclipse-games',JSON.stringify(games)),
+   onProgress:progress=>{
+    status.textContent='Checking '+progress.processed+' of '+progress.total+': '+(progress.currentTitle||'Preparing…')+' · '+progress.updated+' updated · '+progress.skipped+' skipped · '+progress.failed+' failed';
+   }
+  });
+  renderKonsoruHome();renderHomeHero();renderLibrary();
+  if(activePage==='console'&&activeConsoleName)renderConsoleHome(systems.find(item=>item.name===activeConsoleName)||{name:activeConsoleName,icon:'✦',family:'Platform'});
+  const summary='Finished: '+result.updated+' games updated, '+result.skipped+' skipped, '+result.failed+' failed.'+(result.paused?' Scan paused because the provider needs attention.':'');
+  status.textContent=summary+(result.errors.length?' '+result.errors.slice(0,2).map(item=>item.title+': '+item.reason).join(' · '):'');
+  notify(summary);
+ }catch(error){
+  status.textContent=error.message||'Artwork scan could not start.';
+  notify(status.textContent);
+ }finally{
+  button.disabled=false;button.textContent='FETCH MISSING ARTWORK';
+ }
+});
 $('#addFolderPath').addEventListener('click',chooseGameFolder);
 
 $('#rescanFolders').addEventListener('click',rescanGameFolder);
@@ -1076,6 +1130,7 @@ $('#appLibrarySearch')?.addEventListener('input',renderAndroidApps);
 $('#saveSgdbKey')?.addEventListener('click',()=>{const value=$('#sgdbApiKey')?.value.trim();if(!value){notify('Paste your SteamGridDB API key first.');return;}localStorage.setItem('eclipse-steamgriddb-key',value);$('#sgdbKeyStatus').textContent='API key saved on this device.';notify('SteamGridDB key saved locally.');});
 $('#clearSgdbKey')?.addEventListener('click',()=>{localStorage.removeItem('eclipse-steamgriddb-key');if($('#sgdbApiKey'))$('#sgdbApiKey').value='';if($('#sgdbKeyStatus'))$('#sgdbKeyStatus').textContent='No API key saved yet.';notify('SteamGridDB key cleared.');});
 $('#autoFetchArtwork')?.addEventListener('click',autoFetchSgdbArtwork);
+$('#fetchGameMetadata')?.addEventListener('click',async()=>{const game=games.find(item=>item.id===selectedGameDetailId);if(!game)return;const button=$('#fetchGameMetadata');button.disabled=true;button.textContent='FETCHING…';try{const result=await enrichLibraryMetadata({games,apiKey:localStorage.getItem('eclipse-rawg-key')||'',limit:1,gameId:game.id,save:()=>localStorage.setItem('eclipse-games',JSON.stringify(games))});showGameDetails(game);notify(result.updated?'Metadata updated for '+game.title:result.errors[0]?.reason||'No exact metadata match found.');}catch(error){notify(error.message||'Metadata fetch failed.');}finally{button.disabled=false;button.textContent='FETCH / RETRY GAME METADATA';}});
 $('#openArtworkBrowser')?.addEventListener('click',openSgdbBrowser);
 $('#sgdbSearchButton')?.addEventListener('click',searchSgdbGames);
 $('#sgdbSearchInput')?.addEventListener('keydown',event=>{if(event.key==='Enter')searchSgdbGames();});
@@ -1201,8 +1256,10 @@ applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
 refreshDisplayLayout();
 mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
 mountControlCenter({ notify });
+const platformSuite = mountPlatformSuite({ $, notify, games, getInstalledApps:()=>installedApps, launchApp:launchInstalledApp, openGame:showGameDetails, showView, onWidgetsReorder:order=>{widgets=[...order,...widgets.filter(id=>!order.includes(id))];saveLayout();renderWidgets();} });
+const achievementsCenter = mountAchievements({ showView, notify });
 mountPegasusNavigation({ navigate: showView });
-renderSystemPicker();renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();
+renderSystemPicker();decorateSystemArtwork(document,systems);renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();
 // Polished launcher startup: keep the first frame intentional while local UI initializes.
 (function showLauncherBoot(){
  const boot=document.createElement('div');boot.className='eclipse-launch-boot';boot.innerHTML='<div class="launch-boot-mark">E<span>.</span></div><p class="eyebrow">YOUR WORLD IS LOADING</p><h1>ECLIPSE</h1><div class="launch-boot-track"><i></i></div><small>PREPARING YOUR SYSTEMS</small>';
