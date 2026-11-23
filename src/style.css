@@ -1010,3 +1010,21 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .game-detail-metadata{display:grid;gap:7px;margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:#ffffff06}
 .game-detail-metadata p{margin:0;color:#a9bbb1;font-size:10px;line-height:1.55}
 @media(max-width:600px){.performance-metrics{grid-template-columns:1fr 1fr}.performance-panel{padding:16px}.entertainment-feature{padding:17px}.entertainment-orbit{width:62px;height:62px;flex-basis:62px;font-size:25px}.entertainment-app-card{grid-template-columns:40px minmax(0,1fr);gap:9px}.entertainment-app-mark{width:38px;height:38px}.entertainment-app-card button{grid-column:1/-1}.performance-launcher{font-size:7px;padding:7px 8px}}
+
+/* RetroAchievements Center */
+.achievement-profile-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0 26px}
+.achievement-profile-grid article{display:flex;flex-direction:column;gap:7px;padding:16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#ffffff0b,#ffffff03)}
+.achievement-profile-grid small{font:8px ui-monospace,monospace;letter-spacing:1px;color:#91a49b}
+.achievement-profile-grid b{font-size:20px;color:var(--accent);overflow-wrap:anywhere}
+.achievement-section{margin:24px 0}
+.achievement-section h3{font-size:17px;margin:4px 0}
+.achievement-list{display:grid;gap:9px}
+.achievement-row{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;align-items:start;padding:13px;border:1px solid var(--line);border-radius:13px;background:#ffffff07}
+.achievement-mark{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#b49aff20;color:#c7b6ff;font-size:19px}
+.achievement-row b,.achievement-row small{display:block}
+.achievement-row b{font-size:12px}.achievement-row small{margin-top:4px;color:#a3b5aa;font:8px ui-monospace,monospace}
+.achievement-row p{margin:6px 0 0;color:#91a49b;font-size:10px;line-height:1.5}
+.achievement-games{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px}
+.achievement-game{display:flex;flex-direction:column;gap:5px;padding:13px;border:1px solid var(--line);border-radius:12px;background:#ffffff07}
+.achievement-game b{font-size:11px}.achievement-game small{font:8px ui-monospace,monospace;color:#91a49b}.achievement-game span{font-size:9px;color:var(--accent)}
+@media(max-width:650px){.achievement-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.achievement-profile-grid b{font-size:17px}}
