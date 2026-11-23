@@ -213,4 +213,3 @@ export function mountAchievements({ showView, notify }) {
   }
   return { refresh, renderCache, renderGamePanel };
 }
-}
