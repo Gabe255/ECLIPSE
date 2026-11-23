@@ -128,5 +128,89 @@ export function mountAchievements({ showView, notify }) {
     notify('RetroAchievements disconnected.');
   });
   document.getElementById('refreshAchievements').addEventListener('click',refresh);
-  return { refresh, renderCache };
+
+  function normalizeTitle(value) {
+    return String(value || '').toLowerCase().normalize('NFKD')
+      .replace(/[\\u0300-\\u036f]/g, '').replace(/&/g, 'and')
+      .replace(/[^a-z0-9]+/g, ' ').trim().replace(/\\s+/g, ' ');
+  }
+
+  function renderGamePanel(game, root, saveGames = () => {}) {
+    if (!root || !game) return;
+    root.replaceChildren();
+    const heading = document.createElement('div');
+    heading.className = 'game-achievements-heading';
+    const title = document.createElement('b'); title.textContent = 'RETROACHIEVEMENTS';
+    const note = document.createElement('small'); note.textContent = 'Link this ROM to its official achievement set to view your progress.';
+    heading.append(title, note);
+    const form = document.createElement('div'); form.className = 'game-achievements-form';
+    const input = document.createElement('input');
+    input.type = 'number'; input.min = '1'; input.step = '1'; input.inputMode = 'numeric';
+    input.placeholder = 'RetroAchievements Game ID';
+    input.value = game.retroAchievements?.gameId || '';
+    input.setAttribute('aria-label', 'RetroAchievements game ID');
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'primary-btn'; button.textContent = 'LINK & LOAD PROGRESS';
+    form.append(input, button);
+    const statusLine = document.createElement('p'); statusLine.className = 'settings-note'; statusLine.setAttribute('role','status');
+    const progress = document.createElement('div'); progress.className = 'game-achievements-progress';
+    root.append(heading, form, statusLine, progress);
+
+    function showSaved() {
+      const saved = game.retroAchievements;
+      progress.replaceChildren();
+      if (!saved) return;
+      const metrics = document.createElement('div'); metrics.className = 'game-achievement-metrics';
+      [[ 'UNLOCKED', saved.awarded + ' / ' + saved.total ],['COMPLETION', saved.completion || '—'],['HARDCORE', saved.hardcoreCompletion || '—']].forEach(([label,value]) => {
+        const item=document.createElement('article');const small=document.createElement('small');small.textContent=label;const strong=document.createElement('b');strong.textContent=value;item.append(small,strong);metrics.append(item);
+      });
+      const matched = document.createElement('p'); matched.className='settings-note';
+      matched.textContent='Linked set: '+saved.title+' · '+saved.consoleName;
+      const link = document.createElement('a'); link.href='https://retroachievements.org/game/'+encodeURIComponent(saved.gameId);link.target='_blank';link.rel='noopener noreferrer';link.textContent='OPEN ACHIEVEMENT SET ↗';
+      progress.append(metrics,matched,link);
+      const recent = (saved.achievements || []).filter(item=>item.earned).slice(0,8);
+      if(recent.length){const list=document.createElement('div');list.className='game-achievement-unlocks';recent.forEach(item=>{const row=document.createElement('p');row.textContent='✦ '+item.title+' · '+item.points+' pts';list.append(row);});progress.append(list);}
+    }
+    if (game.retroAchievements) { statusLine.textContent='Saved achievement link. Refresh to check for new unlocks.'; showSaved(); }
+
+    button.addEventListener('click', async () => {
+      const gameId = Number(input.value);
+      const username = localStorage.getItem('eclipse-ra-username') || '';
+      const key = localStorage.getItem('eclipse-ra-key') || '';
+      if (!username || !key) { statusLine.textContent='Connect your RetroAchievements account in Settings → System first.'; return; }
+      if (!Number.isSafeInteger(gameId) || gameId < 1) { statusLine.textContent='Enter a valid positive game ID.'; return; }
+      button.disabled = true; button.textContent='LOADING…'; statusLine.textContent='Checking the game ID and loading your achievement progress…';
+      const controller = new AbortController(); const timeout = setTimeout(()=>controller.abort(),15000);
+      try {
+        const params = new URLSearchParams({g:String(gameId),u:username,y:key,a:'1'});
+        const response = await fetch('https://retroachievements.org/API/API_GetGameInfoAndUserProgress.php?'+params.toString(),{headers:{Accept:'application/json'},signal:controller.signal});
+        if(!response.ok) throw new Error(response.status===401||response.status===403?'RetroAchievements rejected the API key.':response.status===404?'That game ID was not found.':'RetroAchievements returned HTTP '+response.status+'.');
+        const data = await response.json();
+        if(!data || !data.Title || !data.NumAchievements) throw new Error('No achievement set was returned for that game ID.');
+        if(normalizeTitle(data.Title)!==normalizeTitle(game.title)) {
+          throw new Error('That ID belongs to “'+data.Title+'”, not “'+game.title+'”. No link was saved. Check the game ID.');
+        }
+        const achievements=Object.values(data.Achievements||{}).map(item=>({
+          title:item.Title||'Achievement',description:item.Description||'',points:Number(item.Points||0),
+          earned:Boolean(item.DateEarned||item.DateEarnedHardcore),hardcore:Boolean(item.DateEarnedHardcore)
+        }));
+        game.retroAchievements={
+          gameId,title:data.Title,consoleName:data.ConsoleName||'Unknown system',
+          total:Number(data.NumAchievements||achievements.length),
+          awarded:Number(data.NumAwardedToUser||achievements.filter(item=>item.earned).length),
+          awardedHardcore:Number(data.NumAwardedToUserHardcore||0),
+          completion:data.UserCompletion||'0%',hardcoreCompletion:data.UserCompletionHardcore||'0%',
+          achievements,fetchedAt:new Date().toISOString()
+        };
+        saveGames();
+        statusLine.textContent='Achievement set linked and progress saved.';
+        showSaved();
+      } catch(error) {
+        statusLine.textContent=error?.name==='AbortError'?'RetroAchievements timed out. Try again.':(error?.message||'Could not load game progress.');
+      } finally {
+        clearTimeout(timeout);button.disabled=false;button.textContent='LINK & LOAD PROGRESS';
+      }
+    });
+  }
+  return { refresh, renderCache, renderGamePanel };
+}
 }
