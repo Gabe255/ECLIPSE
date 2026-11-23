@@ -3,7 +3,7 @@ const KEYS = [
   'eclipse-system-themes','eclipse-profiles','eclipse-active-profile','eclipse-games',
   'eclipse-favorites','eclipse-widgets','eclipse-pages','eclipse-preferences',
   'eclipse-app-games','eclipse-app-playtime','eclipse-home-app-pins','eclipse-display-layout','eclipse-game-mode','eclipse-emulator-assignments',
-  'eclipse-folders','eclipse-system-folders'
+  'eclipse-folders','eclipse-system-folders','eclipse-continue-playing','eclipse-boot-designer'
 ];
 
 export function mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets }) {
