@@ -791,7 +791,7 @@ async function launchSelectedGame(){
  if(!game.uri){notify('This entry has no Android file permission. Re-scan its game folder.');return;}
  const system=playerSystemForGame(game),packageName=emulatorAssignments[system];if(!packageName){notify('Choose an installed player for '+system+' first.');return;}
  const button=$('#gameDetailLaunch');button.disabled=true;button.textContent='OPENING…';
- try{await FolderAccess.launchGame({uri:game.uri,packageName});platformSuite?.recordGameLaunch?.(game);notify('Opening '+game.title+'…');
+ try{await FolderAccess.launchGame({uri:game.uri,packageName});platformSuite?.recordGameLaunch?.(game);notify('Opening '+game.title+'…');}
  catch(error){notify(error?.message||'That player could not open this game file.');}
  finally{button.disabled=false;button.textContent='▶ PLAY GAME';}
 }
