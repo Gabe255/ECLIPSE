@@ -8,6 +8,7 @@ import { enrichLibraryArtwork } from './library-artwork.js';
 import { enrichLibraryMetadata } from './library-metadata.js';
 import { mountPlatformSuite } from './systems/platform-suite.js';
 import { decorateSystemArtwork } from './systems/artwork-pack.js';
+import { mountAchievements } from './systems/achievements.js';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 const FolderAccess = registerPlugin('FolderAccess');
 const UpdateDownload = registerPlugin('UpdateDownload');
@@ -353,7 +354,7 @@ function widgetContent(id){
  if(id==='systems')return `<div class="widget-heading"><small>MY SYSTEMS</small><span>↗</span></div><div class="system-mini-list">${systems.slice(0,3).map(s=>`<span>${s.icon} ${s.name}</span>`).join('')}</div>`;
  if(id==='favorites'){const favoriteGames=games.filter(game=>favorites.includes(game.id));return `<div class="widget-heading"><small>FAVORITES</small><span>✦</span></div><div class="widget-large">${favoriteGames.length?favoriteGames.length+' SAVED':'NO FAVORITES YET'}</div><p class="widget-caption">${escapeHTML(favoriteGames[0]?.title||'Save games from their details panel')}</p>`;}
  if(id==='playtime'){const total=Object.values(appPlaytime).reduce((sum,value)=>sum+Number(value||0),0)+(activeAppSession?Math.floor((Date.now()-activeAppSession.startedAt)/1000):0);const mins=Math.floor(total/60);const label=mins>=60?Math.floor(mins/60)+'h '+mins%60+'m':mins+'m';return `<div class="widget-heading"><small>PLAYTIME</small><span>◷</span></div><div class="widget-large">\${label}</div><p class="widget-caption">\${Object.keys(appPlaytime).length+(activeAppSession?1:0)} tracked app session(s) · manual tracking</p>`}
- if(id==='achievements')return `<div class="widget-heading"><small>ACHIEVEMENTS</small><span>✧</span></div><div class="widget-large">NOT CONNECTED</div><p class="widget-caption">Achievement services are not integrated yet</p>`;
+ if(id==='achievements')return `<div class="widget-heading"><small>ACHIEVEMENTS</small><span>✧</span></div><div class="widget-large">RETROACHIEVEMENTS</div><p class="widget-caption"><button data-jump="achievements">OPEN ACHIEVEMENT CENTER ↗</button></p>`;
  return `<div class="widget-heading"><small>QUICK LAUNCH</small><span>↗</span></div><div class="quick-links"><button data-jump="library">LIBRARY</button><button data-jump="android">ANDROID</button></div>`;
 }
 function renderWidgets(){
@@ -1255,6 +1256,7 @@ refreshDisplayLayout();
 mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
 mountControlCenter({ notify });
 const platformSuite = mountPlatformSuite({ $, notify, games, getInstalledApps:()=>installedApps, launchApp:launchInstalledApp, openGame:showGameDetails, showView, onWidgetsReorder:order=>{widgets=[...order,...widgets.filter(id=>!order.includes(id))];saveLayout();renderWidgets();} });
+const achievementsCenter = mountAchievements({ showView, notify });
 mountPegasusNavigation({ navigate: showView });
 renderSystemPicker();decorateSystemArtwork(document,systems);renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();
 // Polished launcher startup: keep the first frame intentional while local UI initializes.
