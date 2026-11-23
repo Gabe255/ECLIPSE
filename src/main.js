@@ -247,7 +247,7 @@ document.querySelector('#app').innerHTML = `
       <div class="app-library-summary"><div><b id="appCount">0</b><small>DISCOVERED APPS</small></div><div><b id="gameAppCount">0</b><small>TREATED AS GAMES</small></div><div><b id="trackedTime">0m</b><small>TRACKED PLAYTIME</small></div></div>
       <div class="app-library-toolbar"><input id="appLibrarySearch" type="search" placeholder="Search apps…" aria-label="Search installed apps"><span id="appLibraryStatus">Scan your Android device to populate this library.</span></div>
       <div class="app-library-list" id="appLibraryList"><div class="app-library-empty"><span>▣</span><b>YOUR APPS WILL APPEAR HERE</b><p>Run a device scan to find apps Android makes available to ECLIPSE.</p></div></div>
-      <p class="app-library-disclaimer">App discovery requires the Android APK. Treat as Game and session totals are saved locally. Session tracking is manual; ECLIPSE does not yet detect when another app is opened or closed, and app launching is not connected yet.</p>
+      <p class="app-library-disclaimer">App discovery and launching require the Android APK. Treat as Game and session totals are saved locally. Session tracking for external apps is manual; ECLIPSE does not yet automatically observe another app's foreground sessions.</p>
     </section>
     <section id="settingsView" class="view hidden">
       <div class="section-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>SETTINGS</h2></div></div>
@@ -268,11 +268,11 @@ document.querySelector('#app').innerHTML = `
           <article class="settings-card folder-card"><h3>GAME FOLDERS</h3><p class="settings-note">Choose the parent folder that contains your platform folders. On Android, ECLIPSE uses the system folder picker, keeps your folder permission, and scans nested files. Only recognized game files enter your library.</p><div class="folder-add-row"><button class="primary-btn" id="addFolderPath">CHOOSE GAME FOLDER</button></div><div id="folderList" class="folder-list"></div><button class="primary-btn" id="rescanFolders">↻ RESCAN FOLDERS</button><div id="scanResult" class="update-result">Choose a folder to scan your game files. Unsupported files are ignored.</div></article>
           <article class="settings-card"><p class="eyebrow">LIBRARY ARTWORK</p><h3>FETCH MISSING ARTWORK</h3><p class="settings-note">Scan up to eight games at a time using exact SteamGridDB title matches. Existing artwork stays untouched; unclear matches are left for manual selection. Requires your saved SteamGridDB API key.</p><button class="primary-btn" id="bulkFetchArtwork">FETCH MISSING ARTWORK</button><div id="bulkArtworkStatus" class="update-result" role="status" aria-live="polite">Ready when you are. This only adds artwork; it does not download game files.</div></article>
           <article class="settings-card"><p class="eyebrow">GAME METADATA</p><h3>ROM METADATA SCRAPER</h3><label>RAWG API key<input id="rawgApiKey" type="password" autocomplete="off" placeholder="Paste your RAWG API key"></label><div class="sgdb-settings-actions"><button class="primary-btn" id="saveRawgKey">SAVE KEY</button><button class="subtle-btn" id="clearRawgKey">CLEAR</button></div><p class="settings-note" id="rawgKeyStatus">The key stays in local app storage. Exact-title matching only; uncertain matches are skipped.</p><button class="primary-btn" id="bulkFetchMetadata">FETCH GAME METADATA</button><div id="bulkMetadataStatus" class="update-result" role="status" aria-live="polite">Adds descriptions, release dates, developers, genres, platforms and ratings where RAWG returns an exact match. Requires your own RAWG API key.</div></article>
-          <article class="settings-card"><p class="eyebrow">IMPORT STATUS</p><h3>SCAN RESULTS</h3><p class="settings-note">Android folder selection and recursive scanning are connected. ECLIPSE stores game details and file references, not copies of your game files. Artwork scraping, per-game player assignment and emulator launching are still being built.</p></article>
+          <article class="settings-card"><p class="eyebrow">IMPORT STATUS</p><h3>SCAN RESULTS</h3><p class="settings-note">Android folder selection and recursive scanning are connected. ECLIPSE stores game details and file references, not copies of your game files. SteamGridDB artwork enrichment and RAWG metadata scraping are available when you provide your own API keys. Per-game player assignment and emulator handoff are available in supported Android setups.</p></article>
         </div>
         <div class="settings-panel hidden" id="settingsControls">
           <div class="settings-panel-head"><div><p class="eyebrow">NAVIGATION</p><h3>CONTROLS</h3></div></div>
-          <article class="settings-card"><h3>CONTROLLER & KEYBOARD</h3><p class="settings-note">Physical gamepads use the D-pad or left stick to move, A / Cross to select, and B / Circle to go back. Arrow keys, Enter and Escape work with keyboards. Android button layouts can vary by controller.</p><span class="feature-tag">GAMEPAD + KEYBOARD NAVIGATION</span><p class="settings-note" id="controllerStatus" aria-live="polite">Connect a controller to test navigation. ECLIPSE reads standard browser Gamepad input while this screen is open.</p></article>
+          <article class="settings-card"><h3>CONTROLLER & KEYBOARD</h3><p class="settings-note">Controller detection is automatic and stays in the background. Standard gamepads use the D-pad or left stick to move, A / Cross to select, and B / Circle to go back. Arrow keys, Enter and Escape also work. No separate controller setup screen is needed for basic navigation.</p><span class="feature-tag">GAMEPAD + KEYBOARD NAVIGATION</span><p class="settings-note" id="controllerStatus" aria-live="polite">Controller status updates automatically while ECLIPSE is running. Basic navigation is configured without opening a separate hub.</p></article>
         </div>
         <div class="settings-panel hidden" id="settingsPlayers">
           <div class="settings-panel-head"><div><p class="eyebrow">EMULATOR & APP ROUTING</p><h3>YOUR PLAYERS</h3></div><button class="primary-btn" id="scanInstalledPlayers">SCAN INSTALLED APPS</button></div>
@@ -947,7 +947,7 @@ async function scanInstalledApps(systemName){
   renderPlayerSettings();
   if(systemName)populatePlayerSelect($('#systemPlayerSelect'),systemName);
   const message='Found '+installedApps.length+' launchable apps. Choose a player for each system below.';
-  renderAndroidApps();
+  renderAndroidApps();platformSuite?.renderEntertainment?.();
   if(status)status.textContent=message;if(localStatus)localStatus.textContent=message;
   notify('Installed app scan complete.');
  }catch(error){
@@ -1253,7 +1253,7 @@ applyDisplayLayout(localStorage.getItem('eclipse-display-layout')||'auto');
 refreshDisplayLayout();
 mountExperience({ $, themes, setTheme, notify, systems, games, favorites, widgets, renderWidgets });
 mountControlCenter({ notify });
-const platformSuite = mountPlatformSuite({ $, notify, games, getInstalledApps:()=>installedApps, launchApp:launchInstalledApp, openGame:showGameDetails, showView, onWidgetsReorder:order=>{widgets=order;saveLayout();renderWidgets();} });
+const platformSuite = mountPlatformSuite({ $, notify, games, getInstalledApps:()=>installedApps, launchApp:launchInstalledApp, openGame:showGameDetails, showView, onWidgetsReorder:order=>{widgets=[...order,...widgets.filter(id=>!order.includes(id))];saveLayout();renderWidgets();} });
 mountPegasusNavigation({ navigate: showView });
 renderSystemPicker();decorateSystemArtwork(document,systems);renderWidgets();renderLibrary();renderAndroidApps();renderHomeHero();
 // Polished launcher startup: keep the first frame intentional while local UI initializes.
