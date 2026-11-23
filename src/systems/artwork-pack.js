@@ -20,7 +20,7 @@ const SYSTEM_MARKS = {
   'PSP':'▰','PS Vita':'▰','Xbox 360':'◉','Xbox One':'◉','Xbox Series X|S':'✕',
   'Genesis / Mega Drive':'◈','Master System':'◫','Saturn':'◉','Dreamcast':'◇',
   'Atari 2600':'▥','Atari 5200':'▥','Atari 7800':'▥','Atari Lynx':'▰',
-  'Nintendo Switch':'▥','Nintendo Switch 2':'▥'
+  'Nintendo Switch':'▥','Nintendo Switch 2':'▥','Nintendo':'✦','Atari':'▥','Neo Geo':'◆','MAME':'✧','FinalBurn Neo':'✧','DOS':'⌘','Amiga':'⌘','Commodore 64':'⌘','ZX Spectrum':'⌘','PC Engine':'◈','WonderSwan':'▣','Virtual Boy':'◉','Intellivision':'▥','ColecoVision':'▥','Vectrex':'◇','3DO':'◉','CD-i':'◉','ScummVM':'▣','PlayStation':'△','Xbox':'✕','PC Games (x86)':'⌘','Windows PC':'⌘','SteamOS / Steam Deck':'⌘','Linux PC':'⌘','macOS':'⌘','iPhone / iPad':'▣','Master System':'◫','Arcade':'✧','Android':'▣'
 };
 
 export function systemArtwork(system) {
